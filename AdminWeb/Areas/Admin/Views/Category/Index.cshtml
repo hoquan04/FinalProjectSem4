@@ -1,0 +1,97 @@
+﻿@* @using AdminWeb.Areas.Admin.Data.Enum
+@using AdminWeb.Helpers
+@model PagedResponse<AdminWeb.Areas.Admin.Models.CategoryModel> *@
+@{
+    ViewData["Title"] = "Danh sách danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    // int stt = (Model.PageNow - 1) * Model.PageSize + 1;
+}
+
+<div class="col-lg-12">
+    <div class="ibox-content">
+        <div class="row">
+            <form asp-action="Index" method="get">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm..." class="input-sm form-control">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">Tìm kiếm</button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-sm-8 text-right">
+                    <a asp-action="Create" class="btn btn-primary">Thêm mới</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên danh mục</th>
+                        <th>Trạng thái</th>
+                        <th>Ảnh</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                @* <tbody>
+                    @foreach (var item in Model.Data)
+                    {
+                        <tr>
+                            <td>@(stt++)</td>
+                            <td>@item.Title</td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case CategoryStatus.Inactive:
+                                        <span class="label label-danger">Không hoạt động</span>
+                                        break;
+                                    case CategoryStatus.Active:
+                                        <span class="label label-success">Hoạt động</span>
+                                        break;
+                                    case CategoryStatus.Pending:
+                                        <span class="label label-warning">Chờ duyệt</span>
+                                        break;
+                                    case CategoryStatus.Archived:
+                                        <span class="label label-default">Lưu trữ</span>
+                                        break;
+                                    default:
+                                        <span class="label label-default">Không xác định</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <img src="@item.image" alt="@item.Id" width="80" height="80" />
+
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa không?');">Xóa</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody> *@
+            </table>
+        </div>
+
+        <!-- Phân trang thủ công -->
+        @* <div class="text-right mt-3">
+            @if (Model.TotalPage > 1)
+            {
+                <nav>
+                    <ul class="pagination">
+                        @for (int i = 1; i <= Model.TotalPage; i++)
+                        {
+                            <li class="page-item @(i == Model.PageNow ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div> *@
+    </div>
+</div>
