@@ -2,7 +2,7 @@
 
 namespace API.Repositories.IRepositories
 {
-    public interface ICategoryRepository : IType<CategoryModel>
+    public interface ICategoryRepository : IType<Category>
     {
     }
 }
