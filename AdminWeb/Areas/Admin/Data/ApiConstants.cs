@@ -3,7 +3,7 @@
     public class ApiConstants
     {
         //ip quân
-        public const string Domain = "192.168.1.36";
+        public const string Domain = "localhost";
       
         public const string Port = "7245";
 

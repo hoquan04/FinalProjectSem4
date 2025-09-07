@@ -1,0 +1,104 @@
+@model AdminWeb.Areas.Admin.Models.CategoryViewModel
+@{
+    ViewData["Title"] = "Xác nh?n xóa danh m?c";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay l?i danh sách
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                
+                <div class="alert alert-danger">
+                    <h4><i class="fa fa-exclamation-triangle"></i> C?nh báo!</h4>
+                    <p>B?n có ch?c ch?n mu?n xóa danh m?c này không?</p>
+                    <p><strong>Hành ??ng này không th? hoàn tác!</strong></p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <dl class="dl-horizontal">
+                            <dt><i class="fa fa-id-card"></i> ID:</dt>
+                            <dd>
+                                <span class="badge badge-primary">@Model.CategoryId</span>
+                            </dd>
+                            
+                            <dt><i class="fa fa-tag"></i> Tên danh m?c:</dt>
+                            <dd><strong>@Model.Name</strong></dd>
+                            
+                            <dt><i class="fa fa-info-circle"></i> Mô t?:</dt>
+                            <dd>
+                                @if (string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <em class="text-muted">Không có mô t?</em>
+                                }
+                                else
+                                {
+                                    @Model.Description
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="hr-line-dashed"></div>
+                
+                @* ?? Form ?? DELETE API *@
+                <form asp-action="Delete" method="post">
+                    <input asp-for="CategoryId" type="hidden" />
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-danger" id="btnDelete">
+                            <i class="fa fa-trash"></i> Xác nh?n xóa
+                        </button>
+                        <a asp-action="Index" class="btn btn-default">
+                            <i class="fa fa-times"></i> H?y
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin API</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="alert alert-danger">
+                    <h4><i class="fa fa-trash"></i> DELETE API</h4>
+                    <p><strong>Method:</strong> DELETE</p>
+                    <p><strong>Endpoint:</strong></p>
+                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi/@Model.CategoryId</code>
+                    <p class="mt-2"><strong>?? L?u ý:</strong></p>
+                    <small>Vi?c xóa danh m?c có th? ?nh h??ng ??n các s?n ph?m liên quan.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // JavaScript ?? show loading khi submit
+        $('#btnDelete').click(function(e) {
+            if (!confirm('B?n có ch?c ch?n mu?n xóa danh m?c "@Model.Name" không?')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            $(this).prop('disabled', true)
+                   .html('<i class="fa fa-spinner fa-spin"></i> ?ang xóa...');
+        });
+    </script>
+}

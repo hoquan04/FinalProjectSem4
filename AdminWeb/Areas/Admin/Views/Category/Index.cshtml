@@ -1,97 +1,175 @@
-﻿@* @using AdminWeb.Areas.Admin.Data.Enum
-@using AdminWeb.Helpers
-@model PagedResponse<AdminWeb.Areas.Admin.Models.CategoryModel> *@
+﻿@model List<AdminWeb.Areas.Admin.Models.CategoryViewModel>
 @{
     ViewData["Title"] = "Danh sách danh mục";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
-    // int stt = (Model.PageNow - 1) * Model.PageSize + 1;
+    int stt = 1;
 }
 
 <div class="col-lg-12">
     <div class="ibox-content">
+        
+        @* 🚀 Success/Error Messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-check"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-times"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+        
         <div class="row">
             <form asp-action="Index" method="get">
                 <div class="col-sm-4">
                     <div class="input-group">
                         <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm..." class="input-sm form-control">
                         <span class="input-group-btn">
-                            <button type="submit" class="btn btn-sm btn-primary">Tìm kiếm</button>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </button>
                         </span>
                     </div>
                 </div>
 
                 <div class="col-sm-8 text-right">
-                    <a asp-action="Create" class="btn btn-primary">Thêm mới</a>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> Thêm mới
+                    </a>
+                    @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                    {
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fa fa-list"></i> Xem tất cả
+                        </a>
+                    }
                 </div>
             </form>
         </div>
+
+        @* Error từ API call *@
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="alert alert-danger mt-3">
+                <strong><i class="fa fa-exclamation-triangle"></i> @ViewBag.Error</strong>
+                @if (!string.IsNullOrEmpty(ViewBag.ErrorDetail))
+                {
+                    <br><small>@ViewBag.ErrorDetail</small>
+                }
+                <br><small class="text-muted">
+                    <strong>Hướng dẫn:</strong> Đảm bảo API đang chạy tại <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi</code>
+                </small>
+            </div>
+        }
 
         <div class="table-responsive mt-3">
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>STT</th>
+                        <th>ID</th>
                         <th>Tên danh mục</th>
-                        <th>Trạng thái</th>
-                        <th>Ảnh</th>
+                        <th>Mô tả</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
-                @* <tbody>
-                    @foreach (var item in Model.Data)
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(stt++)</td>
+                                <td>
+                                    <span class="badge badge-primary">@item.CategoryId</span>
+                                </td>
+                                <td>
+                                    <strong>@item.Name</strong>
+                                </td>
+                                <td>
+                                    @if (string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <em class="text-muted">Không có mô tả</em>
+                                    }
+                                    else
+                                    {
+                                        @item.Description
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.CategoryId" 
+                                           class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fa fa-edit"></i> Sửa
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.CategoryId" 
+                                           class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fa fa-trash"></i> Xóa
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@(stt++)</td>
-                            <td>@item.Title</td>
-                            <td>
-                                @switch (item.Status)
+                            <td colspan="5" class="text-center py-4">
+                                @if (!string.IsNullOrEmpty(ViewBag.SearchString))
                                 {
-                                    case CategoryStatus.Inactive:
-                                        <span class="label label-danger">Không hoạt động</span>
-                                        break;
-                                    case CategoryStatus.Active:
-                                        <span class="label label-success">Hoạt động</span>
-                                        break;
-                                    case CategoryStatus.Pending:
-                                        <span class="label label-warning">Chờ duyệt</span>
-                                        break;
-                                    case CategoryStatus.Archived:
-                                        <span class="label label-default">Lưu trữ</span>
-                                        break;
-                                    default:
-                                        <span class="label label-default">Không xác định</span>
-                                        break;
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i> 
+                                        Không tìm thấy danh mục nào phù hợp với từ khóa "<strong>@ViewBag.SearchString</strong>"
+                                    </div>
                                 }
-                            </td>
-                            <td>
-                                <img src="@item.image" alt="@item.Id" width="80" height="80" />
-
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Sửa</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa không?');">Xóa</a>
+                                else if (!string.IsNullOrEmpty(ViewBag.Error))
+                                {
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-exclamation-triangle"></i> 
+                                        Không thể tải danh sách danh mục
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i> 
+                                        Chưa có danh mục nào. 
+                                        <a asp-action="Create" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-plus"></i> Thêm danh mục đầu tiên
+                                        </a>
+                                    </div>
+                                }
                             </td>
                         </tr>
                     }
-                </tbody> *@
+                </tbody>
             </table>
         </div>
 
-        <!-- Phân trang thủ công -->
-        @* <div class="text-right mt-3">
-            @if (Model.TotalPage > 1)
-            {
-                <nav>
-                    <ul class="pagination">
-                        @for (int i = 1; i <= Model.TotalPage; i++)
+        @* Footer info *@
+        @if (Model != null && Model.Any())
+        {
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <small class="text-muted">
+                        <i class="fa fa-info-circle"></i>
+                        Hiển thị <strong>@Model.Count</strong> danh mục
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchString))
                         {
-                            <li class="page-item @(i == Model.PageNow ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
-                            </li>
+                            <span>cho từ khóa "<strong>@ViewBag.SearchString</strong>"</span>
                         }
-                    </ul>
-                </nav>
-            }
-        </div> *@
+                    </small>
+                </div>
+                <div class="col-sm-6 text-right">
+                    <small class="text-muted">
+                        API Endpoint: <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi</code>
+                    </small>
+                </div>
+            </div>
+        }
     </div>
 </div>

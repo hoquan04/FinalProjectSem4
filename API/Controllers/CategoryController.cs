@@ -2,6 +2,7 @@
 using API.Repositories.IRepositories;
 using API.Repositories.RestAPI;
 using Microsoft.AspNetCore.Mvc;
+using API.Data;
 
 namespace API.Controllers
 {
@@ -10,13 +11,15 @@ namespace API.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly DataContext _context;
 
         // Inject repository thông qua constructor
-        public CategoryController(ICategoryRepository categoryRepository)
+        public CategoryController(ICategoryRepository categoryRepository, DataContext context)
         {
             _categoryRepository = categoryRepository;
+            _context = context;
         }
-
+        
         // GET: api/category
         [HttpGet]
         public async Task<IActionResult> GetAll()

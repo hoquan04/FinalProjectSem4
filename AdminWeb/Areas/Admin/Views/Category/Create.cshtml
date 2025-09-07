@@ -1,0 +1,98 @@
+@model AdminWeb.Areas.Admin.Models.CategoryCreateModel
+@{
+    ViewData["Title"] = "Thêm danh m?c m?i";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay l?i danh sách
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                
+                @* ?? Form ?? POST API *@
+                <form asp-action="Create" method="post" class="form-horizontal">
+                    @* Anti-forgery token *@
+                    @Html.AntiForgeryToken()
+                    
+                    @* Validation summary - hi?n th? l?i chung *@
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    @* Tr??ng Tên danh m?c *@
+                    <div class="form-group">
+                        <label asp-for="Name" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <input asp-for="Name" class="form-control" 
+                                   placeholder="Nh?p tên danh m?c (ví d?: ?i?n tho?i, Laptop...)">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Tr??ng Mô t? *@
+                    <div class="form-group">
+                        <label asp-for="Description" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Nh?p mô t? cho danh m?c (không b?t bu?c)"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+                    
+                    @* Buttons *@
+                    <div class="form-group">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
+                                <i class="fa fa-save"></i> L?u danh m?c
+                            </button>
+                            <a asp-action="Index" class="btn btn-default">
+                                <i class="fa fa-times"></i> H?y
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin API</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="alert alert-info">
+                    <h4><i class="fa fa-info-circle"></i> API Details</h4>
+                    <p><strong>Method:</strong> POST</p>
+                    <p><strong>Endpoint:</strong></p>
+                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi</code>
+                    <p class="mt-2"><strong>Request Body:</strong></p>
+                    <pre class="text-success">{
+  "name": "Tên danh m?c",
+  "description": "Mô t?"
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // JavaScript ?? show loading khi submit
+        $('#btnSubmit').click(function() {
+            $(this).prop('disabled', true)
+                   .html('<i class="fa fa-spinner fa-spin"></i> ?ang g?i API...');
+        });
+    </script>
+}

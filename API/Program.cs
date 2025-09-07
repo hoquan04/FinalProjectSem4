@@ -33,6 +33,12 @@ builder.Services.AddDbContext<DataContext>(options =>
     object value = options.UseSqlServer(builder.Configuration.GetConnectionString("FlutterDB"));
 });
 
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("FlutterDB");
+    Console.WriteLine($"[DbContext] Đang sử dụng chuỗi kết nối: {connectionString}");
+    options.UseSqlServer(connectionString);
+});
 
 
 // Dependency Injection cho Repository
@@ -60,4 +66,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-//app.Run("http://0.0.0.0:7245");
+app.Run("http://0.0.0.0:7245");
