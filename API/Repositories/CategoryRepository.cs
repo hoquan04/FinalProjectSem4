@@ -17,9 +17,9 @@ namespace API.Repositories
         }
 
         // Thêm mới
-        public async Task<APIRespone<CategoryModel>> AddAsync(CategoryModel entity)
+        public async Task<APIRespone<Category>> AddAsync(Category entity)
         {
-            var response = new APIRespone<CategoryModel>();
+            var response = new APIRespone<Category>();
 
             try
             {
@@ -73,9 +73,9 @@ namespace API.Repositories
         }
 
         // Lấy tất cả
-        public async Task<APIRespone<IEnumerable<CategoryModel>>> GetAllAsync()
+        public async Task<APIRespone<IEnumerable<Category>>> GetAllAsync()
         {
-            var response = new APIRespone<IEnumerable<CategoryModel>>();
+            var response = new APIRespone<IEnumerable<Category>>();
 
             try
             {
@@ -94,9 +94,9 @@ namespace API.Repositories
         }
 
         // Lấy theo ID
-        public async Task<APIRespone<CategoryModel>> GetByIdAsync(int id)
+        public async Task<APIRespone<Category>> GetByIdAsync(int id)
         {
-            var response = new APIRespone<CategoryModel>();
+            var response = new APIRespone<Category>();
 
             try
             {
@@ -122,9 +122,9 @@ namespace API.Repositories
         }
 
         // Phân trang
-        public async Task<APIRespone<PagedResponse<CategoryModel>>> GetPageAsync(int pageNow, int pageSize)
+        public async Task<APIRespone<PagedResponse<Category>>> GetPageAsync(int pageNow, int pageSize)
         {
-            var response = new APIRespone<PagedResponse<CategoryModel>>();
+            var response = new APIRespone<PagedResponse<Category>>();
 
             try
             {
@@ -132,12 +132,12 @@ namespace API.Repositories
                 var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
 
                 var data = await _context.Categories
-                    .OrderBy(c => c.Id)
+                    .OrderBy(c => c.CategoryId)
                     .Skip((pageNow - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
-                var pageResponse = new PagedResponse<CategoryModel>
+                var pageResponse = new PagedResponse<Category>
                 {
                     Data = data,
                     PageNow = pageNow,
@@ -160,9 +160,9 @@ namespace API.Repositories
         }
 
         // Cập nhật
-        public async Task<APIRespone<CategoryModel>> UpdateAsync(int id, CategoryModel entity)
+        public async Task<APIRespone<Category>> UpdateAsync(int id, Category entity)
         {
-            var response = new APIRespone<CategoryModel>();
+            var response = new APIRespone<Category>();
 
             try
             {
@@ -174,8 +174,8 @@ namespace API.Repositories
                     return response;
                 }
 
-                category.Title = entity.Title;
-                category.image = entity.image;
+                category.Name = entity.Name;
+                category.Description = entity.Description;
 
                 _context.Categories.Update(category);
                 await _context.SaveChangesAsync();

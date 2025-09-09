@@ -36,19 +36,19 @@ namespace API.Controllers
 
         // POST: api/category
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CategoryModel model)
+        public async Task<IActionResult> Create([FromBody] Category model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var response = await _categoryRepository.AddAsync(model);
             if (!response.Success) return BadRequest(response);
 
-            return CreatedAtAction(nameof(GetById), new { id = response.Data?.Id }, response);
+            return CreatedAtAction(nameof(GetById), new { id = response.Data?.CategoryId }, response);
         }
 
         // PUT: api/category/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] CategoryModel model)
+        public async Task<IActionResult> Update(int id, [FromBody] Category model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
