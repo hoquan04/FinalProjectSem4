@@ -1,6 +1,6 @@
 @model AdminWeb.Areas.Admin.Models.CategoryEditModel
 @{
-    ViewData["Title"] = "Ch?nh s?a danh m?c";
+    ViewData["Title"] = "Chỉnh sửa danh mục";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
@@ -11,36 +11,36 @@
                 <h5>@ViewData["Title"]: @Model.Name</h5>
                 <div class="ibox-tools">
                     <a asp-action="Index" class="btn btn-sm btn-secondary">
-                        <i class="fa fa-arrow-left"></i> Quay l?i danh s�ch
+                        <i class="fa fa-arrow-left"></i> Quay lại danh sách
                     </a>
                 </div>
             </div>
             <div class="ibox-content">
                 
-                @* ?? Form ?? PUT API *@
+                @* Form để PUT API *@
                 <form asp-action="Edit" method="post" class="form-horizontal">
                     <input asp-for="CategoryId" type="hidden" />
                     @Html.AntiForgeryToken()
                     
-                    @* Validation summary - hi?n th? l?i chung *@
+                    @* Validation summary - hiển thị lỗi chung *@
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     
-                    @* Tr??ng T�n danh m?c *@
+                    @* Trường Tên danh mục *@
                     <div class="form-group">
                         <label asp-for="Name" class="col-sm-2 control-label"></label>
                         <div class="col-sm-10">
                             <input asp-for="Name" class="form-control" 
-                                   placeholder="Nh?p t�n danh m?c (v� d?: ?i?n tho?i, Laptop...)">
+                                   placeholder="Nhập tên danh mục (ví dụ: Điện thoại, Laptop...)">
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
                     </div>
 
-                    @* Tr??ng M� t? *@
+                    @* Trường Mô tả *@
                     <div class="form-group">
                         <label asp-for="Description" class="col-sm-2 control-label"></label>
                         <div class="col-sm-10">
                             <textarea asp-for="Description" class="form-control" rows="4" 
-                                      placeholder="Nh?p m� t? cho danh m?c (kh�ng b?t bu?c)"></textarea>
+                                      placeholder="Nhập mô tả cho danh mục (không bắt buộc)"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                     </div>
@@ -51,10 +51,10 @@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
                             <button type="submit" class="btn btn-primary" id="btnSubmit">
-                                <i class="fa fa-save"></i> C?p nh?t danh m?c
+                                <i class="fa fa-save"></i> Cập nhật danh mục
                             </button>
                             <a asp-action="Index" class="btn btn-default">
-                                <i class="fa fa-times"></i> H?y
+                                <i class="fa fa-times"></i> Hủy
                             </a>
                         </div>
                     </div>
@@ -66,15 +66,20 @@
     <div class="col-lg-4">
         <div class="ibox">
             <div class="ibox-title">
-                <h5>Th�ng tin API</h5>
+                <h5>Thông tin API</h5>
             </div>
             <div class="ibox-content">
                 <div class="alert alert-warning">
-                    <h4><i class="fa fa-info-circle"></i> API Details</h4>
+                    <h4><i class="fa fa-info-circle"></i> Chi tiết API</h4>
                     <p><strong>Method:</strong> PUT</p>
                     <p><strong>Endpoint:</strong></p>
                     <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi/@Model.CategoryId</code>
                     <p class="mt-2"><strong>Category ID:</strong> @Model.CategoryId</p>
+                    <p class="mt-2"><strong>Request Body:</strong></p>
+                    <pre class="text-success">{
+  "name": "Tên danh mục",
+  "description": "Mô tả"
+}</pre>
                 </div>
             </div>
         </div>
@@ -85,10 +90,71 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        // JavaScript ?? show loading khi submit
-        $('#btnSubmit').click(function() {
-            $(this).prop('disabled', true)
-                   .html('<i class="fa fa-spinner fa-spin"></i> ?ang c?p nh?t...');
+        console.log('🔧 Edit script loaded');
+        
+        // JavaScript để show loading khi submit
+        $('#btnSubmit').click(function(e) {
+            e.preventDefault(); // Ngăn submit mặc định
+            
+            console.log('🖱️ Edit button clicked');
+            console.log('🎯 CategoryId:', @Model.CategoryId);
+            
+            var $btn = $(this);
+            var $form = $btn.closest('form');
+            
+            // Kiểm tra validation trước khi submit
+            if (!$form.valid()) {
+                console.log('❌ Form validation failed');
+                return false;
+            }
+            
+            console.log('✅ Form validation passed');
+            console.log('🚀 Submitting form to:', $form.attr('action'));
+            
+            // Show loading state
+            $btn.prop('disabled', true)
+                .html('<i class="fa fa-spinner fa-spin"></i> Đang cập nhật...');
+            
+            // Submit form manually
+            $form.submit();
+        });
+        
+        // Log form submit event
+        $('form').on('submit', function(e) {
+            console.log('📤 Form is being submitted');
+            console.log('🎯 Form action:', $(this).attr('action'));
+            console.log('🎯 Form method:', $(this).attr('method'));
+            
+            // Log form data
+            var formData = new FormData(this);
+            console.log('📋 Form data:');
+            for (var pair of formData.entries()) {
+                console.log('   ' + pair[0] + ': ' + pair[1]);
+            }
+        });
+        
+        // Reset button nếu có lỗi validation
+        $('form').on('invalid-form.validate', function() {
+            console.log('❌ Form validation failed - resetting button');
+            $('#btnSubmit').prop('disabled', false)
+                          .html('<i class="fa fa-save"></i> Cập nhật danh mục');
+        });
+        
+        // Thêm timeout để reset button nếu quá lâu
+        var submitTimeout;
+        $('form').on('submit', function() {
+            submitTimeout = setTimeout(function() {
+                $('#btnSubmit').prop('disabled', false)
+                              .html('<i class="fa fa-save"></i> Cập nhật danh mục');
+                alert('Thao tác mất quá nhiều thời gian. Vui lòng kiểm tra kết nối API và thử lại.');
+            }, 30000); // 30 giây timeout
+        });
+        
+        // Clear timeout khi page unload
+        $(window).on('beforeunload', function() {
+            if (submitTimeout) {
+                clearTimeout(submitTimeout);
+            }
         });
     </script>
 }
