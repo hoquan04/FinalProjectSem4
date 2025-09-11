@@ -1,15 +1,22 @@
-﻿using API.Data;
+using API.Data;
 using API.Models;
 using API.Repositories;
 using API.Repositories.IRepositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Sửa JSON Serialization Cycle
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -51,6 +58,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 // Dependency Injection cho Repository
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 
@@ -76,5 +84,7 @@ app.Urls.Add("http://localhost:7245");
 
 Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
+Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
+Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
 
 app.Run();

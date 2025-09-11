@@ -1,0 +1,284 @@
+@model AdminWeb.Areas.Admin.Models.ProductCreateModel
+@{
+    ViewData["Title"] = "Thêm sản phẩm mới";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                
+                @* Form để POST API *@
+                <form asp-action="Create" method="post" class="form-horizontal">
+                    @* Anti-forgery token *@
+                    @Html.AntiForgeryToken()
+                    
+                    @* Validation summary - hiển thị lỗi chung *@
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    @* Trường Tên sản phẩm *@
+                    <div class="form-group">
+                        <label asp-for="Name" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <input asp-for="Name" class="form-control" 
+                                   placeholder="Nhập tên sản phẩm (ví dụ: iPhone 15, MacBook Pro...)">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Trường Danh mục *@
+                    <div class="form-group">
+                        <label asp-for="CategoryId" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <select asp-for="CategoryId" class="form-control">
+                                <option value="">-- Chọn danh mục --</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    foreach (var category in (List<AdminWeb.Areas.Admin.Models.CategoryViewModel>)ViewBag.Categories)
+                                    {
+                                        <option value="@category.CategoryId">@category.Name</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Trường Mô tả *@
+                    <div class="form-group">
+                        <label asp-for="Description" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Nhập mô tả chi tiết sản phẩm (không bắt buộc)"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Trường Giá *@
+                    <div class="form-group">
+                        <label asp-for="Price" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" 
+                                       placeholder="0">
+                                <span class="input-group-addon">VNĐ</span>
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Trường Số lượng tồn kho *@
+                    <div class="form-group">
+                        <label asp-for="StockQuantity" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <input asp-for="StockQuantity" class="form-control" type="number" min="0" 
+                                   placeholder="0">
+                            <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Trường Hình ảnh *@
+                    <div class="form-group">
+                        <label asp-for="ImageUrl" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <input asp-for="ImageUrl" class="form-control" 
+                                   placeholder="https://example.com/image.jpg">
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            <small class="text-muted">Nhập URL hình ảnh sản phẩm</small>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+                    
+                    @* Buttons *@
+                    <div class="form-group">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
+                                <i class="fa fa-save"></i> Lưu sản phẩm
+                            </button>
+                            <a asp-action="Index" class="btn btn-default">
+                                <i class="fa fa-times"></i> Hủy
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin API</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="alert alert-info">
+                    <h4><i class="fa fa-info-circle"></i> Chi tiết API</h4>
+                    <p><strong>Method:</strong> POST</p>
+                    <p><strong>Endpoint:</strong></p>
+                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</code>
+                    <p class="mt-2"><strong>Request Body:</strong></p>
+                    <pre class="text-success">{
+  "name": "Tên sản phẩm",
+  "categoryId": 1,
+  "description": "Mô tả",
+  "price": 1000000,
+  "stockQuantity": 50,
+  "imageUrl": "https://..."
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        @* Preview image *@
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Xem trước hình ảnh</h5>
+            </div>
+            <div class="ibox-content text-center">
+                <img id="imagePreview" src="#" alt="Preview" style="max-width: 100%; max-height: 200px; display: none;" class="img-responsive">
+                <div id="noImageText" class="text-muted">
+                    <i class="fa fa-image fa-3x"></i>
+                    <p>Nhập URL để xem trước</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        console.log('🔧 Product Create script loaded');
+        
+        // Preview image
+        $('#ImageUrl').on('input', function() {
+            var url = $(this).val();
+            var preview = $('#imagePreview');
+            var noImageText = $('#noImageText');
+            
+            if (url && url.trim() !== '') {
+                preview.attr('src', url).show();
+                noImageText.hide();
+                
+                // Handle image load error
+                preview.on('error', function() {
+                    $(this).hide();
+                    noImageText.show();
+                });
+            } else {
+                preview.hide();
+                noImageText.show();
+            }
+        });
+        
+        // Debug: Log tất cả form fields khi thay đổi
+        $('input, select, textarea').on('change input', function() {
+            console.log(`📝 Field changed: ${this.name} = ${this.value}`);
+        });
+        
+        // JavaScript để show loading khi submit
+        $('#btnSubmit').click(function(e) {
+            e.preventDefault(); // Ngăn submit mặc định
+            
+            console.log('🖱️ Submit button clicked');
+            
+            var $btn = $(this);
+            var $form = $btn.closest('form');
+            
+            // Debug: Log tất cả form data TRƯỚC validation
+            console.log('📋 Form data BEFORE validation:');
+            var formFields = {
+                Name: $('#Name').val(),
+                CategoryId: $('#CategoryId').val(),
+                Description: $('#Description').val(),
+                Price: $('#Price').val(),
+                StockQuantity: $('#StockQuantity').val(),
+                ImageUrl: $('#ImageUrl').val()
+            };
+            console.table(formFields);
+            
+            // Kiểm tra validation trước khi submit
+            if (!$form.valid()) {
+                console.log('❌ Form validation failed');
+                
+                // Debug: Log validation errors
+                var errors = [];
+                $form.find('.field-validation-error').each(function() {
+                    var errorText = $(this).text();
+                    if (errorText) {
+                        errors.push(errorText);
+                    }
+                });
+                console.log('📝 Validation errors:', errors);
+                
+                return false;
+            }
+            
+            console.log('✅ Form validation passed');
+            console.log('🚀 Submitting form to:', $form.attr('action'));
+            
+            // Show loading state
+            $btn.prop('disabled', true)
+                .html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...');
+            
+            // Submit form manually
+            $form.submit();
+        });
+        
+        // Log form submit event
+        $('form').on('submit', function(e) {
+            console.log('📤 Form is being submitted');
+            console.log('🎯 Form action:', $(this).attr('action'));
+            console.log('🎯 Form method:', $(this).attr('method'));
+            
+            // Log form data chi tiết
+            var formData = new FormData(this);
+            console.log('📋 FormData entries:');
+            for (var pair of formData.entries()) {
+                console.log(`   ${pair[0]}: ${pair[1]}`);
+            }
+            
+            // Log serialized form
+            console.log('📊 Serialized form:', $(this).serialize());
+        });
+        
+        // Reset button nếu có lỗi validation
+        $('form').on('invalid-form.validate', function() {
+            console.log('❌ Form validation failed - resetting button');
+            $('#btnSubmit').prop('disabled', false)
+                          .html('<i class="fa fa-save"></i> Lưu sản phẩm');
+        });
+        
+        // Thêm timeout để reset button nếu quá lâu
+        var submitTimeout;
+        $('form').on('submit', function() {
+            submitTimeout = setTimeout(function() {
+                $('#btnSubmit').prop('disabled', false)
+                              .html('<i class="fa fa-save"></i> Lưu sản phẩm');
+                alert('Thao tác mất quá nhiều thời gian. Vui lòng kiểm tra kết nối API và thử lại.');
+            }, 30000); // 30 giây timeout
+        });
+        
+        // Clear timeout khi page unload
+        $(window).on('beforeunload', function() {
+            if (submitTimeout) {
+                clearTimeout(submitTimeout);
+            }
+        });
+        
+        // Debug: Test API constants
+        console.log('🔧 API Constants check:');
+        console.log('   ProductApi URL: @AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi');
+    </script>
+}

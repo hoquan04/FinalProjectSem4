@@ -1,0 +1,212 @@
+@model AdminWeb.Areas.Admin.Models.ProductViewModel
+@{
+    ViewData["Title"] = "Xác nhận xóa sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                
+                <div class="alert alert-danger">
+                    <h4><i class="fa fa-exclamation-triangle"></i> Cảnh báo!</h4>
+                    <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
+                    <p><strong>Hành động này không thể hoàn tác!</strong></p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <dl class="dl-horizontal">
+                            <dt><i class="fa fa-id-card"></i> ID:</dt>
+                            <dd>
+                                <span class="badge badge-primary">@Model.ProductId</span>
+                            </dd>
+                            
+                            <dt><i class="fa fa-cube"></i> Tên sản phẩm:</dt>
+                            <dd><strong>@Model.Name</strong></dd>
+                            
+                            <dt><i class="fa fa-tag"></i> Danh mục:</dt>
+                            <dd>
+                                @if (Model.Category != null)
+                                {
+                                    <span class="badge badge-info">@Model.Category.Name</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </dd>
+                            
+                            <dt><i class="fa fa-info-circle"></i> Mô tả:</dt>
+                            <dd>
+                                @if (string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <em class="text-muted">Không có mô tả</em>
+                                }
+                                else
+                                {
+                                    @Model.Description
+                                }
+                            </dd>
+                            
+                            <dt><i class="fa fa-money"></i> Giá:</dt>
+                            <dd><strong class="text-success">@Model.Price.ToString("N0") VNĐ</strong></dd>
+                            
+                            <dt><i class="fa fa-cubes"></i> Tồn kho:</dt>
+                            <dd>
+                                @if (Model.StockQuantity > 0)
+                                {
+                                    <span class="badge badge-success">@Model.StockQuantity</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Hết hàng</span>
+                                }
+                            </dd>
+                            
+                            <dt><i class="fa fa-calendar"></i> Ngày tạo:</dt>
+                            <dd>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                        </dl>
+                    </div>
+                    
+                    @* Hiển thị hình ảnh nếu có *@
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <img src="@Model.ImageUrl" alt="@Model.Name" class="img-responsive img-thumbnail" style="max-height: 200px;">
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="hr-line-dashed"></div>
+                
+                @* Form để DELETE API *@
+                <form asp-action="Delete" method="post">
+                    <input asp-for="ProductId" type="hidden" />
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-danger" id="btnDelete">
+                            <i class="fa fa-trash"></i> Xác nhận xóa
+                        </button>
+                        <a asp-action="Index" class="btn btn-default">
+                            <i class="fa fa-times"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin API</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="alert alert-danger">
+                    <h4><i class="fa fa-trash"></i> DELETE API</h4>
+                    <p><strong>Method:</strong> DELETE</p>
+                    <p><strong>Endpoint:</strong></p>
+                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi/@Model.ProductId</code>
+                    <p class="mt-2"><strong>Lưu ý:</strong></p>
+                    <small>Việc xóa sản phẩm có thể ảnh hưởng đến các đơn hàng và đánh giá liên quan.</small>
+                </div>
+            </div>
+        </div>
+        
+        @* Thống kê liên quan *@
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin liên quan</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="alert alert-info">
+                    <h4><i class="fa fa-info-circle"></i> Cảnh báo</h4>
+                    <p><strong>Tác động khi xóa:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fa fa-check"></i> Xóa sản phẩm khỏi hệ thống</li>
+                        <li><i class="fa fa-warning text-warning"></i> Có thể ảnh hưởng đến đơn hàng</li>
+                        <li><i class="fa fa-warning text-warning"></i> Có thể ảnh hưởng đến đánh giá</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        console.log('🔧 Product Delete script loaded');
+        
+        // JavaScript để show loading khi submit
+        $('#btnDelete').click(function(e) {
+            e.preventDefault(); // Ngăn submit mặc định
+            
+            console.log('🖱️ Delete button clicked');
+            console.log('🎯 ProductId:', @Model.ProductId);
+            
+            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm "@Model.Name" không?')) {
+                console.log('❌ User cancelled delete');
+                return false;
+            }
+            
+            console.log('✅ User confirmed delete');
+            
+            var $btn = $(this);
+            var $form = $btn.closest('form');
+            
+            // Show loading state
+            $btn.prop('disabled', true)
+                .html('<i class="fa fa-spinner fa-spin"></i> Đang xóa...');
+            
+            console.log('🚀 Submitting form to:', $form.attr('action'));
+            console.log('📦 Form method:', $form.attr('method'));
+            
+            // Submit form manually
+            $form.submit();
+        });
+        
+        // Log form submit event
+        $('form').on('submit', function(e) {
+            console.log('📤 Form is being submitted');
+            console.log('🎯 Form action:', $(this).attr('action'));
+            console.log('🎯 Form method:', $(this).attr('method'));
+            
+            // Log form data
+            var formData = new FormData(this);
+            console.log('📋 Form data:');
+            for (var pair of formData.entries()) {
+                console.log('   ' + pair[0] + ': ' + pair[1]);
+            }
+        });
+        
+        // Thêm timeout để reset button nếu quá lâu
+        var deleteTimeout;
+        $('form').on('submit', function() {
+            deleteTimeout = setTimeout(function() {
+                $('#btnDelete').prop('disabled', false)
+                              .html('<i class="fa fa-trash"></i> Xác nhận xóa');
+                alert('Thao tác mất quá nhiều thời gian. Vui lòng kiểm tra kết nối API và thử lại.');
+            }, 30000); // 30 giây timeout
+        });
+        
+        // Clear timeout khi page unload
+        $(window).on('beforeunload', function() {
+            if (deleteTimeout) {
+                clearTimeout(deleteTimeout);
+            }
+        });
+    </script>
+}

@@ -3,17 +3,22 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// C?u h�nh encoding UTF-8 cho console
+// Cấu hình encoding UTF-8 cho console
 Console.OutputEncoding = Encoding.UTF8;
 Console.InputEncoding = Encoding.UTF8;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+
+// Đăng ký Services
 builder.Services.AddHttpClient<CategoryService>();
 builder.Services.AddScoped<CategoryService>();
 
-// C?u h�nh localization cho ti?ng Vi?t
+builder.Services.AddHttpClient<ProductService>();
+builder.Services.AddScoped<ProductService>();
+
+// Cấu hình localization cho tiếng Việt
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[] { "vi-VN", "en-US" };
@@ -37,7 +42,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// S? d?ng localization
+// Sử dụng localization
 app.UseRequestLocalization();
 
 app.UseAuthorization();
@@ -50,8 +55,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-Console.WriteLine("?? AdminWeb ?ang ch?y...");
-Console.WriteLine("?? URL: http://localhost:5000");
-Console.WriteLine("??  Admin Area: http://localhost:5000/Admin/Category");
+Console.WriteLine("🎯 AdminWeb đang chạy...");
+Console.WriteLine("📱 URL: http://localhost:5000");
+Console.WriteLine("⚙️  Admin Area: http://localhost:5000/Admin/Category");
+Console.WriteLine("📦 Product Area: http://localhost:5000/Admin/Product");
 
 app.Run();

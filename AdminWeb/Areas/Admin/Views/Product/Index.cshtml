@@ -1,0 +1,241 @@
+@model List<AdminWeb.Areas.Admin.Models.ProductViewModel>
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    int stt = 1;
+}
+
+@* Thêm debug info đầu view *@
+<div class="alert alert-info" style="margin-bottom: 20px;">
+    <h5>🔍 Debug Info:</h5>
+    <p><strong>Model:</strong> @(Model?.GetType().Name ?? "NULL")</p>
+    <p><strong>Model Count:</strong> @(Model?.Count ?? 0)</p>
+    <p><strong>ViewBag.Error:</strong> @ViewBag.Error</p>
+    <p><strong>ViewBag.Categories Count:</strong> @(ViewBag.Categories != null ? ((List<AdminWeb.Areas.Admin.Models.CategoryViewModel>)ViewBag.Categories).Count : 0)</p>
+    <p><strong>API URL:</strong> @AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</p>
+</div>
+
+<div class="col-lg-12">
+    <div class="ibox-content">
+        
+        @* 🚀 Success/Error Messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-check"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-times"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+        
+        <div class="row">
+            <form asp-action="Index" method="get">
+                <div class="col-sm-3">
+                    <div class="input-group">
+                        <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm sản phẩm..." class="input-sm form-control">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-sm-3">
+                    <select name="categoryId" class="form-control input-sm" onchange="this.form.submit()">
+                        <option value="">-- Tất cả danh mục --</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var category in (List<AdminWeb.Areas.Admin.Models.CategoryViewModel>)ViewBag.Categories)
+                            {
+                                var isSelected = ViewBag.CategoryId?.ToString() == category.CategoryId.ToString();
+                                <option value="@category.CategoryId" selected="@isSelected">
+                                    @category.Name
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-sm-6 text-right">
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> Thêm sản phẩm
+                    </a>
+                    @if (!string.IsNullOrEmpty(ViewBag.SearchString) || ViewBag.CategoryId != null)
+                    {
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fa fa-list"></i> Xem tất cả
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+
+        @* Error từ API call *@
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="alert alert-danger mt-3">
+                <strong><i class="fa fa-exclamation-triangle"></i> @ViewBag.Error</strong>
+                @if (!string.IsNullOrEmpty(ViewBag.ErrorDetail))
+                {
+                    <br><small>@ViewBag.ErrorDetail</small>
+                }
+                <br><small class="text-muted">
+                    <strong>Hướng dẫn:</strong> Đảm bảo API đang chạy tại <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</code>
+                </small>
+            </div>
+        }
+
+        <div class="table-responsive mt-3">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>ID</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá</th>
+                        <th>Tồn kho</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(stt++)</td>
+                                <td>
+                                    <span class="badge badge-primary">@item.ProductId</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" style="width: 50px; height: 50px; object-fit: cover;" class="img-thumbnail">
+                                    }
+                                    else
+                                    {
+                                        <div style="width: 50px; height: 50px;" class="bg-light d-flex align-items-center justify-content-center">
+                                            <i class="fa fa-image text-muted"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@item.Name</strong>
+                                    @if (!string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <br><small class="text-muted">@item.Description.Substring(0, Math.Min(50, item.Description.Length))@(item.Description.Length > 50 ? "..." : "")</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Category != null)
+                                    {
+                                        <span class="badge badge-info">@item.Category.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong class="text-success">@item.Price.ToString("N0") VNĐ</strong>
+                                </td>
+                                <td>
+                                    @if (item.StockQuantity > 0)
+                                    {
+                                        <span class="badge badge-success">@item.StockQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Hết hàng</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@item.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.ProductId" 
+                                           class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fa fa-edit"></i> Sửa
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.ProductId" 
+                                           class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fa fa-trash"></i> Xóa
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                @if (!string.IsNullOrEmpty(ViewBag.SearchString) || ViewBag.CategoryId != null)
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i> 
+                                        Không tìm thấy sản phẩm nào phù hợp với điều kiện tìm kiếm
+                                    </div>
+                                }
+                                else if (!string.IsNullOrEmpty(ViewBag.Error))
+                                {
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-exclamation-triangle"></i> 
+                                        Không thể tải danh sách sản phẩm
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i> 
+                                        Chưa có sản phẩm nào. 
+                                        <a asp-action="Create" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-plus"></i> Thêm sản phẩm đầu tiên
+                                        </a>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Footer info *@
+        @if (Model != null && Model.Any())
+        {
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <small class="text-muted">
+                        <i class="fa fa-info-circle"></i>
+                        Hiển thị <strong>@Model.Count</strong> sản phẩm
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                        {
+                            <span>cho từ khóa "<strong>@ViewBag.SearchString</strong>"</span>
+                        }
+                        @if (ViewBag.CategoryId != null)
+                        {
+                            <span>trong danh mục được chọn</span>
+                        }
+                    </small>
+                </div>
+                <div class="col-sm-6 text-right">
+                    <small class="text-muted">
+                        API Endpoint: <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</code>
+                    </small>
+                </div>
+            </div>
+        }
+    </div>
+</div>
