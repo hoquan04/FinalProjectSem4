@@ -1,4 +1,4 @@
-﻿@model List<AdminWeb.Areas.Admin.Models.CategoryViewModel>
+@model List<AdminWeb.Areas.Admin.Models.CategoryViewModel>
 @{
     ViewData["Title"] = "Danh sách danh mục";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -138,9 +138,7 @@
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle"></i> 
                                         Chưa có danh mục nào. 
-                                        <a asp-action="Create" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-plus"></i> Thêm danh mục đầu tiên
-                                        </a>
+                                        
                                     </div>
                                 }
                             </td>
@@ -165,9 +163,7 @@
                     </small>
                 </div>
                 <div class="col-sm-6 text-right">
-                    <small class="text-muted">
-                        API Endpoint: <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi</code>
-                    </small>
+                    
                 </div>
             </div>
         }

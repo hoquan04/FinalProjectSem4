@@ -5,15 +5,7 @@
     int stt = 1;
 }
 
-@* Thêm debug info đầu view *@
-<div class="alert alert-info" style="margin-bottom: 20px;">
-    <h5>🔍 Debug Info:</h5>
-    <p><strong>Model:</strong> @(Model?.GetType().Name ?? "NULL")</p>
-    <p><strong>Model Count:</strong> @(Model?.Count ?? 0)</p>
-    <p><strong>ViewBag.Error:</strong> @ViewBag.Error</p>
-    <p><strong>ViewBag.Categories Count:</strong> @(ViewBag.Categories != null ? ((List<AdminWeb.Areas.Admin.Models.CategoryViewModel>)ViewBag.Categories).Count : 0)</p>
-    <p><strong>API URL:</strong> @AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</p>
-</div>
+
 
 <div class="col-lg-12">
     <div class="ibox-content">
@@ -200,9 +192,7 @@
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle"></i> 
                                         Chưa có sản phẩm nào. 
-                                        <a asp-action="Create" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-plus"></i> Thêm sản phẩm đầu tiên
-                                        </a>
+                                        
                                     </div>
                                 }
                             </td>
@@ -231,9 +221,7 @@
                     </small>
                 </div>
                 <div class="col-sm-6 text-right">
-                    <small class="text-muted">
-                        API Endpoint: <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</code>
-                    </small>
+                    
                 </div>
             </div>
         }

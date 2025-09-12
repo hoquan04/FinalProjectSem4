@@ -5,7 +5,7 @@
 }
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="ibox">
             <div class="ibox-title">
                 <h5>@ViewData["Title"]</h5>
@@ -69,23 +69,6 @@
         </div>
     </div>
     
-    <div class="col-lg-4">
-        <div class="ibox">
-            <div class="ibox-title">
-                <h5>Thông tin API</h5>
-            </div>
-            <div class="ibox-content">
-                <div class="alert alert-danger">
-                    <h4><i class="fa fa-trash"></i> DELETE API</h4>
-                    <p><strong>Method:</strong> DELETE</p>
-                    <p><strong>Endpoint:</strong></p>
-                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.CategoryApi/@Model.CategoryId</code>
-                    <p class="mt-2"><strong>Lưu ý:</strong></p>
-                    <small>Việc xóa danh mục có thể ảnh hưởng đến các sản phẩm liên quan.</small>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {

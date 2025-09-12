@@ -19,7 +19,20 @@ namespace API.Controllers
             _categoryRepository = categoryRepository;
             _context = context;
         }
-        
+        // GET: api/category/check-db
+        [HttpGet("check-db")]
+        public async Task<IActionResult> CheckDatabaseConnection()
+        {
+            try
+            {
+                return Ok(new { success = true, message = "Database connection is healthy." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Database connection failed.", error = ex.Message });
+            }
+        }
+
         // GET: api/category
         [HttpGet]
         public async Task<IActionResult> GetAll()

@@ -116,39 +116,21 @@
     </div>
     
     <div class="col-lg-4">
-        <div class="ibox">
-            <div class="ibox-title">
-                <h5>Thông tin API</h5>
-            </div>
-            <div class="ibox-content">
-                <div class="alert alert-info">
-                    <h4><i class="fa fa-info-circle"></i> Chi tiết API</h4>
-                    <p><strong>Method:</strong> POST</p>
-                    <p><strong>Endpoint:</strong></p>
-                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi</code>
-                    <p class="mt-2"><strong>Request Body:</strong></p>
-                    <pre class="text-success">{
-  "name": "Tên sản phẩm",
-  "categoryId": 1,
-  "description": "Mô tả",
-  "price": 1000000,
-  "stockQuantity": 50,
-  "imageUrl": "https://..."
-}</pre>
-                </div>
-            </div>
-        </div>
-
+        
         @* Preview image *@
         <div class="ibox">
             <div class="ibox-title">
                 <h5>Xem trước hình ảnh</h5>
             </div>
-            <div class="ibox-content text-center">
-                <img id="imagePreview" src="#" alt="Preview" style="max-width: 100%; max-height: 200px; display: none;" class="img-responsive">
-                <div id="noImageText" class="text-muted">
-                    <i class="fa fa-image fa-3x"></i>
-                    <p>Nhập URL để xem trước</p>
+            <div class="ibox-content d-flex align-items-center justify-content-center" style="min-height: 250px;">
+                <div class="text-center">
+                    <img id="imagePreview" src="#" alt="Preview" 
+                         style="max-width: 100%; max-height: 200px; display: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
+                         class="img-responsive">
+                    <div id="noImageText" class="text-muted">
+                        <i class="fa fa-image fa-4x mb-3" style="color: #ddd;"></i>
+                        <p class="h6">Nhập URL để xem trước hình ảnh</p>
+                    </div>
                 </div>
             </div>
         </div>
