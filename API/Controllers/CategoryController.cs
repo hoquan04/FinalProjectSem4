@@ -2,6 +2,7 @@
 using API.Repositories.IRepositories;
 using API.Repositories.RestAPI;
 using Microsoft.AspNetCore.Mvc;
+using API.Data;
 
 namespace API.Controllers
 {
@@ -10,11 +11,26 @@ namespace API.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly DataContext _context;
 
         // Inject repository thông qua constructor
-        public CategoryController(ICategoryRepository categoryRepository)
+        public CategoryController(ICategoryRepository categoryRepository, DataContext context)
         {
             _categoryRepository = categoryRepository;
+            _context = context;
+        }
+        // GET: api/category/check-db
+        [HttpGet("check-db")]
+        public async Task<IActionResult> CheckDatabaseConnection()
+        {
+            try
+            {
+                return Ok(new { success = true, message = "Database connection is healthy." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Database connection failed.", error = ex.Message });
+            }
         }
 
         // GET: api/category

@@ -1,3 +1,12 @@
-﻿@using AdminWeb
+@using AdminWeb
 @using AdminWeb.Models
+@using AdminWeb.Areas.Admin.Models
+@using AdminWeb.Areas.Admin.Data
+@using System.Globalization
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    // Đảm bảo culture là vi-VN cho hiển thị tiếng Việt đúng
+    CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("vi-VN");
+    CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("vi-VN");
+}
