@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace API.Models
 {
@@ -17,11 +18,17 @@ namespace API.Models
 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 
+        // Thời điểm tạo payment (dù thành công, pending hay fail đều có)  lưu ý không được dùng làm input để thêm mới hoặc cập nhật nó phải ẩn đi
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Thời điểm thanh toán thành công (chỉ set khi PaymentStatus = Paid) nó là lịch sử ngày, khi thay đổi trạng thái thanh toán
         public DateTime? PaidAt { get; set; }
 
         // Navigation
-        public Order Order { get; set; }
+        [JsonIgnore]
+        public Order? Order { get; set; }
     }
+
 
     public enum PaymentMethod
     {

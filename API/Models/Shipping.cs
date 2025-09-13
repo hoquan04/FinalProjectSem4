@@ -25,6 +25,6 @@ namespace API.Models
         public int? EstimatedDays { get; set; }
 
         // Navigation
-        public ICollection<Order> Orders { get; set; }
+        public ICollection<Order>? Orders { get; set; }
     }
 }

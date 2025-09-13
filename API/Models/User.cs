@@ -34,7 +34,7 @@ namespace API.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation
-        public ICollection<Order> Orders { get; set; }
+        public ICollection<Order>? Orders { get; set; }
         public ICollection<Review> Reviews { get; set; }
     }
 

@@ -1,7 +1,19 @@
+﻿using AdminWeb.Areas.Admin.Data.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient("APIClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:58205/");
+    client.DefaultRequestHeaders.Accept.Add(
+        new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+// Các service dùng HttpClient
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<OrderDetailService>();
 
 var app = builder.Build();
 
