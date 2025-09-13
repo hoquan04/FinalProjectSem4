@@ -58,6 +58,10 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 // Dependency Injection cho Repository
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
 
 
 

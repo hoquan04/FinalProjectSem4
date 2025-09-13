@@ -1,4 +1,4 @@
-﻿namespace AdminWeb.Areas.Admin.Data
+namespace AdminWeb.Areas.Admin.Data
 {
     public class ApiConstants
     {
@@ -13,6 +13,7 @@
 
         public static string ProductApi => $"{BaseUrl}product";
         public static string OrderApi => $"{BaseUrl}order";
+        public static string OrderDetailApi => $"{BaseUrl}orderdetail";
         public static string AccountApi => $"{BaseUrl}accounts";
     }
 }
