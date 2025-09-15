@@ -1,0 +1,176 @@
+﻿@model List<AdminWeb.Areas.Admin.Models.UserViewModel>
+
+
+@{
+    ViewData["Title"] = "Danh sách người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    int stt = 1;
+}
+
+<div class="col-lg-12">
+    <div class="ibox-content">
+
+        @* 🚀 Success/Error Messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-check"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-times"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="row">
+            <form asp-action="Index" method="get">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm..." class="input-sm form-control">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-sm-8 text-right">
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> Thêm mới
+                    </a>
+                    @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                    {
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fa fa-list"></i> Xem tất cả
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+
+        @* Error từ API call *@
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="alert alert-danger mt-3">
+                <strong><i class="fa fa-exclamation-triangle"></i> @ViewBag.Error</strong>
+                @if (!string.IsNullOrEmpty(ViewBag.ErrorDetail))
+                {
+                    <br>
+
+                    <small>@ViewBag.ErrorDetail</small>
+                }
+                <br><small class="text-muted">
+                    <strong>Hướng dẫn:</strong> Đảm bảo API đang chạy tại <code>@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi</code>
+                </small>
+            </div>
+        }
+
+        <div class="table-responsive mt-3">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>ID</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Vai trò</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(stt++)</td>
+                                <td><span class="badge badge-primary">@item.UserId</span></td>
+                                <td>@item.FullName</td>
+                                <td>@item.Email</td>
+                                <td>@item.Phone</td>
+                                <td>@item.Address</td>
+                                <td>
+                                    @if (item.Role == AdminWeb.Areas.Admin.Models.UserRole.Admin)
+                                    {
+                                        <span class="badge badge-danger">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-primary">Customer</span>
+                                    }
+                                </td>
+                                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.UserId"
+                                           class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fa fa-edit"></i> Sửa
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.UserId"
+                                           class="btn btn-sm btn-danger" title="Xóa"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');">
+                                            <i class="fa fa-trash"></i> Xóa
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i>
+                                        Không tìm thấy người dùng nào phù hợp với từ khóa "<strong>@ViewBag.SearchString</strong>"
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i>
+                                        Chưa có người dùng nào.
+                                        <a asp-action="Create" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-plus"></i> Thêm người dùng đầu tiên
+                                        </a>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <small class="text-muted">
+                        <i class="fa fa-info-circle"></i>
+                        Hiển thị <strong>@Model.Count</strong> người dùng
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                        {
+                            <span>cho từ khóa "<strong>@ViewBag.SearchString</strong>"</span>
+                        }
+                    </small>
+                </div>
+                <div class="col-sm-6 text-right">
+                    <small class="text-muted">
+                        API Endpoint: <code>@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi</code>
+                    </small>
+                </div>
+            </div>
+        }
+    </div>
+</div>

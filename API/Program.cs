@@ -4,16 +4,17 @@ using API.Repositories;
 using API.Repositories.IRepositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ================== Services ==================
 
+// Controller
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS: Cho phép gọi từ Flutter hoặc bất kỳ client nào
+// ✅ CORS: Cho phép gọi từ mọi client
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -23,41 +24,44 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+// ✅ Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
 
-
-// Kết nối SQL Server
+// ✅ DbContext (SQL Server)
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    object value = options.UseSqlServer(builder.Configuration.GetConnectionString("FlutterDB"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("FlutterDB"));
 });
 
+// ✅ Dependency Injection cho Repository
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+// builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
-
-// Dependency Injection cho Repository
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
-
-
-
-
-
+// ================== App ==================
 var app = builder.Build();
-// Dùng CORS đúng tên policy
+
+// ✅ Enable CORS
 app.UseCors("AllowAll");
-// Configure the HTTP request pipeline.
+
+// ✅ Swagger UI
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+        c.RoutePrefix = "swagger"; // http://localhost:7245/swagger
+    });
 }
 
+// ✅ Middleware
 app.UseHttpsRedirection();
-
+app.UseAuthentication(); // 👈 cần cho Identity
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-//app.Run("http://0.0.0.0:7245");

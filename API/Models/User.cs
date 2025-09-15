@@ -31,11 +31,11 @@ namespace API.Models
         [Required(ErrorMessage = "Vai trò người dùng là bắt buộc")]
         public UserRole Role { get; set; } = UserRole.Customer;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation
-        public ICollection<Order> Orders { get; set; }
-        public ICollection<Review> Reviews { get; set; }
+        public ICollection<Order>? Orders { get; set; }
+        public ICollection<Review>? Reviews { get; set; }
     }
 
     public enum UserRole

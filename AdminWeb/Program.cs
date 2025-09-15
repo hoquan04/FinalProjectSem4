@@ -1,7 +1,16 @@
+using AdminWeb.Areas.Admin.Data.Services;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<CategoryService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddHttpClient<UserService>();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
