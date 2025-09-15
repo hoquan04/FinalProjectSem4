@@ -37,7 +37,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 // Dependency Injection cho Repository
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 
 
@@ -50,11 +50,15 @@ app.UseCors("AllowAll");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        c.RoutePrefix = string.Empty; // Đặt Swagger ở root ("/")
+    });
 }
-
+//app.MapGet("/", () => Results.Redirect("/swagger"));
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
