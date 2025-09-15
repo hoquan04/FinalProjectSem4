@@ -1,0 +1,83 @@
+@using AdminWeb.Areas.Admin.Models
+@model PagedResponse<OrderDetail>
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    var orderId = ViewBag.OrderId;
+}
+
+<h2>Chi tiết đơn hàng #@orderId</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Mã chi tiết</th>
+            <th>Sản phẩm</th>
+            <th>Ảnh</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Thành tiền</th>
+            <th>Ngày tạo</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model?.Data != null && Model.Data.Any())
+        {
+            foreach (var item in Model.Data)
+            {
+                <tr>
+                    <td>@item.OrderDetailId</td>
+                    <td>@item.Product?.Name</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                        {
+                            <img src="@item.Product.ImageUrl" alt="@item.Product?.Name"
+                                 style="width: 60px; height: 60px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">Không có ảnh</span>
+                        }
+                    </td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitPrice.ToString("N0") đ</td>
+                    <td>@item.SubTotal.ToString("N0") đ</td>
+                    <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="text-center">Không có chi tiết đơn hàng nào</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Phân trang -->
+@if (Model != null && Model.TotalPage > 1)
+{
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(Model.PageNow == 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-orderId="@orderId"
+                   asp-route-pageNow="@(Model.PageNow - 1)" asp-route-pageSize="@Model.PageSize">«</a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPage; i++)
+            {
+                <li class="page-item @(Model.PageNow == i ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-orderId="@orderId"
+                       asp-route-pageNow="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.PageNow == Model.TotalPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-orderId="@orderId"
+                   asp-route-pageNow="@(Model.PageNow + 1)" asp-route-pageSize="@Model.PageSize">»</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+<a asp-area="Admin" asp-controller="Order" asp-action="Index"  class="btn btn-secondary">← Quay lại đơn hàng</a>

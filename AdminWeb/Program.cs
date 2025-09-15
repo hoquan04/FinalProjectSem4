@@ -9,7 +9,16 @@ Console.InputEncoding = Encoding.UTF8;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient();
+
+builder.Services.AddHttpClient("APIClient", client =>
+{
+    client.DefaultRequestHeaders.Accept.Add(
+        new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+// Các service dùng HttpClient
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<OrderDetailService>();
 
 // Đăng ký Services
 builder.Services.AddHttpClient<CategoryService>();
