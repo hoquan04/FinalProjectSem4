@@ -112,13 +112,7 @@
                                 <td>
                                     @if (!string.IsNullOrEmpty(item.ImageUrl))
                                     {
-                                        @{
-                                            // Xây dựng đường dẫn ảnh từ API server
-                                            var imagePath = item.ImageUrl.StartsWith("http") 
-                                                ? item.ImageUrl 
-                                                : $"http://localhost:7245{item.ImageUrl}";
-                                        }
-                                        <img src="@imagePath" 
+                                        <img src="@(item.ImageUrl.StartsWith("http") ? item.ImageUrl : $"http://localhost:7245{item.ImageUrl}")" 
                                              alt="@item.Name" 
                                              style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" 
                                              class="img-thumbnail"
