@@ -327,6 +327,8 @@
     </div>
 </div>
 
+
+
 @section Scripts {
     <script>
         $(document).ready(function() {
@@ -377,13 +379,25 @@
                 btn.prop('disabled', true);
                 spinner.show();
 
-                // Submit via AJAX to avoid redirect issues
+                // Create a temporary form to submit properly
+                const form = $('<form>', {
+                    'method': 'POST',
+                    'action': '@Url.Action("DeleteConfirmed", "Review", new { area = "Admin" })'
+                });
+
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'id',
+                    'value': reviewIdToDelete
+                }));
+
+                form.append($('@Html.AntiForgeryToken()'));
+
+                // Submit form via AJAX
                 $.ajax({
-                    url: '/Admin/Review/DeleteConfirmed/' + reviewIdToDelete,
+                    url: form.attr('action'),
                     type: 'POST',
-                    data: {
-                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                    },
+                    data: form.serialize(),
                     success: function(response) {
                         // Hide modal
                         $('#deleteReviewModal').modal('hide');
@@ -440,6 +454,8 @@
                 $('#deleteSpinner').hide();
                 reviewIdToDelete = null;
             });
+
+                    
         });
     </script>
 }

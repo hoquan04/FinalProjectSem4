@@ -63,15 +63,23 @@ namespace AdminWeb.Areas.Admin.Controllers
         // GET: Review/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var response = await _reviewApiService.GetByIdAsync(id);
-
-            if (!response.Success || response.Data == null)
+            try
             {
-                TempData["ErrorMessage"] = response.Message ?? "Không tìm thấy đánh giá";
+                var response = await _reviewApiService.GetByIdAsync(id);
+
+                if (!response.Success || response.Data == null)
+                {
+                    TempData["ErrorMessage"] = response.Message ?? "Không tìm thấy đánh giá";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                return View(response.Data);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
-
-            return View(response.Data);
         }
 
         // GET: Review/Create

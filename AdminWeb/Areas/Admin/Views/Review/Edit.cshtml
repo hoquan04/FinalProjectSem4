@@ -36,27 +36,6 @@
                         <!-- Hidden field for ReviewId -->
                         <input asp-for="ReviewId" type="hidden" />
 
-                        <!-- Review Information Display -->
-                        @* <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="alert alert-info">
-                                    <h5><i class="fas fa-info-circle"></i> Thông tin đánh giá hiện tại</h5>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <strong>Mã đánh giá:</strong> #@Model.ReviewId<br>
-                                            <strong>Sản phẩm ID:</strong> <span id="current-product-id">Đang tải...</span><br>
-                                            <strong>Tên sản phẩm:</strong> <span id="current-product-name">Đang tải...</span>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <strong>Người dùng ID:</strong> <span id="current-user-id">Đang tải...</span><br>
-                                            <strong>Tên người dùng:</strong> <span id="current-user-name">Đang tải...</span><br>
-                                            <strong>Email:</strong> <span id="current-user-email">Đang tải...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> *@
-
                         <!-- Đánh giá sao -->
                         <div class="form-group">
                             <label asp-for="Rating" class="form-label required">
@@ -66,7 +45,7 @@
                                 <div class="star-rating">
                                     @for (int i = 1; i <= 5; i++)
                                     {
-                                        <span class="star @(Model.Rating >= i ? "selected" : "")" data-value="@i">&#9733;</span>
+                                        <span class="star" data-value="@i">&#9733;</span>
                                     }
                                 </div>
                                 <input type="hidden" id="Rating" name="Rating" value="@Model.Rating" />
@@ -95,44 +74,6 @@
                                 </small>
                             </div>
                         </div>
-
-                        <!-- Preview -->
-                        @* <div class="form-group">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-eye"></i> Xem trước thay đổi
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div id="review-preview">
-                                        <div class="review-info mb-3">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <strong>Mã đánh giá:</strong> #@Model.ReviewId
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <strong>Sản phẩm:</strong>
-                                                    <span id="preview-product">Đang tải...</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="review-rating mb-2">
-                                            <strong>Đánh giá mới:</strong>
-                                            <span id="preview-stars" class="ml-2">
-                                                <span class="text-muted">Chưa thay đổi</span>
-                                            </span>
-                                        </div>
-                                        <div class="review-comment">
-                                            <strong>Bình luận mới:</strong>
-                                            <div id="preview-comment" class="mt-1 p-2 bg-light rounded">
-                                                <em class="text-muted">Chưa thay đổi</em>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> *@
                     </div>
 
                     <div class="card-footer">
@@ -161,21 +102,6 @@
 </div>
 
 <style>
-
-    .star {
-        font-size: 30px;
-        cursor: pointer;
-        color: gray;
-        transition: color 0.2s;
-    }
-
-        .star.selected {
-            color: gold;
-        }
-
-        .star.hovered {
-            color: orange;
-        }
     .required::after {
         content: " *";
         color: red;
@@ -191,20 +117,19 @@
         color: #ccc;
         transition: color 0.2s;
         margin-right: 5px;
+        font-size: 30px;
     }
 
-        .star:hover,
-        .star.active {
+        .star:hover {
             color: #ffc107;
         }
 
-        .star i {
-            transition: all 0.2s;
+        .star.selected {
+            color: #ffc107;
         }
 
-        .star:hover i,
-        .star.active i {
-            transform: scale(1.1);
+        .star.hovered {
+            color: #ff8f00;
         }
 
     .form-control:focus {
@@ -212,17 +137,8 @@
         box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
     }
 
-    /* .card-warning .card-header {
-        background: linear-gradient(45deg, #ffc107, #ff8f00);
-        color: white;
-    } */
-
     .alert-info {
         border-left: 4px solid #17a2b8;
-    }
-
-    #review-preview {
-        min-height: 120px;
     }
 
     @@media (max-width: 768px) {
@@ -246,145 +162,77 @@
 </style>
 
 <script>
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
         // Initialize current rating
         var currentRating = @Model.Rating;
-        $('#Rating').val(currentRating);
+        document.getElementById('Rating').value = currentRating;
 
         // Set initial stars
-        setStarRating(currentRating);
-
-        // Load current review info
-        loadCurrentReviewInfo();
+        updateStars(currentRating);
 
         // Initialize comment count
         updateCommentCount();
 
-        // Initialize preview
-        updatePreview();
+        // Star Rating Click Event
+        document.querySelectorAll('.star').forEach(function(star) {
+            star.addEventListener('click', function() {
+                var rating = parseInt(this.getAttribute('data-value'));
+                document.getElementById('Rating').value = rating;
+                document.getElementById('current-rating').textContent = rating;
+                updateStars(rating);
+            });
 
-        // Star Rating Functionality
-        $('.star').on('click', function() {
-            var rating = $(this).data('value');
-            $('#Rating').val(rating);
-            setStarRating(rating);
-            updatePreview();
+            // Star hover effects
+            star.addEventListener('mouseenter', function() {
+                var rating = parseInt(this.getAttribute('data-value'));
+                document.querySelectorAll('.star').forEach(function(s, index) {
+                    s.classList.remove('hovered');
+                    if (index + 1 <= rating) {
+                        s.classList.add('hovered');
+                    }
+                });
+            });
         });
 
-        // Star hover effect
-        $('.star').on('mouseenter', function() {
-            var rating = $(this).data('value');
-            $('.star').removeClass('hover');
-
-            for(var i = 1; i <= rating; i++) {
-                $('.star[data-value="' + i + '"]').addClass('hover');
-            }
-        });
-
-        $('.star-rating').on('mouseleave', function() {
-            $('.star').removeClass('hover');
+        // Remove hover effect when leaving star rating area
+        document.querySelector('.star-rating').addEventListener('mouseleave', function() {
+            document.querySelectorAll('.star').forEach(function(s) {
+                s.classList.remove('hovered');
+            });
         });
 
         // Comment character count
-        $('#Comment').on('input', function() {
-            updateCommentCount();
-            updatePreview();
-        });
+        document.getElementById('Comment').addEventListener('input', updateCommentCount);
 
-        function setStarRating(rating) {
-            $('.star').removeClass('active');
-            $('.star i').removeClass('fas').addClass('far');
-
-            for(var i = 1; i <= rating; i++) {
-                $('.star[data-value="' + i + '"]').addClass('active');
-                $('.star[data-value="' + i + '"] i').removeClass('far').addClass('fas');
-            }
-        }
-
-        function updateCommentCount() {
-            var length = $('#Comment').val().length;
-            $('#comment-count').text(length);
-        }
-
-        function loadCurrentReviewInfo() {
-            // Gọi API để lấy thông tin chi tiết của review
-            $.ajax({
-                url: '/Admin/Review/Details/@Model.ReviewId',
-                type: 'GET',
-                success: function(response) {
-                    // Mock data - thay thế bằng dữ liệu thật từ API response
-                    $('#current-product-id').text('1');
-                    $('#current-product-name').text('iPhone 15 Pro Max');
-                    $('#current-user-id').text('1');
-                    $('#current-user-name').text('Nguyễn Văn A');
-                    $('#current-user-email').text('nguyenvana@email.com');
-
-                    $('#preview-product').text('iPhone 15 Pro Max');
-                },
-                error: function() {
-                    $('#current-product-id').text('Không tải được');
-                    $('#current-product-name').text('Không tải được');
-                    $('#current-user-id').text('Không tải được');
-                    $('#current-user-name').text('Không tải được');
-                    $('#current-user-email').text('Không tải được');
+        // Update stars display
+        function updateStars(rating) {
+            document.querySelectorAll('.star').forEach(function(star, index) {
+                star.classList.remove('selected');
+                if (index + 1 <= rating) {
+                    star.classList.add('selected');
                 }
             });
         }
 
-        function updatePreview() {
-            var rating = $('#Rating').val();
-            var comment = $('#Comment').val();
-
-            // Update preview stars
-            if(rating > 0) {
-                var starsHtml = '';
-                for(var i = 1; i <= 5; i++) {
-                    if(i <= rating) {
-                        starsHtml += '<i class="fas fa-star text-warning"></i>';
-                    } else {
-                        starsHtml += '<i class="far fa-star text-muted"></i>';
-                    }
-                }
-                starsHtml += ' (' + rating + '/5)';
-
-                if(rating != currentRating) {
-                    starsHtml += ' <span class="badge badge-warning">Thay đổi từ ' + currentRating + ' sao</span>';
-                }
-
-                $('#preview-stars').html(starsHtml);
-            } else {
-                $('#preview-stars').html('<span class="text-muted">Chưa chọn đánh giá</span>');
-            }
-
-            // Update preview comment
-            var originalComment = '@Html.Raw(Html.Encode(Model.Comment ?? ""))';
-            if(comment.trim()) {
-                var commentHtml = '<div class="text-dark">' + comment + '</div>';
-                if(comment.trim() !== originalComment.trim()) {
-                    commentHtml += '<small class="text-warning"><i class="fas fa-edit"></i> Đã thay đổi</small>';
-                }
-                $('#preview-comment').html(commentHtml);
-            } else {
-                if(originalComment.trim()) {
-                    $('#preview-comment').html('<div class="text-muted"><em>Đã xóa bình luận</em></div>');
-                } else {
-                    $('#preview-comment').html('<em class="text-muted">Không có bình luận</em>');
-                }
-            }
+        // Update comment character count
+        function updateCommentCount() {
+            var length = document.getElementById('Comment').value.length;
+            document.getElementById('comment-count').textContent = length;
         }
 
         // Form validation
-        $('form').on('submit', function(e) {
-            var rating = $('#Rating').val();
-            if(!rating || rating == 0) {
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var rating = parseInt(document.getElementById('Rating').value);
+            if (!rating || rating == 0) {
                 e.preventDefault();
                 alert('Vui lòng chọn đánh giá sao!');
                 return false;
             }
 
-            // Confirm changes
-            if(rating != currentRating || $('#Comment').val().trim() !== '@Html.Raw(Html.Encode(Model.Comment ?? ""))'.trim()) {
-                if(!confirm('Bạn có chắc chắn muốn lưu các thay đổi này?')) {
+            // Confirm changes if there are modifications
+            var originalComment = '@Html.Raw(Html.Encode(Model.Comment ?? "").Replace("\\", "\\\\").Replace("'", "\\'").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n"))';
+            if (rating != currentRating || document.getElementById('Comment').value.trim() !== originalComment.trim()) {
+                if (!confirm('Bạn có chắc chắn muốn lưu các thay đổi này?')) {
                     e.preventDefault();
                     return false;
                 }
@@ -393,46 +241,13 @@
 
         // Auto-hide alerts
         setTimeout(function() {
-            $('.alert').fadeOut();
-        }, 5000);
-    });
-
-
-    const stars = document.querySelectorAll('.star-rating .star');
-    const ratingInput = document.getElementById('Rating');
-
-    function highlightStars(value) {
-        stars.forEach(s => {
-            const starValue = parseInt(s.getAttribute('data-value'));
-            s.classList.toggle('selected', starValue <= value);
-        });
-    }
-
-    stars.forEach(star => {
-        // Hover effect
-        star.addEventListener('mouseover', function () {
-            const value = parseInt(this.getAttribute('data-value'));
-            stars.forEach(s => {
-                const starValue = parseInt(s.getAttribute('data-value'));
-                s.classList.toggle('hovered', starValue <= value);
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.display = 'none';
             });
-        });
+        }, 5000);
 
-        // Remove hover effect khi rời chuột
-        star.addEventListener('mouseout', function () {
-            stars.forEach(s => s.classList.remove('hovered'));
-        });
-
-        // Click chọn số sao
-        star.addEventListener('click', function () {
-            const value = parseInt(this.getAttribute('data-value'));
-            ratingInput.value = value;
-            highlightStars(value);
-        });
+        // Initialize comment count on load
+        updateCommentCount();
     });
-
-    // Khởi tạo: highlight theo Model.Rating nếu có
-    if (ratingInput.value) {
-        highlightStars(parseInt(ratingInput.value));
-    }
 </script>

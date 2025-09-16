@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace AdminWeb.Areas.Admin.Models
 {
@@ -47,6 +48,10 @@ namespace AdminWeb.Areas.Admin.Models
 
         [Display(Name = "Bình luận")]
         public string? Comment { get; set; }
+
+        // Dropdown lists
+        public IEnumerable<SelectListItem> ProductList { get; set; } = new List<SelectListItem>();
+        public IEnumerable<SelectListItem> UserList { get; set; } = new List<SelectListItem>();
     }
 
     public class UpdateReviewViewModel
