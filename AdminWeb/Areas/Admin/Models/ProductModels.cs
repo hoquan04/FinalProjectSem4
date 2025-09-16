@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace AdminWeb.Areas.Admin.Models
 {
@@ -61,8 +62,10 @@ namespace AdminWeb.Areas.Admin.Models
         [Display(Name = "Số lượng tồn kho")]
         public int StockQuantity { get; set; } = 0;
 
-        [StringLength(255, ErrorMessage = "Đường dẫn ảnh tối đa 255 ký tự")]
         [Display(Name = "Hình ảnh")]
+        public IFormFile? ImageFile { get; set; }
+
+        // Ẩn field này, chỉ dùng để lưu URL sau khi upload
         public string? ImageUrl { get; set; }
     }
 
@@ -95,8 +98,11 @@ namespace AdminWeb.Areas.Admin.Models
         [Display(Name = "Số lượng tồn kho")]
         public int StockQuantity { get; set; }
 
-        [StringLength(255, ErrorMessage = "Đường dẫn ảnh tối đa 255 ký tự")]
-        [Display(Name = "Hình ảnh")]
+        [Display(Name = "Hình ảnh mới")]
+        public IFormFile? ImageFile { get; set; }
+
+        // URL hình ảnh hiện tại
+        [Display(Name = "Hình ảnh hiện tại")]
         public string? ImageUrl { get; set; }
     }
 

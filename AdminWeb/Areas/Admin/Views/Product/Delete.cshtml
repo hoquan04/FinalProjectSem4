@@ -83,7 +83,10 @@
                     {
                         <div class="col-md-4">
                             <div class="text-center">
-                                <img src="@Model.ImageUrl" alt="@Model.Name" class="img-responsive img-thumbnail" style="max-height: 200px;">
+                                <img src="@(Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{AdminWeb.Areas.Admin.Data.ApiConstants.BaseUrl.Replace("/api/", "")}{Model.ImageUrl}")" 
+                                     alt="@Model.Name" 
+                                     class="img-responsive img-thumbnail" 
+                                     style="max-height: 200px; border-radius: 8px;">
                             </div>
                         </div>
                     }
@@ -123,6 +126,7 @@
                     <p><strong>Tác động khi xóa:</strong></p>
                     <ul class="list-unstyled">
                         <li><i class="fa fa-check"></i> Xóa sản phẩm khỏi hệ thống</li>
+                        <li><i class="fa fa-check"></i> Xóa file ảnh khỏi server</li>
                         <li><i class="fa fa-warning text-warning"></i> Có thể ảnh hưởng đến đơn hàng</li>
                         <li><i class="fa fa-warning text-warning"></i> Có thể ảnh hưởng đến đánh giá</li>
                     </ul>
@@ -143,7 +147,7 @@
             console.log('🖱️ Delete button clicked');
             console.log('🎯 ProductId:', @Model.ProductId);
             
-            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm "@Model.Name" không?')) {
+            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm "@Model.Name" không?\n\nHành động này sẽ xóa cả file ảnh khỏi server và không thể hoàn tác!')) {
                 console.log('❌ User cancelled delete');
                 return false;
             }

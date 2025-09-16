@@ -18,7 +18,7 @@
             <div class="ibox-content">
                 
                 @* Form để POST API *@
-                <form asp-action="Create" method="post" class="form-horizontal">
+                <form asp-action="Create" method="post" enctype="multipart/form-data" class="form-horizontal">
                     @* Anti-forgery token *@
                     @Html.AntiForgeryToken()
                     
@@ -86,16 +86,26 @@
                         </div>
                     </div>
 
-                    @* Trường Hình ảnh *@
+                    @* Trường Upload Hình ảnh *@
                     <div class="form-group">
-                        <label asp-for="ImageUrl" class="col-sm-2 control-label"></label>
+                        <label asp-for="ImageFile" class="col-sm-2 control-label"></label>
                         <div class="col-sm-10">
-                            <input asp-for="ImageUrl" class="form-control" 
-                                   placeholder="https://example.com/image.jpg">
-                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
-                            <small class="text-muted">Nhập URL hình ảnh sản phẩm</small>
+                            <div class="custom-file">
+                                <input asp-for="ImageFile" type="file" class="custom-file-input" id="imageFileInput" accept="image/*">
+                                <label class="custom-file-label" for="imageFileInput">Chọn file ảnh...</label>
+                            </div>
+                            <small class="text-muted">Chấp nhận file: JPG, JPEG, PNG, GIF, WEBP (tối đa 5MB)</small>
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                            
+                            @* Progress bar cho upload *@
+                            <div id="uploadProgress" class="progress mt-2" style="display: none;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
                         </div>
                     </div>
+
+                    @* Hidden field để lưu ImageUrl sau khi upload *@
+                    <input asp-for="ImageUrl" type="hidden" />
 
                     <div class="hr-line-dashed"></div>
                     
@@ -129,7 +139,7 @@
                          class="img-responsive">
                     <div id="noImageText" class="text-muted">
                         <i class="fa fa-image fa-4x mb-3" style="color: #ddd;"></i>
-                        <p class="h6">Nhập URL để xem trước hình ảnh</p>
+                        <p class="h6">Chọn file để xem trước hình ảnh</p>
                     </div>
                 </div>
             </div>
@@ -143,35 +153,104 @@
     <script>
         console.log('🔧 Product Create script loaded');
         
-        // Preview image
-        $('#ImageUrl').on('input', function() {
-            var url = $(this).val();
-            var preview = $('#imagePreview');
-            var noImageText = $('#noImageText');
+        const API_BASE = '@AdminWeb.Areas.Admin.Data.ApiConstants.BaseUrl';
+        const UPLOAD_API = '@AdminWeb.Areas.Admin.Data.ApiConstants.FileUploadApi';
+        
+        // Handle file input change
+        $('#imageFileInput').on('change', function(e) {
+            const file = e.target.files[0];
+            const preview = $('#imagePreview');
+            const noImageText = $('#noImageText');
+            const progressBar = $('#uploadProgress');
+            const fileLabel = $('.custom-file-label');
             
-            if (url && url.trim() !== '') {
-                preview.attr('src', url).show();
-                noImageText.hide();
+            if (file) {
+                // Update label
+                fileLabel.text(file.name);
                 
-                // Handle image load error
-                preview.on('error', function() {
-                    $(this).hide();
-                    noImageText.show();
-                });
+                // Validate file
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Chỉ chấp nhận file ảnh (JPG, JPEG, PNG, GIF, WEBP)');
+                    this.value = '';
+                    fileLabel.text('Chọn file ảnh...');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File không được vượt quá 5MB');
+                    this.value = '';
+                    fileLabel.text('Chọn file ảnh...');
+                    return;
+                }
+                
+                // Show preview immediately
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.attr('src', e.target.result).show();
+                    noImageText.hide();
+                };
+                reader.readAsDataURL(file);
+                
+                // Upload file to server
+                uploadFile(file, progressBar);
             } else {
+                fileLabel.text('Chọn file ảnh...');
                 preview.hide();
                 noImageText.show();
+                $('#ImageUrl').val('');
             }
         });
         
+        // Upload file function
+        function uploadFile(file, progressBar) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            progressBar.show();
+            
+            $.ajax({
+                url: UPLOAD_API,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            const percentComplete = (evt.loaded / evt.total) * 100;
+                            progressBar.find('.progress-bar').css('width', percentComplete + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function(response) {
+                    console.log('✅ File uploaded successfully:', response);
+                    if (response.success && response.data) {
+                        $('#ImageUrl').val(response.data);
+                        console.log('📁 ImageUrl set to:', response.data);
+                    }
+                    progressBar.hide();
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Upload failed:', error);
+                    alert('Upload thất bại: ' + (xhr.responseJSON?.message || error));
+                    progressBar.hide();
+                }
+            });
+        }
+        
         // Debug: Log tất cả form fields khi thay đổi
         $('input, select, textarea').on('change input', function() {
-            console.log(`📝 Field changed: ${this.name} = ${this.value}`);
+            if (this.name !== 'ImageFile') {
+                console.log(`📝 Field changed: ${this.name} = ${this.value}`);
+            }
         });
         
         // JavaScript để show loading khi submit
         $('#btnSubmit').click(function(e) {
-            e.preventDefault(); // Ngăn submit mặc định
+            e.preventDefault();
             
             console.log('🖱️ Submit button clicked');
             
@@ -193,17 +272,6 @@
             // Kiểm tra validation trước khi submit
             if (!$form.valid()) {
                 console.log('❌ Form validation failed');
-                
-                // Debug: Log validation errors
-                var errors = [];
-                $form.find('.field-validation-error').each(function() {
-                    var errorText = $(this).text();
-                    if (errorText) {
-                        errors.push(errorText);
-                    }
-                });
-                console.log('📝 Validation errors:', errors);
-                
                 return false;
             }
             
@@ -216,23 +284,6 @@
             
             // Submit form manually
             $form.submit();
-        });
-        
-        // Log form submit event
-        $('form').on('submit', function(e) {
-            console.log('📤 Form is being submitted');
-            console.log('🎯 Form action:', $(this).attr('action'));
-            console.log('🎯 Form method:', $(this).attr('method'));
-            
-            // Log form data chi tiết
-            var formData = new FormData(this);
-            console.log('📋 FormData entries:');
-            for (var pair of formData.entries()) {
-                console.log(`   ${pair[0]}: ${pair[1]}`);
-            }
-            
-            // Log serialized form
-            console.log('📊 Serialized form:', $(this).serialize());
         });
         
         // Reset button nếu có lỗi validation
@@ -249,7 +300,7 @@
                 $('#btnSubmit').prop('disabled', false)
                               .html('<i class="fa fa-save"></i> Lưu sản phẩm');
                 alert('Thao tác mất quá nhiều thời gian. Vui lòng kiểm tra kết nối API và thử lại.');
-            }, 30000); // 30 giây timeout
+            }, 30000);
         });
         
         // Clear timeout khi page unload
@@ -258,9 +309,5 @@
                 clearTimeout(submitTimeout);
             }
         });
-        
-        // Debug: Test API constants
-        console.log('🔧 API Constants check:');
-        console.log('   ProductApi URL: @AdminWeb.Areas.Admin.Data.ApiConstants.ProductApi');
     </script>
 }

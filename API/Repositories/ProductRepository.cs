@@ -9,10 +9,12 @@ namespace API.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly DataContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductRepository(DataContext context)
+        public ProductRepository(DataContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // Thêm mới sản phẩm
@@ -47,7 +49,7 @@ namespace API.Repositories
             return response;
         }
 
-        // Xóa sản phẩm
+        // Xóa sản phẩm và file ảnh
         public async Task<APIRespone<bool>> DeleteAsync(int id)
         {
             var response = new APIRespone<bool>();
@@ -61,6 +63,27 @@ namespace API.Repositories
                     response.Message = "Không tìm thấy sản phẩm";
                     response.Data = false;
                     return response;
+                }
+
+                // Xóa file ảnh nếu có
+                if (!string.IsNullOrEmpty(product.ImageUrl) && !product.ImageUrl.StartsWith("http"))
+                {
+                    try
+                    {
+                        var fileName = Path.GetFileName(product.ImageUrl);
+                        var filePath = Path.Combine(_environment.WebRootPath, "uploads", "products", fileName);
+                        
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                            Console.WriteLine($"🗑️ Deleted image file: {filePath}");
+                        }
+                    }
+                    catch (Exception fileEx)
+                    {
+                        Console.WriteLine($"⚠️ Warning: Could not delete image file: {fileEx.Message}");
+                        // Không return lỗi, vẫn tiếp tục xóa sản phẩm
+                    }
                 }
 
                 _context.Products.Remove(product);
@@ -198,6 +221,29 @@ namespace API.Repositories
                     response.Success = false;
                     response.Message = "Danh mục không tồn tại";
                     return response;
+                }
+
+                // Xóa file ảnh cũ nếu có ảnh mới và ảnh cũ khác ảnh mới
+                if (!string.IsNullOrEmpty(product.ImageUrl) && 
+                    !string.IsNullOrEmpty(entity.ImageUrl) && 
+                    product.ImageUrl != entity.ImageUrl &&
+                    !product.ImageUrl.StartsWith("http"))
+                {
+                    try
+                    {
+                        var oldFileName = Path.GetFileName(product.ImageUrl);
+                        var oldFilePath = Path.Combine(_environment.WebRootPath, "uploads", "products", oldFileName);
+                        
+                        if (File.Exists(oldFilePath))
+                        {
+                            File.Delete(oldFilePath);
+                            Console.WriteLine($"🗑️ Deleted old image file: {oldFilePath}");
+                        }
+                    }
+                    catch (Exception fileEx)
+                    {
+                        Console.WriteLine($"⚠️ Warning: Could not delete old image file: {fileEx.Message}");
+                    }
                 }
 
                 product.Name = entity.Name;

@@ -66,12 +66,13 @@ builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 
 
 
-
-
 var app = builder.Build();
 
 // Dùng CORS đúng tên policy
 app.UseCors("AllowAll");
+
+// Cấu hình static files để serve uploaded files
+app.UseStaticFiles();
 
 // Cấu hình localization
 app.UseRequestLocalization();
@@ -94,5 +95,6 @@ Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
 Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
 Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
+Console.WriteLine("📁 File Upload API: http://localhost:7245/api/file");
 
 app.Run();

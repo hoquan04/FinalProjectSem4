@@ -15,5 +15,7 @@ namespace AdminWeb.Areas.Admin.Data
         public static string OrderApi => $"{BaseUrl}order";
         public static string OrderDetailApi => $"{BaseUrl}orderdetail";
         public static string AccountApi => $"{BaseUrl}accounts";
+        public static string FileUploadApi => $"{BaseUrl}file/upload";
+        public static string FileDeleteApi => $"{BaseUrl}file/delete";
     }
 }
