@@ -1,10 +1,13 @@
 ﻿using AdminWeb.Areas.Admin.Data.Services;
+using AdminWeb.Areas.Admin.Filters;
 using AdminWeb.Areas.Admin.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly UserService _userService;

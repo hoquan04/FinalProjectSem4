@@ -39,11 +39,29 @@ namespace API.Repositories
         public async Task<ApiResponse<User>> CreateUserAsync(User model)
         {
             var response = new ApiResponse<User>();
+
+            // Nếu truyền Password thì hash
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                model.Password = null; // clear input
+            }
+
+            // Nếu Role chưa set (giá trị mặc định 0 = Customer), ép thành Admin
+            if (model.Role == 0)
+            {
+                model.Role = UserRole.Admin;
+            }
+
             _context.Users.Add(model);
             await _context.SaveChangesAsync();
+
+            // Không trả hash ra ngoài
+            model.PasswordHash = string.Empty;
+
             response.Data = model;
             response.Success = true;
-            response.Message = "Thêm người dùng thành công";
+            response.Message = "Thêm người dùng thành công (Admin mặc định)";
             return response;
         }
 

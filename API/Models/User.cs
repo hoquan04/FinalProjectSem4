@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace API.Models
 {
@@ -9,38 +11,36 @@ namespace API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
 
-        [Required(ErrorMessage = "Họ và tên không được để trống")]
-        [StringLength(100, ErrorMessage = "Họ và tên tối đa 100 ký tự")]
-        public string FullName { get; set; }
+        [Required, StringLength(100)]
+        public string FullName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email không được để trống")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        [StringLength(100, ErrorMessage = "Email tối đa 100 ký tự")]
-        public string Email { get; set; }
+        [Required, EmailAddress, StringLength(100)]
+        public string Email { get; set; } = string.Empty;
 
-        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        [StringLength(15, ErrorMessage = "Số điện thoại tối đa 15 ký tự")]
+        [Phone, StringLength(15)]
         public string? Phone { get; set; }
 
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        [StringLength(255, ErrorMessage = "Mật khẩu tối đa 255 ký tự")]
-        public string PasswordHash { get; set; }
+        // Lưu trong DB, không bind từ JSON, không trả ra JSON
+        [BindNever]                 // ⬅️ quan trọng: model binder bỏ qua => không bị validate [Required]
+        [JsonIgnore]                // không serialize ra JSON
+        [Required, StringLength(255)]
+        public string PasswordHash { get; set; } = string.Empty;
 
         public string? Address { get; set; }
 
-        [Required(ErrorMessage = "Vai trò người dùng là bắt buộc")]
         public UserRole Role { get; set; } = UserRole.Customer;
 
         public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
-        // Navigation
-        public ICollection<Order>? Orders { get; set; }
-        public ICollection<Review>? Reviews { get; set; }
+        // Chỉ nhận vào từ body khi Register/Login, không map DB, không trả ra khi null
+        [NotMapped]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Password { get; set; }
+
+        // Nav props – tránh vòng lặp
+        [JsonIgnore] public ICollection<Order>? Orders { get; set; }
+        [JsonIgnore] public ICollection<Review>? Reviews { get; set; }
     }
 
-    public enum UserRole
-    {
-        Customer,
-        Admin
-    }
+    public enum UserRole { Customer, Admin }
 }

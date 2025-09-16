@@ -1,0 +1,70 @@
+﻿@model AdminWeb.Areas.Admin.Models.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body{
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(135deg,#6a11cb,#2575fc);
+        }
+        .auth-wrap{width:100%; max-width:420px;}
+        .card{border:none; border-radius:16px; box-shadow:0 12px 24px rgba(0,0,0,.18)}
+        .card-header{background:#2575fc; color:#fff; font-weight:600; text-align:center; font-size:1.25rem}
+        .brand{font-weight:700; letter-spacing:.5px}
+    </style>
+</head>
+<body>
+<div class="auth-wrap container px-3">
+    <div class="card">
+        <div class="card-header py-3">
+            <div class="brand">Trang quản trị</div>
+            <div>@ViewData["Title"]</div>
+        </div>
+        <div class="card-body p-4">
+            @if (TempData["Error"] is string err && !string.IsNullOrWhiteSpace(err))
+            {
+                <div class="alert alert-danger">@err</div>
+            }
+            @if (TempData["Success"] is string ok && !string.IsNullOrWhiteSpace(ok))
+            {
+                <div class="alert alert-success">@ok</div>
+            }
+
+            <form asp-area="Admin" asp-controller="Account" asp-action="Login" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="Nhập email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-2">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-2">Đăng nhập</button>
+
+                
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
