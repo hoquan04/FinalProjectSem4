@@ -1,0 +1,346 @@
+﻿@model AdminWeb.Areas.Admin.Models.CreateReviewViewModel
+@{
+    ViewData["Title"] = "Thêm đánh giá mới";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-star"></i> Thêm đánh giá mới
+                    </h3>
+                    <div class="card-tools">
+                        <a asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+
+                <form asp-action="Create" method="post">
+                    <div class="card-body">
+                        <!-- Alert Messages -->
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <i class="icon fas fa-ban"></i> @TempData["ErrorMessage"]
+                            </div>
+                        }
+
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
+
+                        <div class="row">
+                            <!-- Sản phẩm -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ProductId" class="form-label required">
+                                        <i class="fas fa-box"></i> @Html.DisplayNameFor(model => model.ProductId)
+                                    </label>
+                                    <div class="input-group">
+                                       
+                                        <input asp-for="ProductId" class="form-control" placeholder="Nhập mã sản phẩm" />
+                                        
+                                    </div>
+                                    <span asp-validation-for="ProductId" class="text-danger small"></span>
+                                    <div id="product-info" class="mt-2" style="display: none;">
+                                        <div class="alert alert-info">
+                                            <strong>Sản phẩm:</strong> <span id="product-name"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Người dùng -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="UserId" class="form-label required">
+                                        <i class="fas fa-user"></i> @Html.DisplayNameFor(model => model.UserId)
+                                    </label>
+                                    <div class="input-group">
+                                       
+                                        <input asp-for="UserId" class="form-control" placeholder="Nhập mã người dùng" />
+                                        
+                                    </div>
+                                    <span asp-validation-for="UserId" class="text-danger small"></span>
+                                    <div id="user-info" class="mt-2" style="display: none;">
+                                        <div class="alert alert-info">
+                                            <strong>Người dùng:</strong> <span id="user-name"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Đánh giá sao -->
+                        <div class="form-group">
+                            <label asp-for="Rating" class="form-label required">
+                                <i class="fas fa-star"></i> @Html.DisplayNameFor(model => model.Rating)
+                            </label>
+                            <div class="rating-input">
+                                <div class="star-rating" id="star-rating">
+                                    <span class="star" data-value="1">
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                    <span class="star" data-value="2">
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                    <span class="star" data-value="3">
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                    <span class="star" data-value="4">
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                    <span class="star" data-value="5">
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                </div>
+                                <input asp-for="Rating" type="hidden" value="0" />
+                                <div class="rating-text mt-1">
+                                    <small class="text-muted">Chọn số sao để đánh giá (1-5 sao)</small>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Bình luận -->
+                        <div class="form-group">
+                            <label asp-for="Comment" class="form-label">
+                                <i class="fas fa-comment"></i> @Html.DisplayNameFor(model => model.Comment)
+                            </label>
+                            <textarea asp-for="Comment"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Nhập bình luận của bạn về sản phẩm (không bắt buộc)..."
+                                      maxlength="500"></textarea>
+                            <span asp-validation-for="Comment" class="text-danger small"></span>
+                            <div class="mt-1">
+                                <small class="text-muted">
+                                    <span id="comment-count">0</span>/500 ký tự
+                                </small>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-save"></i> Lưu đánh giá
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <a asp-action="Index" class="btn btn-secondary btn-block">
+                                    <i class="fas fa-times"></i> Hủy bỏ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .required::after {
+            content: " *";
+            color: red;
+        }
+
+        .star-rating {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.2s;
+            margin-right: 5px;
+        }
+
+            .star:hover,
+            .star.active {
+                color: #ffc107;
+            }
+
+            .star i {
+                transition: all 0.2s;
+            }
+
+            .star:hover i,
+            .star.active i {
+                transform: scale(1.1);
+            }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa;
+        }
+
+        #review-preview {
+            min-height: 100px;
+        }
+
+        
+
+        .btn-search-product,
+        .btn-search-user {
+            border-left: 1px solid #dee2e6;
+        }
+
+        .alert-info {
+            border-left: 4px solid #17a2b8;
+        }
+
+        @@media (max-width: 768px) {
+            .col-md-8.offset-md-2
+
+        {
+            margin-left: 0;
+            padding: 0 15px;
+        }
+
+        .star-rating {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Star Rating Functionality
+            $('.star').on('click', function() {
+                var rating = $(this).data('value');
+                $('#Rating').val(rating);
+
+                $('.star').removeClass('active');
+                $('.star i').removeClass('fas').addClass('far');
+
+                for(var i = 1; i <= rating; i++) {
+                    $('.star[data-value="' + i + '"]').addClass('active');
+                    $('.star[data-value="' + i + '"] i').removeClass('far').addClass('fas');
+                }
+
+                updatePreview();
+            });
+
+            // Star hover effect
+            $('.star').on('mouseenter', function() {
+                var rating = $(this).data('value');
+                $('.star').removeClass('hover');
+
+                for(var i = 1; i <= rating; i++) {
+                    $('.star[data-value="' + i + '"]').addClass('hover');
+                }
+            });
+
+            $('.star-rating').on('mouseleave', function() {
+                $('.star').removeClass('hover');
+            });
+
+            // Comment character count
+            $('#Comment').on('input', function() {
+                var length = $(this).val().length;
+                $('#comment-count').text(length);
+                updatePreview();
+            });
+
+            // Update preview
+            function updatePreview() {
+                var rating = $('#Rating').val();
+                var comment = $('#Comment').val();
+
+                // Update preview stars
+                if(rating > 0) {
+                    var starsHtml = '';
+                    for(var i = 1; i <= 5; i++) {
+                        if(i <= rating) {
+                            starsHtml += '<i class="fas fa-star text-warning"></i>';
+                        } else {
+                            starsHtml += '<i class="far fa-star text-muted"></i>';
+                        }
+                    }
+                    starsHtml += ' (' + rating + '/5)';
+                    $('#preview-stars').html(starsHtml);
+                } else {
+                    $('#preview-stars').html('<span class="text-muted">Chưa chọn đánh giá</span>');
+                }
+
+                // Update preview comment
+                if(comment.trim()) {
+                    $('#preview-comment').html('<div class="text-dark">' + comment + '</div>');
+                } else {
+                    $('#preview-comment').html('<em class="text-muted">Chưa có bình luận</em>');
+                }
+            }
+
+            // Search Product (Mock function - replace with actual search)
+            $('.btn-search-product').on('click', function() {
+                var productId = $('#ProductId').val();
+                if(productId) {
+                    // Mock data - replace with actual API call
+                    $('#product-name').text('Sản phẩm ' + productId);
+                    $('#product-info').show();
+                } else {
+                    alert('Vui lòng nhập mã sản phẩm');
+                }
+            });
+
+            // Search User (Mock function - replace with actual search)
+            $('.btn-search-user').on('click', function() {
+                var userId = $('#UserId').val();
+                if(userId) {
+                    // Mock data - replace with actual API call
+                    $('#user-name').text('Người dùng ' + userId);
+                    $('#user-info').show();
+                } else {
+                    alert('Vui lòng nhập mã người dùng');
+                }
+            });
+
+            // Form validation
+            $('form').on('submit', function(e) {
+                var rating = $('#Rating').val();
+                if(!rating || rating == 0) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn đánh giá sao!');
+                    return false;
+                }
+
+                var productId = $('#ProductId').val();
+                var userId = $('#UserId').val();
+
+                if(!productId || !userId) {
+                    e.preventDefault();
+                    alert('Vui lòng điền đầy đủ thông tin sản phẩm và người dùng!');
+                    return false;
+                }
+            });
+
+            // Auto-hide alerts
+            setTimeout(function() {
+                $('.alert').fadeOut();
+            }, 5000);
+        });
+    </script>
+}
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

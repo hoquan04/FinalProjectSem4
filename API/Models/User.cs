@@ -32,10 +32,12 @@ namespace API.Models
 
         public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
+
         // Chỉ nhận vào từ body khi Register/Login, không map DB, không trả ra khi null
         [NotMapped]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? Password { get; set; }
+
 
         // Nav props – tránh vòng lặp
         [JsonIgnore] public ICollection<Order>? Orders { get; set; }

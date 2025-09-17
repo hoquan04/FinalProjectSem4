@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace API.Models
 {
@@ -14,7 +15,7 @@ namespace API.Models
 
         [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
         [StringLength(150, ErrorMessage = "Tên sản phẩm tối đa 150 ký tự")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
@@ -30,9 +31,13 @@ namespace API.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Navigation
-        public Category Category { get; set; }
-        public ICollection<OrderDetail> OrderDetails { get; set; }
-        public ICollection<Review> Reviews { get; set; }
+        // Navigation Properties - Thêm JsonIgnore để tránh cycles
+        public Category? Category { get; set; }
+        
+        [JsonIgnore]
+        public ICollection<OrderDetail>? OrderDetails { get; set; }
+        
+        [JsonIgnore]
+        public ICollection<Review>? Reviews { get; set; }
     }
 }

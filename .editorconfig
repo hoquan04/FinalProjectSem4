@@ -1,0 +1,41 @@
+# .editorconfig
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+indent_style = space
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Code files
+[*.{cs,csx,vb,vbx}]
+indent_size = 4
+
+# XML project files
+[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
+indent_size = 2
+
+# JSON files
+[*.{json,json5}]
+indent_size = 2
+
+# Web files
+[*.{htm,html,js,ts,css,scss,less}]
+indent_size = 2
+
+# Razor files
+[*.{razor,cshtml}]
+indent_size = 4
+charset = utf-8
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
