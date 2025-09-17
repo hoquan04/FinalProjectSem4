@@ -5,9 +5,9 @@ namespace AdminWeb.Areas.Admin.Data
         //ip quân
         public const string Domain = "localhost";
       
-        public const string Port = "7245";
+        public const string Port = "50803";
 
-        public static string BaseUrl => $"http://{Domain}:{Port}/api/";
+        public static string BaseUrl => $"https://{Domain}:{Port}/api/";
         public static string CategoryApi => $"{BaseUrl}category";
         public static string BrandApi => $"{BaseUrl}brand";
 
@@ -15,5 +15,6 @@ namespace AdminWeb.Areas.Admin.Data
         public static string OrderApi => $"{BaseUrl}order";
         public static string OrderDetailApi => $"{BaseUrl}orderdetail";
         public static string AccountApi => $"{BaseUrl}accounts";
+        public static string ReviewApi => $"{BaseUrl}Review"; // Thêm dòng này
     }
 }

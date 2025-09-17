@@ -1,5 +1,7 @@
 using AdminWeb.Areas.Admin.Data.Services;
+
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,10 @@ Console.InputEncoding = Encoding.UTF8;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+
+builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
+builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
 
 builder.Services.AddHttpClient("APIClient", client =>
 {
