@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace API.Models
 {
@@ -22,7 +23,9 @@ namespace API.Models
         public DateTime AddedAt { get; set; } = DateTime.Now;
 
         // Navigation (có thể lấy từ DB khi cần)
+        [JsonIgnore]
         public User Users { get; set; }
+        [JsonIgnore]
         public Product Product { get; set; }
     }
 }

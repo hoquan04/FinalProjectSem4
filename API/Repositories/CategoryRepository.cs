@@ -1,4 +1,4 @@
-﻿using API.Data;
+using API.Data;
 using API.Models;
 using API.Repositories.IRepositories;
 using API.Repositories.RestAPI;
@@ -51,6 +51,16 @@ namespace API.Repositories
                 {
                     response.Success = false;
                     response.Message = "Không tìm thấy danh mục";
+                    response.Data = false;
+                    return response;
+                }
+
+                // Kiểm tra xem có sản phẩm nào thuộc danh mục này không
+                var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
+                if (hasProducts)
+                {
+                    response.Success = false;
+                    response.Message = "Không thể xóa danh mục này vì vẫn còn sản phẩm thuộc danh mục. Vui lòng xóa tất cả sản phẩm trước khi xóa danh mục.";
                     response.Data = false;
                     return response;
                 }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace API.Models
 {
@@ -21,10 +22,14 @@ namespace API.Models
 
         [Required(ErrorMessage = "Giá không được để trống")]
         [Range(0, 9999999999.99, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0")]
-        public decimal Price { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal SubTotal { get; set; }   // => lưu lại tổng tiền cho dòng này
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         // Navigation
-        public Order Order { get; set; }
-        public Product Product { get; set; }
+        [JsonIgnore]
+        public Order? Order { get; set; }
+        [JsonIgnore]
+        public Product? Product { get; set; }
     }
 }
