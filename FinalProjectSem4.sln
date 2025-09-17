@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{7EF68960-A507-4482-90A8-8986A3D0D8AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{7EF68960-A507-4482-90A8-8986A3D0D8AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminWeb", "AdminWeb\AdminWeb.csproj", "{AC385C39-A354-4CD3-BFDC-77F869B258FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminWeb", "AdminWeb\AdminWeb.csproj", "{AC385C39-A354-4CD3-BFDC-77F869B258FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

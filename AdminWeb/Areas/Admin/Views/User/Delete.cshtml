@@ -1,0 +1,128 @@
+﻿@model AdminWeb.Areas.Admin.Models.UserViewModel
+@{
+    ViewData["Title"] = "Xác nhận xóa người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+
+                @{
+                    var role = Model.Role != null ? Model.Role.ToString() : "";
+                }
+
+                @if (string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-warning">
+                        <h4><i class="fa fa-exclamation-triangle"></i> Không thể xóa!</h4>
+                        <p>Người dùng có vai trò <strong>Admin</strong> không thể bị xóa.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-danger">
+                        <h4><i class="fa fa-exclamation-triangle"></i> Cảnh báo!</h4>
+                        <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+                        <p><strong>Hành động này không thể hoàn tác!</strong></p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <dl class="dl-horizontal">
+                                <dt>ID:</dt>
+                                <dd><span class="badge badge-primary">@Model.UserId</span></dd>
+
+                                <dt>Họ và tên:</dt>
+                                <dd><strong>@Model.FullName</strong></dd>
+
+                                <dt>Email:</dt>
+                                <dd>@Model.Email</dd>
+
+                                <dt>Số điện thoại:</dt>
+                                <dd>@(string.IsNullOrEmpty(Model.Phone) ? "<em>Không có</em>" : Model.Phone)</dd>
+
+                                <dt>Vai trò:</dt>
+                                <dd>@Model.Role</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <button id="btnDelete" class="btn btn-danger">
+                        <i class="fa fa-trash"></i> Xác nhận xóa
+                    </button>
+                    <a asp-action="Index" class="btn btn-default">
+                        <i class="fa fa-times"></i> Hủy
+                    </a>
+
+                    <div id="apiError" class="alert alert-danger mt-2" style="display:none;"></div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin API</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="alert alert-danger">
+                    <h4><i class="fa fa-trash"></i> DELETE API</h4>
+                    <p><strong>Method:</strong> DELETE</p>
+                    <p><strong>Endpoint:</strong></p>
+                    <code>@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi/@Model.UserId</code>
+                    <p class="mt-2"><strong>Chú ý:</strong> Việc xóa người dùng có thể ảnh hưởng đến đơn hàng và đánh giá liên quan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#btnDelete').click(async function (e) {
+                e.preventDefault();
+
+                if (!confirm('Bạn có chắc chắn muốn xóa người dùng "@Model.FullName" không?')) {
+                    return false;
+                }
+
+                var $btn = $(this);
+                $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang xóa...');
+
+                try {
+                    const resp = await fetch(`@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi/@Model.UserId`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (!resp.ok) {
+                        const errData = await resp.json();
+                        $('#apiError').show().text(JSON.stringify(errData));
+                        $btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Xác nhận xóa');
+                        return;
+                    }
+
+                    // Xóa thành công -> redirect về Index
+                    window.location.href = '@Url.Action("Index")';
+                } catch (err) {
+                    $('#apiError').show().text("Lỗi khi xóa: " + err);
+                    $btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Xác nhận xóa');
+                }
+            });
+        });
+    </script>
+}

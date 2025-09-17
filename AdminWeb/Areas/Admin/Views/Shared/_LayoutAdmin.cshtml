@@ -278,8 +278,15 @@
             };
 
 
-            var ctx4 = document.getElementById("doughnutChart").getContext("2d");
-            new Chart(ctx4, { type: 'doughnut', data: doughnutData, options: doughnutOptions });
+            var ctx4 = document.getElementById("doughnutChart");
+            if (ctx4) {
+                new Chart(ctx4.getContext("2d"), { type: 'doughnut', data: doughnutData, options: doughnutOptions });
+            }
+
+            var ctx5 = document.getElementById("doughnutChart2");
+            if (ctx5) {
+                new Chart(ctx5.getContext("2d"), { type: 'doughnut', data: doughnutData, options: doughnutOptions });
+            }
 
             var doughnutData = {
                 labels: ["App", "Software", "Laptop"],
