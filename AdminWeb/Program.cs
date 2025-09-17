@@ -16,10 +16,13 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
 builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
 
+// Cấu hình HttpClient với timeout và retry policy
 builder.Services.AddHttpClient("APIClient", client =>
 {
     client.DefaultRequestHeaders.Accept.Add(
         new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.BaseAddress = new Uri("http://localhost:7245/");
 });
 
 // Các service dùng HttpClient
@@ -120,6 +123,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -145,8 +152,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 Console.WriteLine("🎯 AdminWeb đang chạy...");
-Console.WriteLine("📱 URL: http://localhost:5000");
-Console.WriteLine("⚙️  Admin Area: http://localhost:5000/Admin/Category");
-Console.WriteLine("📦 Product Area: http://localhost:5000/Admin/Product");
+Console.WriteLine("📱 URL: http://localhost:5005");
+Console.WriteLine("⚙️  Admin Area: http://localhost:5005/Admin/Category");
+Console.WriteLine("📦 Product Area: http://localhost:5005/Admin/Product");
+Console.WriteLine("🔗 API Connection: http://localhost:7245/api/");
 
 app.Run();

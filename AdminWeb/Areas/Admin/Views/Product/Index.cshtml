@@ -112,11 +112,21 @@
                                 <td>
                                     @if (!string.IsNullOrEmpty(item.ImageUrl))
                                     {
-                                        <img src="@item.ImageUrl" alt="@item.Name" style="width: 50px; height: 50px; object-fit: cover;" class="img-thumbnail">
+                                        <img src="@(item.ImageUrl.StartsWith("http") ? item.ImageUrl : $"http://localhost:7245{item.ImageUrl}")" 
+                                             alt="@item.Name" 
+                                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" 
+                                             class="img-thumbnail"
+                                             title="Path: @item.ImageUrl"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <div style="width: 60px; height: 60px; display: none;" 
+                                             class="bg-light d-flex align-items-center justify-content-center border rounded">
+                                            <i class="fa fa-image text-muted"></i>
+                                        </div>
                                     }
                                     else
                                     {
-                                        <div style="width: 50px; height: 50px;" class="bg-light d-flex align-items-center justify-content-center">
+                                        <div style="width: 60px; height: 60px;" 
+                                             class="bg-light d-flex align-items-center justify-content-center border rounded">
                                             <i class="fa fa-image text-muted"></i>
                                         </div>
                                     }
@@ -227,3 +237,22 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            console.log('🖼️ Product Index loaded');
+            
+            // Debug: Log image paths
+            $('img[src*="/uploads/"]').each(function(index) {
+                var $img = $(this);
+                var src = $img.attr('src');
+                var title = $img.attr('title');
+                console.log(`📷 Image ${index + 1}:`, { 
+                    displaySrc: src, 
+                    originalPath: title 
+                });
+            });
+        });
+    </script>
+}

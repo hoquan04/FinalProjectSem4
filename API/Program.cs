@@ -63,6 +63,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
  builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+
 // ✅ JWT (để sau dùng bảo vệ endpoint)
 var jwt = builder.Configuration.GetSection("Jwt");
 var keyBytes = Encoding.UTF8.GetBytes(jwt["Key"] ?? "change_me_32_chars_please");
@@ -87,9 +88,17 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
+
+// Cấu hình static files để serve uploaded files
+app.UseStaticFiles();
+
+// Cấu hình localization
+app.UseRequestLocalization();
+
 // app.UseHttpsRedirection(); // dev http
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -106,5 +115,9 @@ Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
 Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
 Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
+
+Console.WriteLine("📁 File Upload API: http://localhost:7245/api/file");
+
 app.MapControllers();
+
 app.Run();

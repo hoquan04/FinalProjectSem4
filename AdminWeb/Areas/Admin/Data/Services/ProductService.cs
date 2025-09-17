@@ -34,11 +34,14 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 Console.WriteLine($"📊 [ProductService.GetAllProductsAsync] Response Status: {response.StatusCode}");
                 Console.WriteLine($"📨 [ProductService.GetAllProductsAsync] Response Length: {jsonContent?.Length ?? 0} chars");
                 
-                // SỬA LỖI: Thay đổi cách tính substring
-                var previewLength = Math.Min(500, jsonContent?.Length ?? 0);
-                Console.WriteLine($"📨 [ProductService.GetAllProductsAsync] Response Content (first {previewLength} chars): {jsonContent?.Substring(0, previewLength)}...");
+                // SỬA LỖI: Kiểm tra null trước khi sử dụng
+                if (!string.IsNullOrEmpty(jsonContent))
+                {
+                    var previewLength = Math.Min(500, jsonContent.Length);
+                    Console.WriteLine($"📨 [ProductService.GetAllProductsAsync] Response Content (first {previewLength} chars): {jsonContent.Substring(0, previewLength)}...");
+                }
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonContent))
                 {
                     Console.WriteLine($"✅ [ProductService.GetAllProductsAsync] Success response - deserializing...");
                     
@@ -70,7 +73,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 else
                 {
                     Console.WriteLine($"❌ [ProductService.GetAllProductsAsync] Error response: {response.StatusCode}");
-                    Console.WriteLine($"❌ [ProductService.GetAllProductsAsync] Error content: {jsonContent}");
+                    Console.WriteLine($"❌ [ProductService.GetAllProductsAsync] Error content: {jsonContent ?? "null"}");
                 }
 
                 return new List<ProductViewModel>();
@@ -104,7 +107,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
 
                 Console.WriteLine($"📊 Response Status: {response.StatusCode}");
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonContent))
                 {
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(jsonContent, _jsonOptions);
                     return apiResponse?.Data;
@@ -150,7 +153,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 Console.WriteLine($"📊 Response Status: {response.StatusCode}");
                 Console.WriteLine($"📨 Response Content: {responseContent}");
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(responseContent))
                 {
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(responseContent, _jsonOptions);
                     return apiResponse ?? new ApiResponse<ProductViewModel>
@@ -161,8 +164,17 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 }
                 else
                 {
-                    var errorResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(responseContent, _jsonOptions);
-                    return errorResponse ?? new ApiResponse<ProductViewModel>
+                    if (!string.IsNullOrEmpty(responseContent))
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(responseContent, _jsonOptions);
+                        return errorResponse ?? new ApiResponse<ProductViewModel>
+                        {
+                            Success = false,
+                            Message = $"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}"
+                        };
+                    }
+                    
+                    return new ApiResponse<ProductViewModel>
                     {
                         Success = false,
                         Message = $"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}"
@@ -210,7 +222,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 Console.WriteLine($"📊 Response Status: {response.StatusCode}");
                 Console.WriteLine($"📨 Response Content: {responseContent}");
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(responseContent))
                 {
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(responseContent, _jsonOptions);
                     return apiResponse ?? new ApiResponse<ProductViewModel>
@@ -221,8 +233,17 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 }
                 else
                 {
-                    var errorResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(responseContent, _jsonOptions);
-                    return errorResponse ?? new ApiResponse<ProductViewModel>
+                    if (!string.IsNullOrEmpty(responseContent))
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiResponse<ProductViewModel>>(responseContent, _jsonOptions);
+                        return errorResponse ?? new ApiResponse<ProductViewModel>
+                        {
+                            Success = false,
+                            Message = $"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}"
+                        };
+                    }
+                    
+                    return new ApiResponse<ProductViewModel>
                     {
                         Success = false,
                         Message = $"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}"
@@ -256,7 +277,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 Console.WriteLine($"📊 Response Status: {response.StatusCode}");
                 Console.WriteLine($"📨 Response Content: {responseContent}");
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(responseContent))
                 {
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse<bool>>(responseContent, _jsonOptions);
                     return apiResponse ?? new ApiResponse<bool>
@@ -267,8 +288,17 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 }
                 else
                 {
-                    var errorResponse = JsonSerializer.Deserialize<ApiResponse<bool>>(responseContent, _jsonOptions);
-                    return errorResponse ?? new ApiResponse<bool>
+                    if (!string.IsNullOrEmpty(responseContent))
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiResponse<bool>>(responseContent, _jsonOptions);
+                        return errorResponse ?? new ApiResponse<bool>
+                        {
+                            Success = false,
+                            Message = $"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}"
+                        };
+                    }
+                    
+                    return new ApiResponse<bool>
                     {
                         Success = false,
                         Message = $"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}"
@@ -342,7 +372,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
 
                 Console.WriteLine($"📊 Response Status: {response.StatusCode}");
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonContent))
                 {
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse<List<ProductViewModel>>>(jsonContent, _jsonOptions);
                     return apiResponse?.Data ?? new List<ProductViewModel>();
