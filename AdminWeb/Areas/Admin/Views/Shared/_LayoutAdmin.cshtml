@@ -38,7 +38,7 @@
     <link href="/admin/css/plugins/touchspin/jquery.bootstrap-touchspin.min.css" rel="stylesheet">
     <link href="/admin/css/plugins/dualListbox/bootstrap-duallistbox.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @RenderSection("Styles", required: false)
 </head>
 
@@ -278,8 +278,15 @@
             };
 
 
-            var ctx4 = document.getElementById("doughnutChart").getContext("2d");
-            new Chart(ctx4, { type: 'doughnut', data: doughnutData, options: doughnutOptions });
+            var ctx4 = document.getElementById("doughnutChart");
+            if (ctx4) {
+                new Chart(ctx4.getContext("2d"), { type: 'doughnut', data: doughnutData, options: doughnutOptions });
+            }
+
+            var ctx5 = document.getElementById("doughnutChart2");
+            if (ctx5) {
+                new Chart(ctx5.getContext("2d"), { type: 'doughnut', data: doughnutData, options: doughnutOptions });
+            }
 
             var doughnutData = {
                 labels: ["App", "Software", "Laptop"],

@@ -1,29 +1,44 @@
 using API.Data;
-using API.Models;
 using API.Repositories;
 using API.Repositories.IRepositories;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Controllers (enum as string nếu cần)
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // Sửa JSON Serialization Cycle
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.WriteIndented = true;
-    });
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters
+        .Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "API V1", Version = "v1" });
+
+    // ⚡ Thêm cấu hình Bearer
+    var jwtScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Nhập: Bearer {token}"
+    };
+
+    c.AddSecurityDefinition("Bearer", jwtScheme);
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        { jwtScheme, Array.Empty<string>() }
+    });
+});
 
 // Cấu hình encoding UTF-8 cho console
 Console.OutputEncoding = Encoding.UTF8;
 Console.InputEncoding = Encoding.UTF8;
-
 // Cấu hình localization cho tiếng Việt
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
@@ -32,44 +47,47 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
            .AddSupportedCultures(supportedCultures)
            .AddSupportedUICultures(supportedCultures);
 });
+// CORS dev
+builder.Services.AddCors(o => o.AddPolicy("AllowAll",
+    p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-// CORS: Cho phép gọi từ Flutter hoặc bất kỳ client nào
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<DataContext>()
-    .AddDefaultTokenProviders();
-
-// Kết nối SQL Server
+// ✅ ĐĂNG KÝ DataContext (quan trọng)
 builder.Services.AddDbContext<DataContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("FlutterDB");
-    Console.WriteLine($"[DbContext] Đang sử dụng chuỗi kết nối: {connectionString}");
-    options.UseSqlServer(connectionString);
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("FlutterDB")));
 
+// (nếu có repository thì giữ nguyên)
 // Dependency Injection cho Repository
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
-
-
+// ✅ JWT (để sau dùng bảo vệ endpoint)
+var jwt = builder.Configuration.GetSection("Jwt");
+var keyBytes = Encoding.UTF8.GetBytes(jwt["Key"] ?? "change_me_32_chars_please");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        opt.RequireHttpsMetadata = false; // dev
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Dùng CORS đúng tên policy
 app.UseCors("AllowAll");
+
 
 // Cấu hình static files để serve uploaded files
 app.UseStaticFiles();
@@ -77,24 +95,29 @@ app.UseStaticFiles();
 // Cấu hình localization
 app.UseRequestLocalization();
 
-// Configure the HTTP request pipeline.
+// app.UseHttpsRedirection(); // dev http
+app.UseAuthentication();
+app.UseAuthorization();
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+        c.RoutePrefix = "swagger";
+    });
 }
-
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-
-// Cấu hình API chạy trên port 7245
 app.Urls.Add("http://localhost:7245");
 
 Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
 Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
 Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
+
 Console.WriteLine("📁 File Upload API: http://localhost:7245/api/file");
+
+app.MapControllers();
 
 app.Run();

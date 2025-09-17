@@ -1,10 +1,12 @@
-﻿using AdminWeb.Areas.Admin.Data.Services;
+using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Models;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
         private readonly CategoryService _categoryService;

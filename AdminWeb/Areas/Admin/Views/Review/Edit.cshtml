@@ -1,0 +1,253 @@
+﻿@model AdminWeb.Areas.Admin.Models.UpdateReviewViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card card-warning">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-edit"></i> Chỉnh sửa đánh giá #@Model.ReviewId
+                    </h3>
+                    <div class="card-tools">
+                        <a asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+
+                <form asp-action="Edit" asp-route-id="@Model.ReviewId" method="post">
+                    <div class="card-body">
+                        <!-- Alert Messages -->
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <i class="icon fas fa-ban"></i> @TempData["ErrorMessage"]
+                            </div>
+                        }
+
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
+
+                        <!-- Hidden field for ReviewId -->
+                        <input asp-for="ReviewId" type="hidden" />
+
+                        <!-- Đánh giá sao -->
+                        <div class="form-group">
+                            <label asp-for="Rating" class="form-label required">
+                                <i class="fas fa-star"></i> @Html.DisplayNameFor(model => model.Rating)
+                            </label>
+                            <div class="rating-input">
+                                <div class="star-rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="star" data-value="@i">&#9733;</span>
+                                    }
+                                </div>
+                                <input type="hidden" id="Rating" name="Rating" value="@Model.Rating" />
+                                <div class="rating-text mt-1">
+                                    <small class="text-muted">Chọn số sao để đánh giá (1-5 sao)</small>
+                                    <br><small class="text-info">Đánh giá hiện tại: <span id="current-rating">@Model.Rating</span> sao</small>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Bình luận -->
+                        <div class="form-group">
+                            <label asp-for="Comment" class="form-label">
+                                <i class="fas fa-comment"></i> @Html.DisplayNameFor(model => model.Comment)
+                            </label>
+                            <textarea asp-for="Comment"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Nhập bình luận của bạn về sản phẩm (không bắt buộc)..."
+                                      maxlength="500"></textarea>
+                            <span asp-validation-for="Comment" class="text-danger small"></span>
+                            <div class="mt-1">
+                                <small class="text-muted">
+                                    <span id="comment-count">0</span>/500 ký tự
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-warning btn-block">
+                                    <i class="fas fa-save"></i> Cập nhật đánh giá
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <a asp-action="Details" asp-route-id="@Model.ReviewId" class="btn btn-info btn-block">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a asp-action="Index" class="btn btn-secondary btn-block">
+                                    <i class="fas fa-times"></i> Hủy bỏ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+
+    .star-rating {
+        font-size: 2rem;
+        margin: 10px 0;
+    }
+
+    .star {
+        cursor: pointer;
+        color: #ccc;
+        transition: color 0.2s;
+        margin-right: 5px;
+        font-size: 30px;
+    }
+
+        .star:hover {
+            color: #ffc107;
+        }
+
+        .star.selected {
+            color: #ffc107;
+        }
+
+        .star.hovered {
+            color: #ff8f00;
+        }
+
+    .form-control:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+
+    .alert-info {
+        border-left: 4px solid #17a2b8;
+    }
+
+    @@media (max-width: 768px) {
+        .col-md-8.offset-md-2
+
+    {
+        margin-left: 0;
+        padding: 0 15px;
+    }
+
+    .star-rating {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .card-footer .btn {
+        margin-bottom: 10px;
+    }
+
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize current rating
+        var currentRating = @Model.Rating;
+        document.getElementById('Rating').value = currentRating;
+
+        // Set initial stars
+        updateStars(currentRating);
+
+        // Initialize comment count
+        updateCommentCount();
+
+        // Star Rating Click Event
+        document.querySelectorAll('.star').forEach(function(star) {
+            star.addEventListener('click', function() {
+                var rating = parseInt(this.getAttribute('data-value'));
+                document.getElementById('Rating').value = rating;
+                document.getElementById('current-rating').textContent = rating;
+                updateStars(rating);
+            });
+
+            // Star hover effects
+            star.addEventListener('mouseenter', function() {
+                var rating = parseInt(this.getAttribute('data-value'));
+                document.querySelectorAll('.star').forEach(function(s, index) {
+                    s.classList.remove('hovered');
+                    if (index + 1 <= rating) {
+                        s.classList.add('hovered');
+                    }
+                });
+            });
+        });
+
+        // Remove hover effect when leaving star rating area
+        document.querySelector('.star-rating').addEventListener('mouseleave', function() {
+            document.querySelectorAll('.star').forEach(function(s) {
+                s.classList.remove('hovered');
+            });
+        });
+
+        // Comment character count
+        document.getElementById('Comment').addEventListener('input', updateCommentCount);
+
+        // Update stars display
+        function updateStars(rating) {
+            document.querySelectorAll('.star').forEach(function(star, index) {
+                star.classList.remove('selected');
+                if (index + 1 <= rating) {
+                    star.classList.add('selected');
+                }
+            });
+        }
+
+        // Update comment character count
+        function updateCommentCount() {
+            var length = document.getElementById('Comment').value.length;
+            document.getElementById('comment-count').textContent = length;
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var rating = parseInt(document.getElementById('Rating').value);
+            if (!rating || rating == 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn đánh giá sao!');
+                return false;
+            }
+
+            // Confirm changes if there are modifications
+            var originalComment = '@Html.Raw(Html.Encode(Model.Comment ?? "").Replace("\\", "\\\\").Replace("'", "\\'").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n"))';
+            if (rating != currentRating || document.getElementById('Comment').value.trim() !== originalComment.trim()) {
+                if (!confirm('Bạn có chắc chắn muốn lưu các thay đổi này?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.display = 'none';
+            });
+        }, 5000);
+
+        // Initialize comment count on load
+        updateCommentCount();
+    });
+</script>
