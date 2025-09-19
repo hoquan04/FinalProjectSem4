@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -25,9 +25,9 @@ namespace API.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation
-        [JsonIgnore]
-        public Product Product { get; set; }
-        [JsonIgnore]
-        public User Users { get; set; }
+      
+        public Product? Product { get; set; }
+    
+        public User? Users { get; set; }
     }
 }

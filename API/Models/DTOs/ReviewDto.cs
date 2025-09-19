@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace API.Models.DTO
+namespace API.Models.DTOs
 {
     public class ReviewDto
     {

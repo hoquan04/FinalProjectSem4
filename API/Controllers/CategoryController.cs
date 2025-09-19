@@ -1,4 +1,4 @@
-﻿using API.Models;
+using API.Models;
 using API.Repositories.IRepositories;
 using API.Repositories.RestAPI;
 using Microsoft.AspNetCore.Mvc;
@@ -21,17 +21,22 @@ namespace API.Controllers
         }
         // GET: api/category/check-db
         [HttpGet("check-db")]
-        public async Task<IActionResult> CheckDatabaseConnection()
+        public Task<IActionResult> CheckDatabaseConnection()
         {
             try
             {
-                return Ok(new { success = true, message = "Database connection is healthy." });
+                return Task.FromResult<IActionResult>(
+                    Ok(new { success = true, message = "Database connection is healthy." })
+                );
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Database connection failed.", error = ex.Message });
+                return Task.FromResult<IActionResult>(
+                    StatusCode(500, new { success = false, message = "Database connection failed.", error = ex.Message })
+                );
             }
         }
+
 
         // GET: api/category
         [HttpGet]

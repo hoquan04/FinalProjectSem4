@@ -1,8 +1,8 @@
-using AdminWeb.Areas.Admin.Data;
 using AdminWeb.Areas.Admin.Models;
 using AdminWeb.Areas.Admin.Models.DTOs;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AdminWeb.Areas.Admin.Data.Services
 {
@@ -16,14 +16,13 @@ namespace AdminWeb.Areas.Admin.Data.Services
             _httpClient = factory.CreateClient("APIClient");
             _options = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
             };
         }
 
-        /// <summary>
-        /// 🚀 Lấy danh sách chi tiết đơn hàng theo OrderId
-        /// </summary>
-        public async Task<ApiResponse<PagedResponse<OrderDetail>>> GetByOrderIdAsync(int orderId, int pageNow = 1, int pageSize = 10)
+        // 🚀 Lấy danh sách chi tiết đơn hàng theo OrderId
+        public async Task<ApiResponse<PagedResponse<OrderDetailDto>>> GetByOrderIdAsync(int orderId, int pageNow = 1, int pageSize = 10)
         {
             var search = new SearchOrderDetail { OrderId = orderId };
 
@@ -32,87 +31,75 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 search
             );
 
-            return await response.Content.ReadFromJsonAsync<ApiResponse<PagedResponse<OrderDetail>>>(_options)
-                   ?? new ApiResponse<PagedResponse<OrderDetail>>
+            return await response.Content.ReadFromJsonAsync<ApiResponse<PagedResponse<OrderDetailDto>>>(_options)
+                   ?? new ApiResponse<PagedResponse<OrderDetailDto>>
                    {
                        Success = false,
                        Message = "Không parse được dữ liệu từ API"
                    };
         }
 
-        /// <summary>
-        /// 🚀 Lấy danh sách chi tiết đơn hàng có phân trang
-        /// </summary>
-        public async Task<ApiResponse<PagedResponse<OrderDetail>>> GetOrderDetailPageAsync(int pageNow = 1, int pageSize = 10)
+        // 🚀 Lấy danh sách chi tiết đơn hàng có phân trang
+        public async Task<ApiResponse<PagedResponse<OrderDetailDto>>> GetOrderDetailPageAsync(int pageNow = 1, int pageSize = 10)
         {
-            return await _httpClient.GetFromJsonAsync<ApiResponse<PagedResponse<OrderDetail>>>(
+            return await _httpClient.GetFromJsonAsync<ApiResponse<PagedResponse<OrderDetailDto>>>(
                 $"{ApiConstants.OrderDetailApi}/paged?pageNow={pageNow}&pageSize={pageSize}", _options
-            ) ?? new ApiResponse<PagedResponse<OrderDetail>>
+            ) ?? new ApiResponse<PagedResponse<OrderDetailDto>>
             {
                 Success = false,
                 Message = "Không parse được dữ liệu từ API"
             };
         }
 
-        /// <summary>
-        /// 🚀 Lấy tất cả chi tiết đơn hàng
-        /// </summary>
-        public async Task<ApiResponse<IEnumerable<OrderDetail>>> GetAllOrderDetailsAsync()
+        // 🚀 Lấy tất cả chi tiết đơn hàng
+        public async Task<ApiResponse<IEnumerable<OrderDetailDto>>> GetAllOrderDetailsAsync()
         {
-            return await _httpClient.GetFromJsonAsync<ApiResponse<IEnumerable<OrderDetail>>>(
+            return await _httpClient.GetFromJsonAsync<ApiResponse<IEnumerable<OrderDetailDto>>>(
                 $"{ApiConstants.OrderDetailApi}", _options
-            ) ?? new ApiResponse<IEnumerable<OrderDetail>>
+            ) ?? new ApiResponse<IEnumerable<OrderDetailDto>>
             {
                 Success = false,
                 Message = "Không parse được dữ liệu từ API"
             };
         }
 
-        /// <summary>
-        /// 🚀 Lấy chi tiết đơn hàng theo ID
-        /// </summary>
-        public async Task<ApiResponse<OrderDetail>> GetOrderDetailByIdAsync(int id)
+        // 🚀 Lấy chi tiết đơn hàng theo ID
+        public async Task<ApiResponse<OrderDetailDto>> GetOrderDetailByIdAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<ApiResponse<OrderDetail>>(
+            return await _httpClient.GetFromJsonAsync<ApiResponse<OrderDetailDto>>(
                 $"{ApiConstants.OrderDetailApi}/{id}", _options
-            ) ?? new ApiResponse<OrderDetail>
+            ) ?? new ApiResponse<OrderDetailDto>
             {
                 Success = false,
                 Message = "Không parse được dữ liệu từ API"
             };
         }
 
-        /// <summary>
-        /// 🚀 Tạo chi tiết đơn hàng
-        /// </summary>
-        public async Task<ApiResponse<OrderDetail>> CreateOrderDetailAsync(OrderDetail model)
+        // 🚀 Tạo chi tiết đơn hàng
+        public async Task<ApiResponse<OrderDetailDto>> CreateOrderDetailAsync(OrderDetailDto model)
         {
             var response = await _httpClient.PostAsJsonAsync($"{ApiConstants.OrderDetailApi}", model);
-            return await response.Content.ReadFromJsonAsync<ApiResponse<OrderDetail>>(_options)
-                   ?? new ApiResponse<OrderDetail>
+            return await response.Content.ReadFromJsonAsync<ApiResponse<OrderDetailDto>>(_options)
+                   ?? new ApiResponse<OrderDetailDto>
                    {
                        Success = false,
                        Message = "Không parse được dữ liệu từ API"
                    };
         }
 
-        /// <summary>
-        /// 🚀 Cập nhật chi tiết đơn hàng
-        /// </summary>
-        public async Task<ApiResponse<OrderDetail>> UpdateOrderDetailAsync(int id, OrderDetail model)
+        // 🚀 Cập nhật chi tiết đơn hàng
+        public async Task<ApiResponse<OrderDetailDto>> UpdateOrderDetailAsync(int id, OrderDetailDto model)
         {
             var response = await _httpClient.PutAsJsonAsync($"{ApiConstants.OrderDetailApi}/{id}", model);
-            return await response.Content.ReadFromJsonAsync<ApiResponse<OrderDetail>>(_options)
-                   ?? new ApiResponse<OrderDetail>
+            return await response.Content.ReadFromJsonAsync<ApiResponse<OrderDetailDto>>(_options)
+                   ?? new ApiResponse<OrderDetailDto>
                    {
                        Success = false,
                        Message = "Không parse được dữ liệu từ API"
                    };
         }
 
-        /// <summary>
-        /// 🚀 Xóa chi tiết đơn hàng
-        /// </summary>
+        // 🚀 Xóa chi tiết đơn hàng
         public async Task<ApiResponse<bool>> DeleteOrderDetailAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"{ApiConstants.OrderDetailApi}/{id}");

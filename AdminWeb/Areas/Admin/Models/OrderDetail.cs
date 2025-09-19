@@ -1,4 +1,4 @@
-﻿namespace AdminWeb.Areas.Admin.Models
+namespace AdminWeb.Areas.Admin.Models
 {
     public class OrderDetail
     {
@@ -12,6 +12,6 @@
 
         // Navigation
         public Order? Order { get; set; }
-        public Product? Product { get; set; }
+        public ProductViewModel? Product { get; set; }
     }
 }

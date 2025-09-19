@@ -1,6 +1,6 @@
 using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Models;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminWeb.Areas.Admin.Controllers
