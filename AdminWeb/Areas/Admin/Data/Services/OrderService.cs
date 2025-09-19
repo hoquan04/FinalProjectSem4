@@ -3,6 +3,7 @@ using AdminWeb.Areas.Admin.Models;
 using AdminWeb.Areas.Admin.Models.DTOs;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AdminWeb.Areas.Admin.Data.Services
 {
@@ -16,7 +17,8 @@ namespace AdminWeb.Areas.Admin.Data.Services
             _httpClient = factory.CreateClient("APIClient");
             _options = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
             };
         }
 

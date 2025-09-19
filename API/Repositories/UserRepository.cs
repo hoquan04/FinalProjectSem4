@@ -1,6 +1,7 @@
-﻿using API.Data;
+using API.Data;
 using API.Models;
 using API.Repositories.IRepositories;
+using API.Repositories.RestAPI;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,17 +19,17 @@ namespace API.Repositories
             _context = context;
         }
 
-        public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
+        public async Task<APIRespone<List<User>>> GetAllUsersAsync()
         {
-            var response = new ApiResponse<List<User>>();
+            var response = new APIRespone<List<User>>();
             response.Data = await _context.Users.ToListAsync();
             response.Success = true;
             return response;
         }
 
-        public async Task<ApiResponse<User>> GetUserByIdAsync(int id)
+        public async Task<APIRespone<User>> GetUserByIdAsync(int id)
         {
-            var response = new ApiResponse<User>();
+            var response = new APIRespone<User>();
             var user = await _context.Users.FindAsync(id);
             response.Data = user;
             response.Success = user != null;
@@ -36,9 +37,9 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<ApiResponse<User>> CreateUserAsync(User model)
+        public async Task<APIRespone<User>> CreateUserAsync(User model)
         {
-            var response = new ApiResponse<User>();
+            var response = new APIRespone<User>();
 
             // Nếu truyền Password thì hash
             if (!string.IsNullOrWhiteSpace(model.Password))
@@ -65,9 +66,9 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<ApiResponse<User>> UpdateUserAsync(int id, User model)
+        public async Task<APIRespone<User>> UpdateUserAsync(int id, User model)
         {
-            var response = new ApiResponse<User>();
+            var response = new APIRespone<User>();
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
@@ -90,9 +91,9 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<ApiResponse<bool>> DeleteUserAsync(int id)
+        public async Task<APIRespone<bool>> DeleteUserAsync(int id)
         {
-            var response = new ApiResponse<bool>();
+            var response = new APIRespone<bool>();
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
@@ -110,9 +111,9 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<ApiResponse<List<User>>> SearchUsersAsync(string searchTerm)
+        public async Task<APIRespone<List<User>>> SearchUsersAsync(string searchTerm)
         {
-            var response = new ApiResponse<List<User>>();
+            var response = new APIRespone<List<User>>();
             response.Data = await _context.Users
                 .Where(u => u.FullName.Contains(searchTerm) || u.Email.Contains(searchTerm))
                 .ToListAsync();
@@ -121,9 +122,9 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<ApiResponse<PagedResponse<User>>> GetPageAsync(int pageNow, int pageSize)
+        public async Task<APIRespone<PagedResponse<User>>> GetPageAsync(int pageNow, int pageSize)
         {
-            var response = new ApiResponse<PagedResponse<User>>();
+            var response = new APIRespone<PagedResponse<User>>();
             var totalCount = await _context.Users.CountAsync();
             var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
 

@@ -1,4 +1,4 @@
-﻿using API.Data;
+using API.Data;
 using API.Models;
 using API.Models.DTOs;
 using API.Repositories.IRepositories;
@@ -16,19 +16,23 @@ namespace API.Repositories
             _context = context;
         }
 
-        public async Task<APIRespone<OrderDetail>> AddAsync(OrderDetail entity)
+        // 🚀 Thêm chi tiết đơn hàng
+        public async Task<APIRespone<OrderDetailDto>> AddAsync(OrderDetail entity)
         {
             _context.OrderDetails.Add(entity);
             await _context.SaveChangesAsync();
 
-            return new APIRespone<OrderDetail>
+            var dto = await MapToDto(entity.OrderDetailId);
+
+            return new APIRespone<OrderDetailDto>
             {
                 Success = true,
                 Message = "Thêm chi tiết đơn hàng thành công",
-                Data = entity
+                Data = dto
             };
         }
 
+        // 🚀 Xóa chi tiết
         public async Task<APIRespone<bool>> DeleteAsync(int id)
         {
             var detail = await _context.OrderDetails.FindAsync(id);
@@ -53,32 +57,50 @@ namespace API.Repositories
             };
         }
 
-        public async Task<APIRespone<IEnumerable<OrderDetail>>> GetAllAsync()
+        // 🚀 Lấy tất cả chi tiết (không phân trang)
+        public async Task<APIRespone<IEnumerable<OrderDetailDto>>> GetAllAsync()
         {
-            var details = await _context.OrderDetails
-                .Include(od => od.Order)
+            var data = await _context.OrderDetails
                 .Include(od => od.Product)
-                .OrderByDescending(od => od.OrderDetailId)
+                .Include(od => od.Order).ThenInclude(o => o.Users)
+                .Include(od => od.Order).ThenInclude(o => o.Shipping)
+                .Select(od => new OrderDetailDto
+                {
+                    OrderDetailId = od.OrderDetailId,
+                    ProductId = od.ProductId,
+                    ProductName = od.Product.Name,
+                    ImageUrl = od.Product.ImageUrl,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    SubTotal = od.SubTotal,
+                    CreatedDate = od.CreatedDate,
+
+                    OrderId = od.Order.OrderId,
+                    OrderDate = od.Order.OrderDate,
+                    CustomerName = od.Order.Users.FullName,
+                    Email = od.Order.Users.Email,
+                    Address = od.Order.Shipping.Address,
+                    Status = od.Order.Status
+                })
+                .OrderByDescending(x => x.OrderDetailId)
                 .ToListAsync();
 
-            return new APIRespone<IEnumerable<OrderDetail>>
+            return new APIRespone<IEnumerable<OrderDetailDto>>
             {
                 Success = true,
                 Message = "Lấy danh sách chi tiết đơn hàng thành công",
-                Data = details
+                Data = data
             };
         }
 
-        public async Task<APIRespone<OrderDetail>> GetByIdAsync(int id)
+        // 🚀 Lấy chi tiết theo Id
+        public async Task<APIRespone<OrderDetailDto>> GetByIdAsync(int id)
         {
-            var detail = await _context.OrderDetails
-                .Include(od => od.Order)
-                .Include(od => od.Product)
-                .FirstOrDefaultAsync(od => od.OrderDetailId == id);
+            var dto = await MapToDto(id);
 
-            if (detail == null)
+            if (dto == null)
             {
-                return new APIRespone<OrderDetail>
+                return new APIRespone<OrderDetailDto>
                 {
                     Success = false,
                     Message = "Không tìm thấy chi tiết đơn hàng",
@@ -86,20 +108,21 @@ namespace API.Repositories
                 };
             }
 
-            return new APIRespone<OrderDetail>
+            return new APIRespone<OrderDetailDto>
             {
                 Success = true,
                 Message = "Lấy chi tiết đơn hàng thành công",
-                Data = detail
+                Data = dto
             };
         }
 
-        public async Task<APIRespone<OrderDetail>> UpdateAsync(int id, OrderDetail entity)
+        // 🚀 Cập nhật chi tiết
+        public async Task<APIRespone<OrderDetailDto>> UpdateAsync(int id, OrderDetail entity)
         {
             var detail = await _context.OrderDetails.FindAsync(id);
             if (detail == null)
             {
-                return new APIRespone<OrderDetail>
+                return new APIRespone<OrderDetailDto>
                 {
                     Success = false,
                     Message = "Không tìm thấy chi tiết đơn hàng",
@@ -110,19 +133,23 @@ namespace API.Repositories
             _context.Entry(detail).CurrentValues.SetValues(entity);
             await _context.SaveChangesAsync();
 
-            return new APIRespone<OrderDetail>
+            var dto = await MapToDto(id);
+
+            return new APIRespone<OrderDetailDto>
             {
                 Success = true,
                 Message = "Cập nhật chi tiết đơn hàng thành công",
-                Data = entity
+                Data = dto
             };
         }
 
-        public async Task<APIRespone<PagedResponse<OrderDetail>>> GetPageAsync(int pageNow, int pageSize)
+        // 🚀 Lấy danh sách phân trang
+        public async Task<APIRespone<PagedResponse<OrderDetailDto>>> GetPageAsync(int pageNow, int pageSize)
         {
             var query = _context.OrderDetails
-                .Include(od => od.Order)
                 .Include(od => od.Product)
+                .Include(od => od.Order).ThenInclude(o => o.Users)
+                .Include(od => od.Order).ThenInclude(o => o.Shipping)
                 .OrderByDescending(od => od.OrderDetailId)
                 .AsQueryable();
 
@@ -132,9 +159,27 @@ namespace API.Repositories
             var data = await query
                 .Skip((pageNow - 1) * pageSize)
                 .Take(pageSize)
+                .Select(od => new OrderDetailDto
+                {
+                    OrderDetailId = od.OrderDetailId,
+                    ProductId = od.ProductId,
+                    ProductName = od.Product.Name,
+                    ImageUrl = od.Product.ImageUrl,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    SubTotal = od.SubTotal,
+                    CreatedDate = od.CreatedDate,
+
+                    OrderId = od.Order.OrderId,
+                    OrderDate = od.Order.OrderDate,
+                    CustomerName = od.Order.Users.FullName,
+                    Email = od.Order.Users.Email,
+                    Address = od.Order.Shipping.Address,
+                    Status = od.Order.Status
+                })
                 .ToListAsync();
 
-            var response = new PagedResponse<OrderDetail>
+            var response = new PagedResponse<OrderDetailDto>
             {
                 Data = data,
                 PageNow = pageNow,
@@ -143,7 +188,7 @@ namespace API.Repositories
                 TotalCount = totalCount
             };
 
-            return new APIRespone<PagedResponse<OrderDetail>>
+            return new APIRespone<PagedResponse<OrderDetailDto>>
             {
                 Success = true,
                 Message = "Lấy danh sách chi tiết đơn hàng phân trang thành công",
@@ -151,64 +196,53 @@ namespace API.Repositories
             };
         }
 
-        public async Task<APIRespone<PagedResponse<OrderDetail>>> Search(int pageNow, int pageSize, SearchOrderDetail search)
+        // 🚀 Search
+        public async Task<APIRespone<PagedResponse<OrderDetailDto>>> Search(int pageNow, int pageSize, SearchOrderDetail search)
         {
             var query = _context.OrderDetails
-                .Include(od => od.Order)
                 .Include(od => od.Product)
+                .Include(od => od.Order).ThenInclude(o => o.Users)
+                .Include(od => od.Order).ThenInclude(o => o.Shipping)
                 .AsQueryable();
 
-            // Tìm theo từ khóa (ProductName hoặc OrderId)
+            // 🔎 Tìm theo từ khóa
             if (!string.IsNullOrEmpty(search.Keyword))
             {
                 var keyword = search.Keyword.ToLower();
                 query = query.Where(od =>
                     od.OrderId.ToString().Contains(keyword) ||
-                    od.Product.Name.ToLower().Contains(keyword)
+                    od.Product.Name.ToLower().Contains(keyword) ||
+                    od.Order.Users.FullName.ToLower().Contains(keyword) ||
+                    od.Order.Users.Email.ToLower().Contains(keyword) ||
+                    od.Order.Shipping.Address.ToLower().Contains(keyword)
                 );
             }
 
-            // Lọc theo OrderId
+            // Lọc OrderId
             if (search.OrderId.HasValue)
-            {
                 query = query.Where(od => od.OrderId == search.OrderId.Value);
-            }
 
-            // Lọc theo ProductId
+            // Lọc ProductId
             if (search.ProductId.HasValue)
-            {
                 query = query.Where(od => od.ProductId == search.ProductId.Value);
-            }
 
-            // Lọc theo số lượng
+            // Lọc số lượng
             if (search.MinQuantity.HasValue)
-            {
                 query = query.Where(od => od.Quantity >= search.MinQuantity.Value);
-            }
             if (search.MaxQuantity.HasValue)
-            {
                 query = query.Where(od => od.Quantity <= search.MaxQuantity.Value);
-            }
 
-            // Lọc theo giá
+            // Lọc giá
             if (search.MinPrice.HasValue)
-            {
                 query = query.Where(od => od.SubTotal >= search.MinPrice.Value);
-            }
             if (search.MaxPrice.HasValue)
-            {
                 query = query.Where(od => od.SubTotal <= search.MaxPrice.Value);
-            }
 
-            // Lọc theo ngày
+            // Lọc ngày
             if (search.FromDate.HasValue)
-            {
                 query = query.Where(od => od.CreatedDate >= search.FromDate.Value);
-            }
             if (search.ToDate.HasValue)
-            {
                 query = query.Where(od => od.CreatedDate <= search.ToDate.Value);
-            }
 
             var totalCount = await query.CountAsync();
             var totalPage = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -217,9 +251,27 @@ namespace API.Repositories
                 .OrderByDescending(od => od.OrderDetailId)
                 .Skip((pageNow - 1) * pageSize)
                 .Take(pageSize)
+                .Select(od => new OrderDetailDto
+                {
+                    OrderDetailId = od.OrderDetailId,
+                    ProductId = od.ProductId,
+                    ProductName = od.Product.Name,
+                    ImageUrl = od.Product.ImageUrl,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    SubTotal = od.SubTotal,
+                    CreatedDate = od.CreatedDate,
+
+                    OrderId = od.Order.OrderId,
+                    OrderDate = od.Order.OrderDate,
+                    CustomerName = od.Order.Users.FullName,
+                    Email = od.Order.Users.Email,
+                    Address = od.Order.Shipping.Address,
+                    Status = od.Order.Status
+                })
                 .ToListAsync();
 
-            var response = new PagedResponse<OrderDetail>
+            var response = new PagedResponse<OrderDetailDto>
             {
                 Data = data,
                 PageNow = pageNow,
@@ -228,12 +280,41 @@ namespace API.Repositories
                 TotalCount = totalCount
             };
 
-            return new APIRespone<PagedResponse<OrderDetail>>
+            return new APIRespone<PagedResponse<OrderDetailDto>>
             {
                 Success = true,
                 Message = "Tìm kiếm chi tiết đơn hàng thành công",
                 Data = response
             };
+        }
+
+        // Helper map entity -> DTO
+        private async Task<OrderDetailDto?> MapToDto(int id)
+        {
+            return await _context.OrderDetails
+                .Include(od => od.Product)    
+                .Include(od => od.Order).ThenInclude(o => o.Users)
+                .Include(od => od.Order).ThenInclude(o => o.Shipping)
+                .Where(od => od.OrderDetailId == id)
+                .Select(od => new OrderDetailDto
+                {
+                    OrderDetailId = od.OrderDetailId,
+                    ProductId = od.ProductId,
+                    ProductName = od.Product.Name,
+                    ImageUrl = od.Product.ImageUrl,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    SubTotal = od.SubTotal,
+                    CreatedDate = od.CreatedDate,
+
+                    OrderId = od.Order.OrderId,
+                    OrderDate = od.Order.OrderDate,
+                    CustomerName = od.Order.Users.FullName,
+                    Email = od.Order.Users.Email,
+                    Address = od.Order.Shipping.Address,
+                    Status = od.Order.Status
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

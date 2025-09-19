@@ -1,4 +1,4 @@
-﻿using API.Models;
+using API.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,10 +75,10 @@ namespace API.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.Shipping)
-                .WithMany(s => s.Orders)
-                .HasForeignKey(o => o.ShippingId)
-                .OnDelete(DeleteBehavior.SetNull);
+               .HasOne(o => o.Shipping)
+               .WithMany(s => s.Orders)
+               .HasForeignKey(o => o.ShippingId)
+               .OnDelete(DeleteBehavior.Cascade);
 
             // OrderDetails
             modelBuilder.Entity<OrderDetail>()

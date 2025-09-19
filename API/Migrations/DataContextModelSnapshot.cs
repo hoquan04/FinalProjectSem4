@@ -326,7 +326,7 @@ namespace API.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -497,7 +497,7 @@ namespace API.Migrations
                     b.HasOne("API.Models.Shipping", "Shipping")
                         .WithMany("Orders")
                         .HasForeignKey("ShippingId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("API.Models.User", "Users")

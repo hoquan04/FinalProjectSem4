@@ -8,7 +8,7 @@ namespace AdminWeb.Areas.Admin.Data
         public const string Port = "7245";
 
 
-        public static string BaseUrl => $"https://{Domain}:{Port}/api/";
+        public static string BaseUrl => $"http://{Domain}:{Port}/api/";
         public static string CategoryApi => $"{BaseUrl}category";
         public static string UserApi => $"{BaseUrl}user";
         public static string BrandApi => $"{BaseUrl}brand";

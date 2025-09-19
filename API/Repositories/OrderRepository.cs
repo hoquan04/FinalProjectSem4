@@ -1,4 +1,4 @@
-﻿using API.Data;
+using API.Data;
 using API.Models;
 using API.Models.DTOs;
 using API.Repositories.IRepositories;
@@ -129,7 +129,7 @@ namespace API.Repositories
                 .Include(o => o.Users)
                 .Include(o => o.Shipping)
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
+                .ThenInclude(od => od.Product)
                 .Include(o => o.Payments)
                 .OrderByDescending(o => o.OrderDate)
                 .AsQueryable();
@@ -186,10 +186,11 @@ namespace API.Repositories
                 }
                 else
                 {
-                    // Nếu nhập chữ thì tìm theo tên hoặc email
+                    // Nếu nhập chữ thì tìm theo tên KH, email, hoặc địa chỉ giao hàng
                     query = query.Where(o =>
                         o.Users.FullName.ToLower().Contains(keyword) ||
-                        o.Users.Email.ToLower().Contains(keyword)
+                        o.Users.Email.ToLower().Contains(keyword) ||
+                        o.Shipping.Address.ToLower().Contains(keyword)
                     );
                 }
             }

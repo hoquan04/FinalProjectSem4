@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -16,7 +16,10 @@ namespace API.Models
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Trạng thái đơn hàng là bắt buộc")]
+
+       
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
 
         [Required(ErrorMessage = "Tổng tiền không được để trống")]
         [Range(0, 9999999999.99, ErrorMessage = "Tổng tiền phải lớn hơn hoặc bằng 0")]
@@ -25,12 +28,14 @@ namespace API.Models
         public int ShippingId { get; set; }
 
         // Navigation
-        [JsonIgnore]
+   
         public User? Users { get; set; }
-        [JsonIgnore]
+       
         public Shipping? Shipping { get; set; }
 
+        [JsonIgnore]
         public ICollection<OrderDetail>? OrderDetails { get; set; }
+        [JsonIgnore]
         public ICollection<Payment>? Payments { get; set; }
     }
 

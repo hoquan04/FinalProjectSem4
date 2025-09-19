@@ -1,9 +1,9 @@
-﻿using API.Models;
+using API.Models;
 using API.Repositories.IRepositories;
 using API.Repositories.RestAPI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static API.Models.DTO.ReviewDto;
+using static API.Models.DTOs.ReviewDto;
 
 namespace API.Controllers
 {

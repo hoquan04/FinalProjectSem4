@@ -5,13 +5,21 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers (enum as string nếu cần)
 builder.Services.AddControllers()
-    .AddJsonOptions(o => o.JsonSerializerOptions.Converters
-        .Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+    .AddJsonOptions(o =>
+    {
+        // 🚀 Cho phép tránh vòng lặp khi serialize navigation properties
+        o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
+        // 🚀 Convert enum sang string thay vì số
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -62,6 +70,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
  builder.Services.AddScoped<IUserRepository, UserRepository>();
+ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 
 // ✅ JWT (để sau dùng bảo vệ endpoint)

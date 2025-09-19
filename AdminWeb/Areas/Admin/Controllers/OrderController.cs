@@ -1,4 +1,4 @@
-﻿using AdminWeb.Areas.Admin.Data.Services;
+using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Models;
 using AdminWeb.Areas.Admin.Models.DTOs;
 using AdminWeb.Models;
@@ -152,9 +152,10 @@ namespace AdminWeb.Areas.Admin.Controllers
             if (!response.Success || response.Data == null)
                 return View("Error", response.Message);
 
-            ViewBag.OrderId = orderId; // để biết đang xem chi tiết của đơn nào
-            return View(response.Data);
+            ViewBag.OrderId = orderId;
+            return View(response.Data); // Model = PagedResponse<OrderDetailDto>
         }
+
 
     }
 }

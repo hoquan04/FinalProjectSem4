@@ -1,7 +1,10 @@
-using System.Text;
 using AdminWeb.Areas.Admin.Data.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +18,12 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
 builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
-
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 // Cấu hình HttpClient với timeout và retry policy
 builder.Services.AddHttpClient("APIClient", client =>
 {
@@ -127,7 +135,8 @@ else
 {
     app.UseDeveloperExceptionPage();
 }
-
+var locOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>();
+app.UseRequestLocalization(locOptions.Value);
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -142,9 +151,11 @@ app.MapGet("/", () => Results.Redirect("/Admin/Account/Login"));
 
 app.MapControllerRoute(
     name: "areas",
+    pattern: "{area:exists}/{controller=Category}/{action=Index}/{id?}");
 
 // Sử dụng localization
-app.UseRequestLocalization();
+// Sử dụng localization
+
 
 
 app.MapControllerRoute(
