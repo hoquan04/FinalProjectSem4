@@ -1,6 +1,7 @@
 using API.Data;
 using API.Repositories;
 using API.Repositories.IRepositories;
+using API.Repositories.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -71,7 +72,8 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
  builder.Services.AddScoped<IUserRepository, UserRepository>();
  builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-
+builder.Services.AddScoped<IShippingRepository, ShippingRepository>();
+builder.Services.AddScoped<ShippingService>();
 
 // ✅ JWT (để sau dùng bảo vệ endpoint)
 var jwt = builder.Configuration.GetSection("Jwt");
@@ -118,7 +120,7 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
-app.Urls.Add("http://localhost:7245");
+app.Urls.Add("https://localhost:64767");
 
 Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
