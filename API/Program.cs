@@ -108,7 +108,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.Urls.Add("https://localhost:7245");
+app.Urls.Add("http://localhost:7245");
 
 Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");

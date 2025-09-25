@@ -29,7 +29,7 @@ builder.Services.AddHttpClient("APIClient", client =>
     client.DefaultRequestHeaders.Accept.Add(
         new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
     client.Timeout = TimeSpan.FromSeconds(30);
-    client.BaseAddress = new Uri("https://localhost:64767/");
+    client.BaseAddress = new Uri("http://localhost:7245/");
 });
 
 // Các service dùng HttpClient
@@ -87,7 +87,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<JwtAttachHandler>();
 
 var apiBase = builder.Configuration["Api:Base"]
-             ?? throw new InvalidOperationException("Missing Api:Base (e.g. https://localhost:64767/api/)");
+             ?? throw new InvalidOperationException("Missing Api:Base (e.g. http://localhost:7245/api/)");
 
 // AuthService: KHÔNG gắn bearer
 builder.Services.AddHttpClient<AuthService>(c =>

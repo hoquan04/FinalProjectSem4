@@ -45,9 +45,9 @@
             <li>
                 <a asp-action="Index" asp-controller="Category"><i class="fa fa-diamond"></i> <span class="nav-label">Categories</span></a>
             </li>
-            <li>
+          @*   <li>
                 <a asp-action="Index" asp-controller="Brand"><i class="fa fa-sitemap"></i> <span class="nav-label">Brands</span></a>
-            </li>
+            </li> *@
             <li class="has-submenu">
                 <a href="#"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">Products</span><span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse">
@@ -60,13 +60,19 @@
             </li>
 
 			<li>
-				<a asp-action="Index" asp-controller="User"><i class="fa fa-shopping-cart"></i></i> <span class="nav-label">User</span></a>
+                <a asp-action="Index" asp-controller="User"><i class="fa fa-database"></i></i> <span class="nav-label">User</span></a>
 			</li>
 
 			<li>
-				<a asp-action="Index" asp-controller="Payment"><i class="fa fa-shopping-cart"></i></i> <span class="nav-label">Payment</span></a>
+                <a asp-action="Index" asp-controller="Payment"><i class="fa fa-magic"></i></i> <span class="nav-label">Payment</span></a>
 			</li>
-         
+            <li>
+                <a asp-action="Index" asp-controller="Review"><i class="fa fa-laptop"></i></i> <span class="nav-label">Review</span></a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-controller="Shipping"><i class="fa fa-files-o"></i></i> <span class="nav-label">Shipping</span></a>
+            </li>
+
             <!--End Sidebar-->
         </ul>
     </div>
