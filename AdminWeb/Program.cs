@@ -44,6 +44,8 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddHttpClient<ProductService>();
 builder.Services.AddScoped<ProductService>();
 
+builder.Services.AddHttpClient<PaymentService>();
+
 // Cấu hình localization cho tiếng Việt
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {

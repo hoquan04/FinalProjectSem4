@@ -1,4 +1,4 @@
-﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 <nav class="navbar-default navbar-static-side" role="navigation">
     <div class="sidebar-collapse">
         <ul class="nav metismenu" id="side-menu">
@@ -58,6 +58,14 @@
          <li>
                 <a asp-action="Index" asp-controller="Order"><i class="fa fa-shopping-cart"></i></i> <span class="nav-label">Order</span></a>
             </li>
+
+			<li>
+				<a asp-action="Index" asp-controller="User"><i class="fa fa-shopping-cart"></i></i> <span class="nav-label">User</span></a>
+			</li>
+
+			<li>
+				<a asp-action="Index" asp-controller="Payment"><i class="fa fa-shopping-cart"></i></i> <span class="nav-label">Payment</span></a>
+			</li>
          
             <!--End Sidebar-->
         </ul>
