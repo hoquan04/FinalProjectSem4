@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using API.Data;
 using API.Helpers;
@@ -7,6 +7,7 @@ using API.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 
 namespace API.Controllers
 {
@@ -196,5 +197,88 @@ namespace API.Controllers
         }
 
 
+
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] SignUpModel req)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (req.Password != req.ConfirmPassword)
+                return BadRequest(new { message = "Password và ConfirmPassword không khớp" });
+
+            if (_ctx.Users.Any(u => u.Email == req.Email))
+                return BadRequest(new { message = "Email đã tồn tại" });
+
+            // Ghép họ + tên thành FullName
+            string fullName = $"{req.FirstName} {req.LastName}".Trim();
+
+            var user = new User
+            {
+                FullName = fullName,
+                Email = req.Email,
+                Role = UserRole.Customer,
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password)
+            };
+
+            _ctx.Users.Add(user);
+            _ctx.SaveChanges();
+
+            return Ok(new
+            {
+                message = "Đăng ký thành công",
+                user = new { user.UserId, user.FullName, user.Email, user.Role }
+            });
+        }
+
+
+        // POST: /api/auth/login
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] SigninModel req)
+        {
+            var user = _ctx.Users.FirstOrDefault(u => u.Email == req.Email);
+            if (user == null) return Ok(new { message = "Sai tài khoản hoặc mật khẩu" });
+
+            var stored = user.PasswordHash ?? string.Empty;
+            var isBcrypt = stored.StartsWith("$2");
+            var ok = false;
+
+            if (isBcrypt)
+            {
+                ok = BCrypt.Net.BCrypt.Verify(req.Password, stored);
+            }
+            else
+            {
+                ok = req.Password == stored;
+                if (ok)
+                {
+                    // nâng cấp sang bcrypt
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password);
+                    _ctx.SaveChanges();
+                }
+            }
+
+            if (!ok) return Ok(new { message = "Sai tài khoản hoặc mật khẩu" });
+
+            // phát JWT cho user
+            var jwt = _config.GetSection("Jwt");
+            var token = JwtHelper.GenerateToken(
+                userId: user.UserId,
+                email: user.Email,
+                fullName: user.FullName,
+                role: user.Role.ToString(),
+                key: jwt["Key"]!,
+                issuer: jwt["Issuer"]!,
+                audience: jwt["Audience"]!
+            );
+
+            return Ok(new
+            {
+                message = "Đăng nhập thành công",
+                token,
+                user = new { user.UserId, user.FullName, user.Email, user.Role, user.CreatedAt }
+            });
+        }
     }
 }

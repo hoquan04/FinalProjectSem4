@@ -11,6 +11,8 @@ namespace AdminWeb.Areas.Admin.Data
         public static string BaseUrl => $"https://{Domain}:{Port}/api/";
         public static string CategoryApi => $"{BaseUrl}category";
         public static string UserApi => $"{BaseUrl}user";
+
+        public static string PaymentApi => $"{BaseUrl}payment";
         public static string BrandApi => $"{BaseUrl}brand";
         public static string ProductApi => $"{BaseUrl}product";
         public static string OrderApi => $"{BaseUrl}order";

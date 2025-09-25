@@ -1,0 +1,158 @@
+@model List<AdminWeb.Areas.Admin.Models.Payment>
+@using AdminWeb.Areas.Admin.Models
+
+@{
+	ViewData["Title"] = "Danh sách thanh toán";
+	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+	int stt = 1;
+
+	// Lấy trạng thái đã chọn từ ViewBag
+	PaymentStatus? selectedStatus = ViewBag.Status as PaymentStatus?;
+
+	// Tạo HTML cho <option>
+	var optionsHtml = new System.Text.StringBuilder();
+	foreach (PaymentStatus s in Enum.GetValues(typeof(PaymentStatus)))
+	{
+		var text = s switch
+		{
+			PaymentStatus.Pending => "Đang chờ",
+			PaymentStatus.Paid => "Đã thanh toán",
+			PaymentStatus.Failed => "Thất bại",
+			_ => s.ToString()
+		};
+		var selectedAttr = (selectedStatus.HasValue && selectedStatus.Value == s) ? " selected" : "";
+		optionsHtml.Append($"<option value='{s}'{selectedAttr}>{text}</option>");
+	}
+}
+
+<div class="col-lg-12">
+    <div class="ibox-content">
+
+        @* 🔔 Success/Error Messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-check"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-times"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="row mb-3">
+    <form asp-action="Index" method="get" class="form-inline w-100">
+				<div class="col-sm-3">
+					<input type="text" name="paymentId"
+						   value="@(ViewBag.PaymentId ?? "")"
+						   placeholder="Tìm kiếm theo mã thanh toán..."
+						   class="input-sm form-control w-100" />
+				</div>
+
+        <div class="col-sm-3">
+            <select name="status" class="form-control input-sm w-100">
+						@foreach (PaymentStatus s in Enum.GetValues(typeof(PaymentStatus)))
+						{
+							var text = s switch
+							{
+								PaymentStatus.Pending => "Đang chờ",
+								PaymentStatus.Paid => "Đã thanh toán",
+								PaymentStatus.Failed => "Thất bại",
+								_ => s.ToString()
+							};
+
+							if (ViewBag.Status != null && (PaymentStatus)ViewBag.Status == s)
+							{
+								<option value="@s" selected>@text</option>
+							}
+							else
+							{
+								
+							}
+							{
+								<option value="@s">@text</option>
+							}
+						}
+            </select>
+        </div>
+
+        <div class="col-sm-6 text-right">
+            <button type="submit" class="btn btn-sm btn-primary">
+                <i class="fa fa-search"></i> Tìm kiếm
+            </button>
+            @* <a asp-action="Create" class="btn btn-sm btn-success">
+                <i class="fa fa-plus"></i> Thêm mới
+            </a> *@
+					@if (ViewBag.OrderId != null || ViewBag.Status != null)
+					{
+						<a asp-action="Index" class="btn btn-secondary">
+							<i class="fa fa-list"></i> Xem tất cả
+						</a>
+					}
+        </div>
+    </form>
+</div>
+
+        @* Bảng hiển thị dữ liệu *@
+        <div class="table-responsive mt-3">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã thanh toán</th>
+                        <th>Mã đơn hàng</th>
+                        <th>Phương thức</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Ngày thanh toán</th>
+                        @* <th>Thao tác</th> *@
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(stt++)</td>
+                                <td>@item.PaymentId</td>
+                                <td>@item.OrderId</td>
+                                <td>@item.PaymentMethod</td>
+								<td>
+									@switch (item.PaymentStatus)
+									{
+										case PaymentStatus.Paid:
+											<span class="badge badge-success">Đã thanh toán</span>
+											break;
+										case PaymentStatus.Pending:
+											<span class="badge badge-warning">Đang chờ</span>
+											break;
+										case PaymentStatus.Failed:
+											<span class="badge badge-danger">Thất bại</span>
+											break;
+									}
+								</td>
+                                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@(item.PaidAt.HasValue ? item.PaidAt.Value.ToString("dd/MM/yyyy HH:mm") : "-")</td>
+                                @* <td>
+                                    <a asp-action="Edit" asp-route-id="@item.PaymentId" class="btn btn-sm btn-warning">Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@item.PaymentId" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa thanh toán này?');">Xóa</a>
+                                </td> *@
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">Không có thanh toán nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
