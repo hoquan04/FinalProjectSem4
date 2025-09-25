@@ -1,6 +1,7 @@
 using API.Data;
 using API.Repositories;
 using API.Repositories.IRepositories;
+using API.Repositories.Services;
 using API.Repositories.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +51,12 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+ builder.Services.AddScoped<IUserRepository, UserRepository>();
+ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IShippingRepository, ShippingRepository>();
+builder.Services.AddScoped<ShippingService>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -100,6 +107,15 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
+
+app.Urls.Add("https://localhost:7245");
+
+Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
+Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
+Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
+Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
+
+Console.WriteLine("📁 File Upload API: http://localhost:7245/api/file");
 
 // Map Controllers
 app.MapControllers();

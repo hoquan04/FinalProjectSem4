@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace API.Models
 {
@@ -24,7 +25,8 @@ namespace API.Models
         [Range(1, 365, ErrorMessage = "Số ngày giao hàng ước tính phải từ 1 đến 365")]
         public int? EstimatedDays { get; set; }
 
-        // Navigation
+        // Navigation - Ẩn trong JSON response
+        [JsonIgnore]
         public ICollection<Order>? Orders { get; set; }
     }
 }

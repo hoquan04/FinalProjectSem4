@@ -5,10 +5,10 @@ namespace AdminWeb.Areas.Admin.Data
 
         // Dev: API & AdminWeb chạy cùng máy
         public const string Domain = "localhost";
-        public const string Port = "7245";
+        public const string Port = "64767";
 
 
-        public static string BaseUrl => $"http://{Domain}:{Port}/api/";
+        public static string BaseUrl => $"https://{Domain}:{Port}/api/";
         public static string CategoryApi => $"{BaseUrl}category";
         public static string UserApi => $"{BaseUrl}user";
 
@@ -26,6 +26,7 @@ namespace AdminWeb.Areas.Admin.Data
         public static string AuthRegister => $"{AuthApi}/register";
 
         public static string ReviewApi => $"{BaseUrl}Review"; // Thêm dòng này
+        public static string ShippingApi => $"{BaseUrl}Shipping"; // Thêm dòng này
 
     }
 }

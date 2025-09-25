@@ -16,8 +16,7 @@ Console.InputEncoding = Encoding.UTF8;
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
-builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
-builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
+
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
@@ -30,7 +29,7 @@ builder.Services.AddHttpClient("APIClient", client =>
     client.DefaultRequestHeaders.Accept.Add(
         new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
     client.Timeout = TimeSpan.FromSeconds(30);
-    client.BaseAddress = new Uri("http://localhost:7245/");
+    client.BaseAddress = new Uri("https://localhost:64767/");
 });
 
 // Các service dùng HttpClient
@@ -43,6 +42,13 @@ builder.Services.AddScoped<CategoryService>();
 
 builder.Services.AddHttpClient<ProductService>();
 builder.Services.AddScoped<ProductService>();
+
+
+builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
+builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
+
+builder.Services.AddHttpClient<ShippingApiService>();
+builder.Services.AddScoped<ShippingApiService>();
 
 builder.Services.AddHttpClient<PaymentService>();
 
@@ -81,7 +87,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<JwtAttachHandler>();
 
 var apiBase = builder.Configuration["Api:Base"]
-             ?? throw new InvalidOperationException("Missing Api:Base (e.g. http://localhost:7245/api/)");
+             ?? throw new InvalidOperationException("Missing Api:Base (e.g. https://localhost:64767/api/)");
 
 // AuthService: KHÔNG gắn bearer
 builder.Services.AddHttpClient<AuthService>(c =>
