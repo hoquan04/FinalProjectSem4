@@ -8,5 +8,6 @@ namespace API.Repositories.IRepositories
         // Thêm các method đặc biệt cho Product
         Task<APIRespone<IEnumerable<Product>>> GetProductsByCategoryAsync(int categoryId);
         Task<APIRespone<IEnumerable<Product>>> SearchProductsAsync(string searchTerm);
+        Task<APIRespone<IEnumerable<Product>>> GetNewestProductsAsync(int count);
     }
 }

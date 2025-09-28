@@ -23,6 +23,14 @@ namespace API.Controllers
             return Ok(response);
         }
 
+        // GET: api/product/newest?count=4
+        [HttpGet("newest")]
+        public async Task<IActionResult> GetNewest([FromQuery] int count = 4)
+        {
+            var response = await _productRepository.GetNewestProductsAsync(count);
+            return Ok(response);
+        }
+
         // GET: api/product/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
