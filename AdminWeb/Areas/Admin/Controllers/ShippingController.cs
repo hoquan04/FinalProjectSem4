@@ -13,18 +13,33 @@ namespace AdminWeb.Areas.Admin.Controllers
         {
             _shippingApiService = shippingApiService;
         }
-        public async Task<IActionResult> Index(string? searchString)
+
+        // Danh sách
+        public async Task<IActionResult> Index(string? recipientName, string? phoneNumber, string? address, string? city, string? postalCode)
         {
-            ViewBag.SearchString = searchString;
+            ViewBag.RecipientName = recipientName;
+            ViewBag.PhoneNumber = phoneNumber;
+            ViewBag.Address = address;
+            ViewBag.City = city;
+            ViewBag.PostalCode = postalCode;
 
             try
             {
                 List<Shipping> shippings;
 
-                // Gọi API thông qua ShippingService
-                if (!string.IsNullOrEmpty(searchString))
+                if (!string.IsNullOrEmpty(recipientName) || !string.IsNullOrEmpty(phoneNumber)
+                    || !string.IsNullOrEmpty(address) || !string.IsNullOrEmpty(city)
+                    || !string.IsNullOrEmpty(postalCode))
                 {
-                    var searchModel = new ShippingSearchModel { SearchTerm = searchString };
+                    var searchModel = new ShippingSearchModel
+                    {
+                        RecipientName = recipientName,
+                        PhoneNumber = phoneNumber,
+                        Address = address,
+                        City = city,
+                        PostalCode = postalCode
+                    };
+
                     shippings = await _shippingApiService.SearchShippingAsync(searchModel);
                 }
                 else
@@ -36,30 +51,29 @@ namespace AdminWeb.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                // Error handling
                 ViewBag.Error = $"Lỗi khi tải danh sách shipping: {ex.Message}";
                 ViewBag.ErrorDetail = "Vui lòng kiểm tra API đã chạy chưa hoặc kết nối mạng.";
                 return View(new List<Shipping>());
             }
         }
 
+
+        // GET: Create
         public IActionResult Create()
         {
             return View(new ShippingCreateModel());
         }
 
+        // POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ShippingCreateModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             try
             {
-                // Gọi API POST thông qua CategoryService
                 var result = await _shippingApiService.CreateShippingAsync(model);
 
                 if (result.Success)
@@ -80,11 +94,11 @@ namespace AdminWeb.Areas.Admin.Controllers
             }
         }
 
+        // GET: Edit
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                // Gọi API GET by ID thông qua CategoryService
                 var shipping = await _shippingApiService.GetShippingByIdAsync(id);
                 if (shipping == null)
                 {
@@ -92,10 +106,12 @@ namespace AdminWeb.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Convert sang EditModel
                 var editModel = new ShippingEditModel
                 {
                     ShippingId = shipping.ShippingId,
+                    RecipientName = shipping.RecipientName,
+                    PhoneNumber = shipping.PhoneNumber,
+                    Email = shipping.Email,
                     Address = shipping.Address,
                     City = shipping.City,
                     PostalCode = shipping.PostalCode,
@@ -112,25 +128,21 @@ namespace AdminWeb.Areas.Admin.Controllers
             }
         }
 
+        // POST: Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ShippingEditModel model)
         {
             if (id != model.ShippingId)
-            {
                 return NotFound();
-            }
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             try
             {
-                // Gọi API PUT thông qua CategoryService
                 var result = await _shippingApiService.UpdateShippingAsync(id, model);
-                
+
                 if (result.Success)
                 {
                     TempData["SuccessMessage"] = result.Message ?? "Cập nhật shipping thành công!";
@@ -149,6 +161,7 @@ namespace AdminWeb.Areas.Admin.Controllers
             }
         }
 
+        // GET: Delete
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -168,6 +181,7 @@ namespace AdminWeb.Areas.Admin.Controllers
             }
         }
 
+        // POST: Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

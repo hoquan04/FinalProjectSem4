@@ -80,12 +80,16 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 // Chuẩn bị request body JSON
                 var requestData = new
                 {
+                    RecipientName = model.RecipientName,
+                    PhoneNumber = model.PhoneNumber,
+                    Email = model.Email,
                     Address = model.Address,
                     City = model.City,
                     PostalCode = model.PostalCode,
                     ShippingFee = model.ShippingFee,
                     EstimatedDays = model.EstimatedDays
                 };
+
 
                 var json = JsonSerializer.Serialize(requestData, _jsonOptions);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -139,12 +143,16 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 // Chuẩn bị request body JSON
                 var requestData = new
                 {
+                    RecipientName = model.RecipientName,
+                    PhoneNumber = model.PhoneNumber,
+                    Email = model.Email,
                     Address = model.Address,
                     City = model.City,
                     PostalCode = model.PostalCode,
                     ShippingFee = model.ShippingFee,
                     EstimatedDays = model.EstimatedDays
                 };
+
 
                 var json = JsonSerializer.Serialize(requestData, _jsonOptions);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -268,22 +276,47 @@ namespace AdminWeb.Areas.Admin.Data.Services
         {
             try
             {
-                // Lấy tất cả categories từ API rồi filter local
-                var allShipping = await GetAllShippingAsync();
+                var queryParams = new List<string>();
 
-                if (string.IsNullOrEmpty(searchModel.SearchTerm))
-                    return allShipping;
+                if (!string.IsNullOrEmpty(searchModel.RecipientName))
+                    queryParams.Add($"RecipientName={searchModel.RecipientName}");
+                if (!string.IsNullOrEmpty(searchModel.PhoneNumber))
+                    queryParams.Add($"PhoneNumber={searchModel.PhoneNumber}");
+                if (!string.IsNullOrEmpty(searchModel.Address))
+                    queryParams.Add($"Address={searchModel.Address}");
+                if (!string.IsNullOrEmpty(searchModel.City))
+                    queryParams.Add($"City={searchModel.City}");
+                if (!string.IsNullOrEmpty(searchModel.PostalCode))
+                    queryParams.Add($"PostalCode={searchModel.PostalCode}");
 
-                return allShipping
-                    .Where(c => c.Address.Contains(searchModel.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        c.City.Contains(searchModel.SearchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                // Phân trang
+                queryParams.Add($"PageNow={searchModel.PageNow}");
+                queryParams.Add($"PageSize={searchModel.PageSize}");
+
+                var url = $"{ApiConstants.ShippingApi}/search";
+                if (queryParams.Any())
+                    url += "?" + string.Join("&", queryParams);
+
+                Console.WriteLine($"📡 Calling Search API: {url}");
+
+                var response = await _httpClient.GetAsync(url);
+                var jsonContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiResponse = JsonSerializer.Deserialize<ApiResponse<List<Shipping>>>(jsonContent, _jsonOptions);
+                    return apiResponse?.Data ?? new List<Shipping>();
+                }
+
+                return new List<Shipping>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error searching categories: {ex.Message}");
+                Console.WriteLine($"❌ Error searching shippings: {ex.Message}");
                 return new List<Shipping>();
             }
         }
+
+
     }
 }

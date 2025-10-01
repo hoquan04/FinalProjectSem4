@@ -68,16 +68,32 @@ namespace AdminWeb.Areas.Admin.Controllers
             if (!response.Success || response.Data == null)
                 return NotFound(response.Message);
 
-            // Gửi danh sách trạng thái xuống view
+            var order = response.Data;
+
+            // Lấy User
+            var userService = HttpContext.RequestServices.GetRequiredService<UserService>();
+            var user = await userService.GetUserByIdAsync(order.UserId);
+
+            // Lấy Shipping
+            var shippingService = HttpContext.RequestServices.GetRequiredService<ShippingApiService>();
+            var shipping = await shippingService.GetShippingByIdAsync(order.ShippingId);
+
+            // Gửi dữ liệu xuống View
+            ViewBag.UserAndRecipient = $"{(user?.FullName ?? $"User #{order.UserId}")} - {(shipping?.RecipientName ?? $"Recipient #{order.ShippingId}")}";
+            ViewBag.ShippingAddress = shipping?.Address ?? "";
+
+
+            // Trạng thái
             ViewBag.statusList = new SelectList(
                 Enum.GetValues(typeof(OrderStatus))
                     .Cast<OrderStatus>()
                     .Select(s => new { Value = s, Text = s.ToString() }),
-                "Value", "Text", response.Data.Status
+                "Value", "Text", order.Status
             );
 
-            return View(response.Data);
+            return View(order);
         }
+
 
         // POST: /Admin/Order/Edit/5
         [HttpPost]

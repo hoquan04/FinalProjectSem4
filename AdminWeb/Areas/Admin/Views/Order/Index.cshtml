@@ -72,8 +72,8 @@
             {
                 <tr>
                     <td>@order.OrderId</td>
-                    <td>@order.Users?.FullName</td>
-                    <td>@order.Users?.Email</td>
+                    <td>@order.Shipping?.RecipientName</td>
+                    <td>@order.Shipping?.Email</td>
                     <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
                     <td>
                         @switch (order.Status)

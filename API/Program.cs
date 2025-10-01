@@ -60,6 +60,10 @@ builder.Services.AddScoped<ShippingService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+// Program.cs
+builder.Services.AddScoped<CheckoutRepository>();
 
 // ✅ JWT Auth
 var jwt = builder.Configuration.GetSection("Jwt");
