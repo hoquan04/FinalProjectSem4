@@ -27,30 +27,16 @@
         }
 
         <div class="row">
-            <form asp-action="Index" method="get">
-                <div class="col-sm-4">
-                    <div class="input-group">
-                        <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm..." class="input-sm form-control">
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="fa fa-search"></i> Tìm kiếm
-                            </button>
-                        </span>
-                    </div>
-                </div>
+            <form asp-action="Index" method="get" class="form-inline">
+                <input type="text" name="recipientName" value="@ViewBag.RecipientName" placeholder="Tên người nhận" class="form-control mr-2" />
+                <input type="text" name="phoneNumber" value="@ViewBag.PhoneNumber" placeholder="Số điện thoại" class="form-control mr-2" />
+                <input type="text" name="address" value="@ViewBag.Address" placeholder="Địa chỉ" class="form-control mr-2" />
+                <input type="text" name="city" value="@ViewBag.City" placeholder="Thành phố" class="form-control mr-2" />
+                <input type="text" name="postalCode" value="@ViewBag.PostalCode" placeholder="Mã bưu điện" class="form-control mr-2" />
 
-                <div class="col-sm-8 text-right">
-                    <a asp-action="Create" class="btn btn-primary">
-                        <i class="fa fa-plus"></i> Thêm mới
-                    </a>
-                    @if (!string.IsNullOrEmpty(ViewBag.SearchString))
-                    {
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="fa fa-list"></i> Xem tất cả
-                        </a>
-                    }
-                </div>
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
             </form>
+
         </div>
 
         @* Error từ API call *@
@@ -76,12 +62,16 @@
                     <tr>
                         <th>STT</th>
                         <th>ID</th>
+                        <th>Tên người nhận</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
                         <th>Địa chỉ</th>
-                        <th>Thành Phố</th>
-                        <th>Mã Bưu Chính</th>
-                        <th>Giá Vận Chuyển</th>
-                        <th>Ngày Dự Kiến</th>
-                        <th>Thao Tác</th>
+                        <th>Thành phố</th>
+                        <th>Mã bưu điện</th>
+                        <th>Phí vận chuyển</th>
+                        <th>Ngày dự kiến</th> 
+                        <th>Thao tác</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -94,21 +84,14 @@
                                 <td>
                                     <span class="badge badge-primary">@item.ShippingId</span>
                                 </td>
-                                <td>
-                                    <strong>@item.Address</strong>
-                                </td>
-                                <td>
-                                    <strong>@item.City</strong>
-                                </td>
-                                <td>
-                                    <strong>@item.PostalCode</strong>
-                                </td>
-                                <td>
-                                    <strong>@item.ShippingFee</strong>
-                                </td>
-                                <td>
-                                    <strong>@item.EstimatedDays</strong>
-                                </td>
+                                <td>@item.RecipientName</td>
+                                <td>@item.PhoneNumber</td>
+                                <td>@item.Email</td>
+                                <td>@item.Address</td>
+                                <td>@item.City</td>
+                                <td>@item.PostalCode</td>
+                                <td>@item.ShippingFee?.ToString("N0") ₫</td>
+                                <td>@item.EstimatedDays ngày</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a asp-action="Edit" asp-route-id="@item.ShippingId"

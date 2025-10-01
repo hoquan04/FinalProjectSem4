@@ -5,59 +5,65 @@ namespace AdminWeb.Areas.Admin.Models
     public class Shipping
     {
         public int ShippingId { get; set; }
-        public string? Address { get; set; }
+
+        // 👤 Người nhận
+        public string RecipientName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string? Email { get; set; }
+
+        // 📍 Địa chỉ
+        public string Address { get; set; } = string.Empty;
         public string? City { get; set; }
         public string? PostalCode { get; set; }
+
+        // 💰 Vận chuyển
         public decimal? ShippingFee { get; set; }
         public int? EstimatedDays { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class ShippingCreateModel
     {
-        [Required(ErrorMessage = "Địa chỉ giao hàng không được để trống")]
-        public string Address { get; set; }
+        [Required, StringLength(150)]
+        public string RecipientName { get; set; } = string.Empty;
 
-        [StringLength(100, ErrorMessage = "Tên thành phố tối đa 100 ký tự")]
+        [Required, Phone, StringLength(20)]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        [EmailAddress, StringLength(100)]
+        public string? Email { get; set; }
+
+        [Required]
+        public string Address { get; set; } = string.Empty;
+
+        [StringLength(100)]
         public string? City { get; set; }
 
-        [StringLength(20, ErrorMessage = "Mã bưu điện tối đa 20 ký tự")]
+        [StringLength(20)]
         public string? PostalCode { get; set; }
 
-        [Range(0, 9999999999.99, ErrorMessage = "Phí vận chuyển phải lớn hơn hoặc bằng 0")]
+        [Range(0, 9999999999.99)]
         public decimal? ShippingFee { get; set; }
 
-        [Range(1, 365, ErrorMessage = "Số ngày giao hàng ước tính phải từ 1 đến 365")]
+        [Range(1, 365)]
         public int? EstimatedDays { get; set; }
     }
 
-    public class ShippingEditModel
+    public class ShippingEditModel : ShippingCreateModel
     {
         public int ShippingId { get; set; }
-        [Required(ErrorMessage = "Địa chỉ giao hàng không được để trống")]
-        public string Address { get; set; }
-
-        [StringLength(100, ErrorMessage = "Tên thành phố tối đa 100 ký tự")]
-        public string? City { get; set; }
-
-        [StringLength(20, ErrorMessage = "Mã bưu điện tối đa 20 ký tự")]
-        public string? PostalCode { get; set; }
-
-        [Range(0, 9999999999.99, ErrorMessage = "Phí vận chuyển phải lớn hơn hoặc bằng 0")]
-        public decimal? ShippingFee { get; set; }
-
-        [Range(1, 365, ErrorMessage = "Số ngày giao hàng ước tính phải từ 1 đến 365")]
-        public int? EstimatedDays { get; set; }
     }
 
     public class ShippingSearchModel
     {
-        [Display(Name = "Từ khóa tìm kiếm")]
-        public string? SearchTerm { get; set; }
+        public string? RecipientName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Address { get; set; }
+        public string? City { get; set; }
+        public string? PostalCode { get; set; }
 
-        [Display(Name = "Trang hiện tại")]
         public int PageNow { get; set; } = 1;
-
-        [Display(Name = "Số bản ghi mỗi trang")]
         public int PageSize { get; set; } = 10;
     }
+
 }

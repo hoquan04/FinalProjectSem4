@@ -1,10 +1,7 @@
 using API.Models;
 using API.Models.DTOs;
-using API.Repositories.IRepositories;
 using API.Repositories.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 
 namespace API.Controllers
 {
@@ -39,19 +36,19 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateShipping([FromBody] ShippingCreateDto shippingDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Map DTO to Entity
             var shipping = new Shipping
             {
+                RecipientName = shippingDto.RecipientName,
+                PhoneNumber = shippingDto.PhoneNumber,
+                Email = shippingDto.Email,
                 Address = shippingDto.Address,
                 City = shippingDto.City,
                 PostalCode = shippingDto.PostalCode,
                 ShippingFee = shippingDto.ShippingFee,
-                EstimatedDays = shippingDto.EstimatedDays
+                EstimatedDays = shippingDto.EstimatedDays,
+                CreatedAt = DateTime.Now
             };
 
             var result = await _shippingService.CreateShippingAsync(shipping);
@@ -62,14 +59,13 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateShipping(int id, [FromBody] ShippingUpdateDto shippingDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Map DTO to Entity
             var shipping = new Shipping
             {
+                RecipientName = shippingDto.RecipientName,
+                PhoneNumber = shippingDto.PhoneNumber,
+                Email = shippingDto.Email,
                 Address = shippingDto.Address,
                 City = shippingDto.City,
                 PostalCode = shippingDto.PostalCode,
@@ -97,24 +93,22 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        // GET: api/Shipping/search?address=xxx&city=yyy
+        // GET: api/Shipping/search
+        // GET: api/Shipping/search
         [HttpGet("search")]
-        public async Task<IActionResult> SearchShippings([FromQuery] string? address, [FromQuery] string? city)
+        public async Task<IActionResult> SearchShippings([FromQuery] ShippingSearchDto searchDto)
         {
-            var result = await _shippingService.SearchShippingsAsync(address, city);
+            var result = await _shippingService.SearchShippingsAsync(searchDto);
             return Ok(result);
         }
 
-        // GET: api/Shipping/search/paged?address=xxx&city=yyy&pageNow=1&pageSize=10
+        // GET: api/Shipping/search/paged
         [HttpGet("search/paged")]
-        public async Task<IActionResult> SearchShippingsWithPagination(
-            [FromQuery] string? address,
-            [FromQuery] string? city,
-            [FromQuery] int pageNow = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> SearchShippingsWithPagination([FromQuery] ShippingSearchDto searchDto)
         {
-            var result = await _shippingService.SearchShippingsWithPaginationAsync(address, city, pageNow, pageSize);
+            var result = await _shippingService.SearchShippingsWithPaginationAsync(searchDto);
             return Ok(result);
         }
+
     }
 }

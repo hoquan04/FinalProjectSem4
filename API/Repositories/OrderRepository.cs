@@ -10,10 +10,12 @@ namespace API.Repositories
     public class OrderRepository : IOrderRepository
     {
         private readonly DataContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public OrderRepository(DataContext context)
+        public OrderRepository(DataContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         public async Task<APIRespone<Order>> AddAsync(Order entity)
@@ -101,7 +103,10 @@ namespace API.Repositories
 
         public async Task<APIRespone<Order>> UpdateAsync(int id, Order entity)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders
+                .Include(o => o.Shipping)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
             if (order == null)
             {
                 return new APIRespone<Order>
@@ -115,10 +120,33 @@ namespace API.Repositories
             _context.Entry(order).CurrentValues.SetValues(entity);
             await _context.SaveChangesAsync();
 
+            try
+            {
+                var email = order.Shipping?.Email;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    string subject = $"Cập nhật trạng thái đơn hàng #{order.OrderId}";
+                    string message = $@"
+                        <h3>Xin chào {order.Shipping?.RecipientName},</h3>
+                        <p>Đơn hàng <strong>#{order.OrderId}</strong> đã được cập nhật.</p>
+                        <p><b>Trạng thái mới:</b> {order.Status}</p>
+                        <p><b>Ngày đặt:</b> {order.OrderDate:dd/MM/yyyy}</p>
+                        <p><b>Tổng tiền:</b> {order.TotalAmount:N0} đ</p>
+                        <br/>
+                        <p>Cảm ơn bạn đã mua sắm tại cửa hàng!</p>";
+
+                    await _emailSender.SendEmailAsync(email, subject, message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi gửi email: {ex.Message}");
+            }
+
             return new APIRespone<Order>
             {
                 Success = true,
-                Message = "Cập nhật đơn hàng thành công",
+                Message = "Cập nhật đơn hàng thành công và đã gửi thông báo email",
                 Data = entity
             };
         }
@@ -188,8 +216,8 @@ namespace API.Repositories
                 {
                     // Nếu nhập chữ thì tìm theo tên KH, email, hoặc địa chỉ giao hàng
                     query = query.Where(o =>
-                        o.Users.FullName.ToLower().Contains(keyword) ||
-                        o.Users.Email.ToLower().Contains(keyword) ||
+                        o.Shipping.RecipientName.ToLower().Contains(keyword) ||
+                        o.Shipping.Email.ToLower().Contains(keyword) ||
                         o.Shipping.Address.ToLower().Contains(keyword)
                     );
                 }

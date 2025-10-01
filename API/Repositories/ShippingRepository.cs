@@ -22,16 +22,21 @@ namespace API.Repositories
             try
             {
                 var shippings = await _context.Shippings
-                    .Select(s => new Shipping
-                    {
-                        ShippingId = s.ShippingId,
-                        Address = s.Address,
-                        City = s.City,
-                        PostalCode = s.PostalCode,
-                        ShippingFee = s.ShippingFee,
-                        EstimatedDays = s.EstimatedDays
-                    })
-                    .ToListAsync();
+                 .Select(s => new Shipping
+                 {
+                     ShippingId = s.ShippingId,
+                     RecipientName = s.RecipientName,
+                     PhoneNumber = s.PhoneNumber,
+                     Email = s.Email,
+                     Address = s.Address,
+                     City = s.City,
+                     PostalCode = s.PostalCode,
+                     ShippingFee = s.ShippingFee,
+                     EstimatedDays = s.EstimatedDays,
+                     CreatedAt = s.CreatedAt
+                 })
+                .ToListAsync();
+
 
                 return new APIRespone<IEnumerable<Shipping>>
                 {
@@ -60,11 +65,15 @@ namespace API.Repositories
                     .Select(s => new Shipping
                     {
                         ShippingId = s.ShippingId,
+                        RecipientName = s.RecipientName,
+                        PhoneNumber = s.PhoneNumber,
+                        Email = s.Email,
                         Address = s.Address,
                         City = s.City,
                         PostalCode = s.PostalCode,
                         ShippingFee = s.ShippingFee,
-                        EstimatedDays = s.EstimatedDays
+                        EstimatedDays = s.EstimatedDays,
+                        CreatedAt = s.CreatedAt
                     })
                     .FirstOrDefaultAsync();
 
@@ -96,6 +105,7 @@ namespace API.Repositories
             }
         }
 
+
         public async Task<APIRespone<Shipping>> AddAsync(Shipping entity)
         {
             try
@@ -107,12 +117,17 @@ namespace API.Repositories
                 var createdShipping = new Shipping
                 {
                     ShippingId = entity.ShippingId,
+                    RecipientName = entity.RecipientName,
+                    PhoneNumber = entity.PhoneNumber,
+                    Email = entity.Email,
                     Address = entity.Address,
                     City = entity.City,
                     PostalCode = entity.PostalCode,
                     ShippingFee = entity.ShippingFee,
-                    EstimatedDays = entity.EstimatedDays
+                    EstimatedDays = entity.EstimatedDays,
+                    CreatedAt = entity.CreatedAt
                 };
+
 
                 return new APIRespone<Shipping>
                 {
@@ -146,12 +161,15 @@ namespace API.Repositories
                         Data = null
                     };
                 }
-
+                existingShipping.RecipientName = entity.RecipientName;
+                existingShipping.PhoneNumber = entity.PhoneNumber;
+                existingShipping.Email = entity.Email;
                 existingShipping.Address = entity.Address;
                 existingShipping.City = entity.City;
                 existingShipping.PostalCode = entity.PostalCode;
                 existingShipping.ShippingFee = entity.ShippingFee;
                 existingShipping.EstimatedDays = entity.EstimatedDays;
+
 
                 await _context.SaveChangesAsync();
 
@@ -236,20 +254,27 @@ namespace API.Repositories
         {
             try
             {
-                var totalCount = await _context.Shippings.CountAsync();
+                var query = _context.Shippings.AsQueryable();
+
+                var totalCount = await query.CountAsync();
                 var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
 
-                var shippings = await _context.Shippings
+                var shippings = await query
+                    .OrderByDescending(s => s.CreatedAt) // mới nhất lên trước
                     .Skip((pageNow - 1) * pageSize)
                     .Take(pageSize)
                     .Select(s => new Shipping
                     {
                         ShippingId = s.ShippingId,
+                        RecipientName = s.RecipientName,
+                        PhoneNumber = s.PhoneNumber,
+                        Email = s.Email,
                         Address = s.Address,
                         City = s.City,
                         PostalCode = s.PostalCode,
                         ShippingFee = s.ShippingFee,
-                        EstimatedDays = s.EstimatedDays
+                        EstimatedDays = s.EstimatedDays,
+                        CreatedAt = s.CreatedAt
                     })
                     .ToListAsync();
 
@@ -280,31 +305,43 @@ namespace API.Repositories
             }
         }
 
-        public async Task<APIRespone<IEnumerable<Shipping>>> SearchAsync(string? address, string? city)
+
+        public async Task<APIRespone<IEnumerable<Shipping>>> SearchAsync(
+     string? recipientName, string? phoneNumber, string? address, string? city, string? postalCode)
         {
             try
             {
                 var query = _context.Shippings.AsQueryable();
 
+                if (!string.IsNullOrEmpty(recipientName))
+                    query = query.Where(s => s.RecipientName.Contains(recipientName));
+
+                if (!string.IsNullOrEmpty(phoneNumber))
+                    query = query.Where(s => s.PhoneNumber.Contains(phoneNumber));
+
                 if (!string.IsNullOrEmpty(address))
-                {
                     query = query.Where(s => s.Address.Contains(address));
-                }
 
                 if (!string.IsNullOrEmpty(city))
-                {
                     query = query.Where(s => s.City != null && s.City.Contains(city));
-                }
+
+                if (!string.IsNullOrEmpty(postalCode))
+                    query = query.Where(s => s.PostalCode != null && s.PostalCode.Contains(postalCode));
 
                 var shippings = await query
+                    .OrderByDescending(s => s.CreatedAt)
                     .Select(s => new Shipping
                     {
                         ShippingId = s.ShippingId,
+                        RecipientName = s.RecipientName,
+                        PhoneNumber = s.PhoneNumber,
+                        Email = s.Email,
                         Address = s.Address,
                         City = s.City,
                         PostalCode = s.PostalCode,
                         ShippingFee = s.ShippingFee,
-                        EstimatedDays = s.EstimatedDays
+                        EstimatedDays = s.EstimatedDays,
+                        CreatedAt = s.CreatedAt
                     })
                     .ToListAsync();
 
@@ -326,37 +363,52 @@ namespace API.Repositories
             }
         }
 
+
         public async Task<APIRespone<PagedResponse<Shipping>>> SearchWithPaginationAsync(
-            string? address, string? city, int pageNow, int pageSize)
+     string? recipientName, string? phoneNumber, string? address, string? city, string? postalCode,
+     int pageNow, int pageSize)
         {
             try
             {
                 var query = _context.Shippings.AsQueryable();
 
+                // 🔍 Các điều kiện tìm kiếm
+                if (!string.IsNullOrEmpty(recipientName))
+                    query = query.Where(s => s.RecipientName.Contains(recipientName));
+
+                if (!string.IsNullOrEmpty(phoneNumber))
+                    query = query.Where(s => s.PhoneNumber.Contains(phoneNumber));
+
                 if (!string.IsNullOrEmpty(address))
-                {
                     query = query.Where(s => s.Address.Contains(address));
-                }
 
                 if (!string.IsNullOrEmpty(city))
-                {
                     query = query.Where(s => s.City != null && s.City.Contains(city));
-                }
 
+                if (!string.IsNullOrEmpty(postalCode))
+                    query = query.Where(s => s.PostalCode != null && s.PostalCode.Contains(postalCode));
+
+                // 📊 Đếm tổng số bản ghi
                 var totalCount = await query.CountAsync();
                 var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
 
+                // ⏩ Lấy dữ liệu phân trang
                 var shippings = await query
+                    .OrderByDescending(s => s.CreatedAt)
                     .Skip((pageNow - 1) * pageSize)
                     .Take(pageSize)
                     .Select(s => new Shipping
                     {
                         ShippingId = s.ShippingId,
+                        RecipientName = s.RecipientName,
+                        PhoneNumber = s.PhoneNumber,
+                        Email = s.Email,
                         Address = s.Address,
                         City = s.City,
                         PostalCode = s.PostalCode,
                         ShippingFee = s.ShippingFee,
-                        EstimatedDays = s.EstimatedDays
+                        EstimatedDays = s.EstimatedDays,
+                        CreatedAt = s.CreatedAt
                     })
                     .ToListAsync();
 
@@ -386,5 +438,6 @@ namespace API.Repositories
                 };
             }
         }
+
     }
 }
