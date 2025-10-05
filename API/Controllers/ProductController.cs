@@ -9,10 +9,12 @@ namespace API.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
+        private readonly IFavoriteRepository _favoriteRepository;
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, IFavoriteRepository favoriteRepository)
         {
             _productRepository = productRepository;
+            _favoriteRepository = favoriteRepository;
         }
 
         // GET: api/product
@@ -38,6 +40,40 @@ namespace API.Controllers
             var response = await _productRepository.GetByIdAsync(id);
             if (!response.Success) return NotFound(response);
             return Ok(response);
+        }
+
+        // GET: api/product/5/with-favorite-info?userId=1
+        [HttpGet("{id}/with-favorite-info")]
+        public async Task<IActionResult> GetByIdWithFavoriteInfo(int id, [FromQuery] int? userId = null)
+        {
+            var productResponse = await _productRepository.GetByIdAsync(id);
+            if (!productResponse.Success) return NotFound(productResponse);
+
+            // Lấy số lượng yêu thích
+            var favoriteCountResponse = await _favoriteRepository.GetFavoriteCountByProductIdAsync(id);
+            int favoriteCount = favoriteCountResponse.Success ? favoriteCountResponse.Data : 0;
+
+            // Kiểm tra user có yêu thích không (nếu có userId)
+            bool isFavorite = false;
+            if (userId.HasValue && userId.Value > 0)
+            {
+                var checkFavoriteResponse = await _favoriteRepository.CheckIsFavoriteAsync(userId.Value, id);
+                isFavorite = checkFavoriteResponse.Success && checkFavoriteResponse.Data;
+            }
+
+            var result = new
+            {
+                Success = productResponse.Success,
+                Message = productResponse.Message,
+                Data = new
+                {
+                    Product = productResponse.Data,
+                    FavoriteCount = favoriteCount,
+                    IsFavorite = isFavorite
+                }
+            };
+
+            return Ok(result);
         }
 
         // POST: api/product
