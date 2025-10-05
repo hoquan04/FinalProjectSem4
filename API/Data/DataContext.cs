@@ -20,6 +20,7 @@ namespace API.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Shipping> Shippings { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -114,6 +115,7 @@ namespace API.Data
                 .HasMany(s => s.Orders)
                 .WithOne(o => o.Shipping)
                 .HasForeignKey(o => o.ShippingId);
+
             // Cart
             modelBuilder.Entity<Cart>()
                 .HasOne(c => c.Users)
@@ -127,7 +129,24 @@ namespace API.Data
                 .HasForeignKey(c => c.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Notifications
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Notifications - FIX CASCADE CONFLICT
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Order)
+                .WithMany()
+                .HasForeignKey(n => n.OrderId)
+                .OnDelete(DeleteBehavior.NoAction);  // Đổi từ SetNull thành NoAction
+
+
+            // Index để tăng hiệu suất query thông báo
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
         }
     }
 }
