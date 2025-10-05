@@ -40,8 +40,16 @@ namespace API.Controllers
 
         // GET: api/category
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? page = null, [FromQuery] int? pageSize = null)
         {
+            // Nếu có tham số phân trang, trả về dữ liệu phân trang
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var pagedResponse = await _categoryRepository.GetPageAsync(page.Value, pageSize.Value);
+                return Ok(pagedResponse);
+            }
+            
+            // Nếu không có tham số phân trang, trả về tất cả như cũ
             var response = await _categoryRepository.GetAllAsync();
             return Ok(response);
         }
@@ -95,6 +103,40 @@ namespace API.Controllers
         {
             var response = await _categoryRepository.GetPageAsync(pageNow, pageSize);
             return Ok(response);
+        }
+
+        // GET: api/category/admin/page?pageNow=1&pageSize=10 - For AdminWeb
+        [HttpGet("admin/page")]
+        public async Task<IActionResult> GetPageForAdmin(int pageNow = 1, int pageSize = 10)
+        {
+            var response = await _categoryRepository.GetPageAsync(pageNow, pageSize);
+            
+            if (!response.Success)
+                return BadRequest(response);
+
+            // Convert Category to CategoryViewModel for AdminWeb
+            var categoryViewModels = response.Data.Data.Select(c => new
+            {
+                CategoryId = c.CategoryId,
+                Name = c.Name,
+                Description = c.Description
+            }).ToList();
+
+            var adminPagedResponse = new
+            {
+                Data = categoryViewModels,
+                PageNow = response.Data.PageNow,
+                PageSize = response.Data.PageSize,
+                TotalPage = response.Data.TotalPage,
+                TotalCount = response.Data.TotalCount
+            };
+
+            return Ok(new
+            {
+                Success = response.Success,
+                Data = adminPagedResponse,
+                Message = response.Message
+            });
         }
     }
 }

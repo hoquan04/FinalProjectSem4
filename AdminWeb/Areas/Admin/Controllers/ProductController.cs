@@ -19,34 +19,45 @@ namespace AdminWeb.Areas.Admin.Controllers
         /// <summary>
         /// GET: /Admin/Product - Hiển thị danh sách products
         /// </summary>
-        public async Task<IActionResult> Index(string? searchString, int? categoryId)
+        public async Task<IActionResult> Index(string? searchString, int? categoryId, int pageNow = 1, int pageSize = 2)
         {
             Console.WriteLine($"📋 [ProductController.Index] Bắt đầu - SearchString: {searchString}, CategoryId: {categoryId}");
             
             ViewBag.SearchString = searchString;
             ViewBag.CategoryId = categoryId;
+            ViewBag.PageNow = pageNow;
+            ViewBag.PageSize = pageSize;
 
             try
             {
-                List<ProductViewModel> products;
-
-                // Gọi API thông qua ProductService
-                if (!string.IsNullOrEmpty(searchString) || categoryId.HasValue)
+                PagedResponse<ProductViewModel> pagedProducts;
+                if (string.IsNullOrEmpty(searchString) && !categoryId.HasValue)
                 {
-                    Console.WriteLine("🔍 [ProductController.Index] Thực hiện tìm kiếm sản phẩm");
-                    var searchModel = new ProductSearchModel 
-                    { 
-                        SearchTerm = searchString,
-                        CategoryId = categoryId
-                    };
-                    products = await _productService.SearchProductsAsync(searchModel);
-                    Console.WriteLine($"✅ [ProductController.Index] Tìm kiếm hoàn tất. Tìm thấy {products.Count} sản phẩm");
+                    Console.WriteLine("📦 [ProductController.Index] Lấy tất cả sản phẩm");
+                    pagedProducts = await _productService.GetProductsPagedAsync(pageNow, pageSize);
+                    Console.WriteLine($"✅ [ProductController.Index] Lấy tất cả sản phẩm hoàn tất. Tổng: {pagedProducts.TotalCount} sản phẩm");
                 }
                 else
                 {
-                    Console.WriteLine("📦 [ProductController.Index] Lấy tất cả sản phẩm");
-                    products = await _productService.GetAllProductsAsync();
-                    Console.WriteLine($"✅ [ProductController.Index] Lấy tất cả sản phẩm hoàn tất. Tổng: {products.Count} sản phẩm");
+                    Console.WriteLine("🔍 [ProductController.Index] Thực hiện tìm kiếm sản phẩm");
+                    // Nếu có search/filter thì vẫn dùng logic cũ (hoặc có thể mở rộng phân trang cho search nếu muốn)
+                    var searchModel = new ProductSearchModel 
+                    { 
+                        SearchTerm = searchString,
+                        CategoryId = categoryId,
+                        PageNow = pageNow,
+                        PageSize = pageSize
+                    };
+                    var all = await _productService.SearchProductsAsync(searchModel);
+                    pagedProducts = new PagedResponse<ProductViewModel>
+                    {
+                        Data = all,
+                        PageNow = 1,
+                        PageSize = all.Count,
+                        TotalCount = all.Count,
+                        TotalPage = 1
+                    };
+                    Console.WriteLine($"✅ [ProductController.Index] Tìm kiếm hoàn tất. Tìm thấy {pagedProducts.TotalCount} sản phẩm");
                 }
 
                 // Lấy categories để hiển thị trong dropdown
@@ -55,7 +66,7 @@ namespace AdminWeb.Areas.Admin.Controllers
                 ViewBag.Categories = categories;
                 Console.WriteLine($"✅ [ProductController.Index] Lấy categories hoàn tất. Tổng: {categories.Count} categories");
 
-                return View(products);
+                return View(pagedProducts);
             }
             catch (Exception ex)
             {
@@ -63,7 +74,7 @@ namespace AdminWeb.Areas.Admin.Controllers
                 ViewBag.Error = $"Lỗi khi tải danh sách sản phẩm: {ex.Message}";
                 ViewBag.ErrorDetail = "Vui lòng kiểm tra API đã chạy chưa hoặc kết nối mạng.";
                 ViewBag.Categories = new List<CategoryViewModel>();
-                return View(new List<ProductViewModel>());
+                return View(new PagedResponse<ProductViewModel>());
             }
         }
 
