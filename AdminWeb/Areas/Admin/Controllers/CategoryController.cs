@@ -19,33 +19,44 @@ namespace AdminWeb.Areas.Admin.Controllers
         /// <summary>
         /// GET: /Admin/Category - Hiển thị danh sách categories
         /// </summary>
-        public async Task<IActionResult> Index(string? searchString)
+        public async Task<IActionResult> Index(string? searchString, int pageNow = 1, int pageSize = 2)
         {
             ViewBag.SearchString = searchString;
+            ViewBag.PageNow = pageNow;
+            ViewBag.PageSize = pageSize;
 
             try
             {
-                List<CategoryViewModel> categories;
+                PagedResponse<CategoryViewModel> pagedCategories;
 
-                // Gọi API thông qua CategoryService
                 if (!string.IsNullOrEmpty(searchString))
                 {
+                    // Nếu có search, dùng logic cũ
                     var searchModel = new CategorySearchModel { SearchTerm = searchString };
-                    categories = await _categoryService.SearchCategoriesAsync(searchModel);
+                    var searchResults = await _categoryService.SearchCategoriesAsync(searchModel);
+                    pagedCategories = new PagedResponse<CategoryViewModel>
+                    {
+                        Data = searchResults,
+                        PageNow = 1,
+                        PageSize = searchResults.Count,
+                        TotalCount = searchResults.Count,
+                        TotalPage = 1
+                    };
                 }
                 else
                 {
-                    categories = await _categoryService.GetAllCategoriesAsync();
+                    // Gọi API phân trang
+                    pagedCategories = await _categoryService.GetCategoriesPagedAsync(pageNow, pageSize);
                 }
 
-                return View(categories);
+                return View(pagedCategories);
             }
             catch (Exception ex)
             {
                 // Error handling
                 ViewBag.Error = $"Lỗi khi tải danh sách danh mục: {ex.Message}";
                 ViewBag.ErrorDetail = "Vui lòng kiểm tra API đã chạy chưa hoặc kết nối mạng.";
-                return View(new List<CategoryViewModel>());
+                return View(new PagedResponse<CategoryViewModel>());
             }
         }
 

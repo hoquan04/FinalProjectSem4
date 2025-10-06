@@ -386,5 +386,62 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 return new List<ProductViewModel>();
             }
         }
+
+        /// <summary>
+        /// 🚀 GET API - Lấy sản phẩm phân trang (PagedResponse)
+        /// </summary>
+        public async Task<PagedResponse<ProductViewModel>> GetProductsPagedAsync(int pageNow = 1, int pageSize = 10)
+        {
+            var url = $"{ApiConstants.ProductApi}/admin/page?pageNow={pageNow}&pageSize={pageSize}";
+            try
+            {
+                Console.WriteLine($"📡 [GetProductsPagedAsync] Calling API: {url}");
+                var response = await _httpClient.GetAsync(url);
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                
+                Console.WriteLine($"📊 [GetProductsPagedAsync] Response Status: {response.StatusCode}");
+                Console.WriteLine($"📨 [GetProductsPagedAsync] Response Content: {jsonContent}");
+                
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonContent))
+                {
+                    try
+                    {
+                        var apiResponse = JsonSerializer.Deserialize<ApiResponse<PagedResponse<ProductViewModel>>>(jsonContent, _jsonOptions);
+                        Console.WriteLine($"✅ [GetProductsPagedAsync] Deserialization Success: {apiResponse != null}");
+                        Console.WriteLine($"🎯 [GetProductsPagedAsync] API Success: {apiResponse?.Success}");
+                        Console.WriteLine($"📝 [GetProductsPagedAsync] API Message: {apiResponse?.Message}");
+                        Console.WriteLine($"📦 [GetProductsPagedAsync] Data Not Null: {apiResponse?.Data != null}");
+                        Console.WriteLine($"📦 [GetProductsPagedAsync] Data Count: {apiResponse?.Data?.Data?.Count ?? 0}");
+                        Console.WriteLine($"📄 [GetProductsPagedAsync] Page Info: {apiResponse?.Data?.PageNow}/{apiResponse?.Data?.TotalPage} (Total: {apiResponse?.Data?.TotalCount})");
+                        
+                        if (apiResponse?.Data?.Data != null && apiResponse.Data.Data.Any())
+                        {
+                            foreach (var product in apiResponse.Data.Data.Take(3))
+                            {
+                                Console.WriteLine($"   📦 Product: ID={product.ProductId}, Name={product.Name}");
+                            }
+                        }
+                        
+                        return apiResponse?.Data ?? new PagedResponse<ProductViewModel>();
+                    }
+                    catch (JsonException jsonEx)
+                    {
+                        Console.WriteLine($"❌ [GetProductsPagedAsync] JSON Parse Error: {jsonEx.Message}");
+                        Console.WriteLine($"❌ [GetProductsPagedAsync] Raw JSON for debugging: {jsonContent}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"❌ [GetProductsPagedAsync] Error Response: {response.StatusCode}");
+                    Console.WriteLine($"❌ [GetProductsPagedAsync] Error Content: {jsonContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [GetProductsPagedAsync] Exception: {ex.Message}");
+                Console.WriteLine($"❌ [GetProductsPagedAsync] Stack Trace: {ex.StackTrace}");
+            }
+            return new PagedResponse<ProductViewModel>();
+        }
     }
 }
