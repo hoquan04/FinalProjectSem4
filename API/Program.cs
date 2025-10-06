@@ -61,6 +61,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();  // ← Thêm dòng này
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -120,6 +121,7 @@ Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
 Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
 Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
+Console.WriteLine("❤️ Favorite API: http://localhost:7245/api/favorite");  // ← Thêm dòng này
 
 Console.WriteLine("📁 File Upload API: http://localhost:7245/api/file");
 

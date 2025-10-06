@@ -4,6 +4,7 @@ using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251005104943_AddFavoriteTable")]
+    partial class AddFavoriteTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,43 +155,15 @@ namespace API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FavoriteId"));
-            modelBuilder.Entity("API.Models.Notification", b =>
-                {
-                    b.Property<int>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ProductId")
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
-
 
                     b.HasKey("FavoriteId");
 
@@ -198,15 +173,6 @@ namespace API.Migrations
                         .IsUnique();
 
                     b.ToTable("Favorites");
-
-                    b.HasKey("NotificationId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("UserId", "IsRead", "CreatedAt");
-
-                    b.ToTable("Notifications");
-
                 });
 
             modelBuilder.Entity("API.Models.Order", b =>
@@ -621,7 +587,6 @@ namespace API.Migrations
                     b.Navigation("Users");
                 });
 
-
             modelBuilder.Entity("API.Models.Favorite", b =>
                 {
                     b.HasOne("API.Models.Product", "Product")
@@ -630,25 +595,13 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-            modelBuilder.Entity("API.Models.Notification", b =>
-                {
-                    b.HasOne("API.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-
                     b.HasOne("API.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-
                     b.Navigation("Product");
-
-                    b.Navigation("Order");
-
 
                     b.Navigation("User");
                 });
@@ -792,7 +745,7 @@ namespace API.Migrations
                 {
                     b.Navigation("OrderDetails");
 
-https://github.com/hoquan04/FinalProjectSem4/pull/14/conflict?name=API%252FData%252FDataContext.cs&ancestor_oid=aa1fc61affecb62fa03f0095572545c6415e0dd1&base_oid=774a97d27da1e2fa8ca5756f3d17f2b3a14eba98&head_oid=8363b4af90cc7a6252d37419c2df62f025f80ead                    b.Navigation("Payments");
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("API.Models.Product", b =>
