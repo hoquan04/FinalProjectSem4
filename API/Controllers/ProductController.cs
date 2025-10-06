@@ -17,8 +17,16 @@ namespace API.Controllers
 
         // GET: api/product
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? page = null, [FromQuery] int? pageSize = null)
         {
+            // Nếu có tham số phân trang, trả về dữ liệu phân trang
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var pagedResponse = await _productRepository.GetPageAsync(page.Value, pageSize.Value);
+                return Ok(pagedResponse);
+            }
+            
+            // Nếu không có tham số phân trang, trả về tất cả như cũ
             var response = await _productRepository.GetAllAsync();
             return Ok(response);
         }
@@ -96,6 +104,50 @@ namespace API.Controllers
         {
             var response = await _productRepository.SearchProductsAsync(term);
             return Ok(response);
+        }
+
+        // GET: api/product/admin/page?pageNow=1&pageSize=10 - For AdminWeb
+        [HttpGet("admin/page")]
+        public async Task<IActionResult> GetPageForAdmin(int pageNow = 1, int pageSize = 10)
+        {
+            var response = await _productRepository.GetPageAsync(pageNow, pageSize);
+            
+            if (!response.Success)
+                return BadRequest(response);
+
+            // Convert Product to ProductViewModel for AdminWeb
+            var productViewModels = response.Data.Data.Select(p => new
+            {
+                ProductId = p.ProductId,
+                CategoryId = p.CategoryId,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                ImageUrl = p.ImageUrl,
+                CreatedAt = p.CreatedAt,
+                Category = p.Category != null ? new
+                {
+                    CategoryId = p.Category.CategoryId,
+                    Name = p.Category.Name
+                } : null
+            }).ToList();
+
+            var adminPagedResponse = new
+            {
+                Data = productViewModels,
+                PageNow = response.Data.PageNow,
+                PageSize = response.Data.PageSize,
+                TotalPage = response.Data.TotalPage,
+                TotalCount = response.Data.TotalCount
+            };
+
+            return Ok(new
+            {
+                Success = response.Success,
+                Data = adminPagedResponse,
+                Message = response.Message
+            });
         }
     }
 }
