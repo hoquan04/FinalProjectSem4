@@ -21,7 +21,7 @@ namespace AdminWeb.Areas.Admin.Controllers
         /// </summary>
         public async Task<IActionResult> Index(string? searchString, int? categoryId)
         {
-            Console.WriteLine($"📋 [ProductController.Index] Bắt đầu - SearchString: {searchString}, CategoryId: {categoryId}");
+            Console.WriteLine($"📋 [ProductController.Ind    qex] Bắt đầu - SearchString: {searchString}, CategoryId: {categoryId}");
             
             ViewBag.SearchString = searchString;
             ViewBag.CategoryId = categoryId;
