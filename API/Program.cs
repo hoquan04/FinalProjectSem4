@@ -18,6 +18,7 @@ builder.Services.AddControllers()
         o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+builder.Services.AddHttpContextAccessor();
 
 // ✅ Swagger + JWT config
 builder.Services.AddEndpointsApiExplorer();
@@ -68,6 +69,8 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 // Program.cs
 builder.Services.AddScoped<CheckoutRepository>();
 
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
+
 // ✅ JWT Auth
 var jwt = builder.Configuration.GetSection("Jwt");
 var keyBytes = Encoding.UTF8.GetBytes(jwt["Key"] ?? "change_me_32_chars_please");
@@ -115,7 +118,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.Urls.Add("http://localhost:7245");
+//app.Urls.Add("http://localhost:7245");
+app.Urls.Add("http://0.0.0.0:7245");
 
 Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");

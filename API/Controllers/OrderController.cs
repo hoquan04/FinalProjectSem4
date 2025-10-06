@@ -80,5 +80,15 @@ namespace API.Controllers
             var result = await _orderRepository.Search(pageNow, pageSize, search);
             return Ok(result);
         }
+
+        // GET: api/Order/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<APIRespone<IEnumerable<Order>>>> GetByUserId(int userId)
+        {
+            var result = await _orderRepository.GetByUserIdAsync(userId);
+            if (!result.Success) return NotFound(result);
+            return Ok(result);
+        }
+
     }
 }

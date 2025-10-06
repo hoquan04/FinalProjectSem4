@@ -15,7 +15,8 @@ namespace AdminWeb.Areas.Admin.Controllers
         }
 
         // Danh sách
-        public async Task<IActionResult> Index(string? recipientName, string? phoneNumber, string? address, string? city, string? postalCode)
+        public async Task<IActionResult> Index(int pageNow = 1, int pageSize = 10,
+    string? recipientName = null, string? phoneNumber = null, string? address = null, string? city = null, string? postalCode = null)
         {
             ViewBag.RecipientName = recipientName;
             ViewBag.PhoneNumber = phoneNumber;
@@ -25,7 +26,7 @@ namespace AdminWeb.Areas.Admin.Controllers
 
             try
             {
-                List<Shipping> shippings;
+                PagedResponse<Shipping> pagedResult;
 
                 if (!string.IsNullOrEmpty(recipientName) || !string.IsNullOrEmpty(phoneNumber)
                     || !string.IsNullOrEmpty(address) || !string.IsNullOrEmpty(city)
@@ -37,25 +38,27 @@ namespace AdminWeb.Areas.Admin.Controllers
                         PhoneNumber = phoneNumber,
                         Address = address,
                         City = city,
-                        PostalCode = postalCode
+                        PostalCode = postalCode,
+                        PageNow = pageNow,
+                        PageSize = pageSize
                     };
 
-                    shippings = await _shippingApiService.SearchShippingAsync(searchModel);
+                    pagedResult = await _shippingApiService.SearchPagedShippingAsync(searchModel);
                 }
                 else
                 {
-                    shippings = await _shippingApiService.GetAllShippingAsync();
+                    pagedResult = await _shippingApiService.GetPagedShippingAsync(pageNow, pageSize);
                 }
 
-                return View(shippings);
+                return View(pagedResult);
             }
             catch (Exception ex)
             {
                 ViewBag.Error = $"Lỗi khi tải danh sách shipping: {ex.Message}";
-                ViewBag.ErrorDetail = "Vui lòng kiểm tra API đã chạy chưa hoặc kết nối mạng.";
-                return View(new List<Shipping>());
+                return View(new PagedResponse<Shipping>() { Data = new List<Shipping>() });
             }
         }
+
 
 
         // GET: Create

@@ -248,17 +248,14 @@ namespace AdminWeb.Areas.Admin.Data.Services
         {
             try
             {
-                var url = $"{ApiConstants.ShippingApi}/page?pageNow={pageNow}&pageSize={pageSize}";
+                var url = $"{ApiConstants.ShippingApi}/paged?pageNow={pageNow}&pageSize={pageSize}";
                 Console.WriteLine($"📡 Calling GET Paged API: {url}");
 
                 var response = await _httpClient.GetAsync(url);
                 var jsonContent = await response.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"📊 Response Status: {response.StatusCode}");
-
                 if (response.IsSuccessStatusCode)
                 {
-                    // Parse response từ API: APIRespone<PagedResponse<Shipping>>
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse<PagedResponse<Shipping>>>(jsonContent, _jsonOptions);
                     return apiResponse?.Data ?? new PagedResponse<Shipping>();
                 }
@@ -270,6 +267,36 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 Console.WriteLine($"❌ Error calling GET Paged API: {ex.Message}");
                 return new PagedResponse<Shipping>();
             }
+        }
+
+        public async Task<PagedResponse<Shipping>> SearchPagedShippingAsync(ShippingSearchModel searchModel)
+        {
+            var queryParams = new List<string>();
+            if (!string.IsNullOrEmpty(searchModel.RecipientName))
+                queryParams.Add($"RecipientName={searchModel.RecipientName}");
+            if (!string.IsNullOrEmpty(searchModel.PhoneNumber))
+                queryParams.Add($"PhoneNumber={searchModel.PhoneNumber}");
+            if (!string.IsNullOrEmpty(searchModel.Address))
+                queryParams.Add($"Address={searchModel.Address}");
+            if (!string.IsNullOrEmpty(searchModel.City))
+                queryParams.Add($"City={searchModel.City}");
+            if (!string.IsNullOrEmpty(searchModel.PostalCode))
+                queryParams.Add($"PostalCode={searchModel.PostalCode}");
+
+            queryParams.Add($"PageNow={searchModel.PageNow}");
+            queryParams.Add($"PageSize={searchModel.PageSize}");
+
+            var url = $"{ApiConstants.ShippingApi}/search/paged?{string.Join("&", queryParams)}";
+
+            var response = await _httpClient.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<PagedResponse<Shipping>>>(json, _jsonOptions);
+                return apiResponse?.Data ?? new PagedResponse<Shipping>();
+            }
+            return new PagedResponse<Shipping>();
         }
 
         public async Task<List<Shipping>> SearchShippingAsync(ShippingSearchModel searchModel)

@@ -1,60 +1,14 @@
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@model List<AdminWeb.Areas.Admin.Models.Shipping>
+@using AdminWeb.Areas.Admin.Models
+@model PagedResponse<Shipping>
+
 @{
     ViewData["Title"] = "Danh sách shipping";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
-    int stt = 1;
+    int stt = 1 + (Model.PageNow - 1) * Model.PageSize; // để số thứ tự đúng trang
 }
+
 <div class="col-lg-12">
     <div class="ibox-content">
-
-        @* 🚀 Success/Error Messages *@
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissable">
-                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                <i class="fa fa-check"></i> @TempData["SuccessMessage"]
-            </div>
-        }
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissable">
-                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                <i class="fa fa-times"></i> @TempData["ErrorMessage"]
-            </div>
-        }
-
-        <div class="row">
-            <form asp-action="Index" method="get" class="form-inline">
-                <input type="text" name="recipientName" value="@ViewBag.RecipientName" placeholder="Tên người nhận" class="form-control mr-2" />
-                <input type="text" name="phoneNumber" value="@ViewBag.PhoneNumber" placeholder="Số điện thoại" class="form-control mr-2" />
-                <input type="text" name="address" value="@ViewBag.Address" placeholder="Địa chỉ" class="form-control mr-2" />
-                <input type="text" name="city" value="@ViewBag.City" placeholder="Thành phố" class="form-control mr-2" />
-                <input type="text" name="postalCode" value="@ViewBag.PostalCode" placeholder="Mã bưu điện" class="form-control mr-2" />
-
-                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-            </form>
-
-        </div>
-
-        @* Error từ API call *@
-        @if (!string.IsNullOrEmpty(ViewBag.Error))
-        {
-            <div class="alert alert-danger mt-3">
-                <strong><i class="fa fa-exclamation-triangle"></i> @ViewBag.Error</strong>
-                @if (!string.IsNullOrEmpty(ViewBag.ErrorDetail))
-                {
-                    <br>
-            
-                    <small>@ViewBag.ErrorDetail</small>
-                }
-                <br><small class="text-muted">
-                    <strong>Hướng dẫn:</strong> Đảm bảo API đang chạy tại <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ShippingApi</code>
-                </small>
-            </div>
-        }
 
         <div class="table-responsive mt-3">
             <table class="table table-striped">
@@ -69,21 +23,18 @@
                         <th>Thành phố</th>
                         <th>Mã bưu điện</th>
                         <th>Phí vận chuyển</th>
-                        <th>Ngày dự kiến</th> 
+                        <th>Ngày dự kiến</th>
                         <th>Thao tác</th>
-
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null && Model.Any())
+                    @if (Model.Data != null && Model.Data.Any())
                     {
-                        @foreach (var item in Model)
+                        foreach (var item in Model.Data)
                         {
                             <tr>
                                 <td>@(stt++)</td>
-                                <td>
-                                    <span class="badge badge-primary">@item.ShippingId</span>
-                                </td>
+                                <td><span class="badge badge-primary">@item.ShippingId</span></td>
                                 <td>@item.RecipientName</td>
                                 <td>@item.PhoneNumber</td>
                                 <td>@item.Email</td>
@@ -94,12 +45,10 @@
                                 <td>@item.EstimatedDays ngày</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a asp-action="Edit" asp-route-id="@item.ShippingId"
-                                           class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                        <a asp-action="Edit" asp-route-id="@item.ShippingId" class="btn btn-sm btn-warning">
                                             <i class="fa fa-edit"></i> Sửa
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.ShippingId"
-                                           class="btn btn-sm btn-danger" title="Xóa">
+                                        <a asp-action="Delete" asp-route-id="@item.ShippingId" class="btn btn-sm btn-danger">
                                             <i class="fa fa-trash"></i> Xóa
                                         </a>
                                     </div>
@@ -110,53 +59,36 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center py-4">
-                                @if (!string.IsNullOrEmpty(ViewBag.SearchString))
-                                {
-                                    <div class="alert alert-info">
-                                        <i class="fa fa-info-circle"></i>
-                                        Không tìm thấy shipping nào phù hợp với từ khóa "<strong>@ViewBag.SearchString</strong>"
-                                    </div>
-                                }
-                                else if (!string.IsNullOrEmpty(ViewBag.Error))
-                                {
-                                    <div class="alert alert-warning">
-                                        <i class="fa fa-exclamation-triangle"></i>
-                                        Không thể tải danh sách shipping
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="alert alert-info">
-                                        <i class="fa fa-info-circle"></i>
-                                        Chưa có shipping nào.
-
-                                    </div>
-                                }
-                            </td>
+                            <td colspan="11" class="text-center">Không có shipping nào</td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
 
-        @* Footer info *@
-        @if (Model != null && Model.Any())
-        {
-            <div class="row mt-3">
-                <div class="col-sm-6">
-                    <small class="text-muted">
-                        <i class="fa fa-info-circle"></i>
-                        Hiển thị <strong>@Model.Count</strong> shipping
-                        @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+        <div class="row mt-3">
+            <div class="col-sm-6">
+                <nav>
+                    <ul class="pagination mb-0">
+                        @for (int i = 1; i <= Model.TotalPage; i++)
                         {
-                            <span>cho từ khóa "<strong>@ViewBag.SearchString</strong>"</span>
+                            <li class="page-item @(i == Model.PageNow ? "active" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pageNow="@i"
+                                   asp-route-pageSize="@Model.PageSize">@i</a>
+                            </li>
                         }
-                    </small>
-                </div>
-                <div class="col-sm-6 text-right">
-                </div>
+                    </ul>
+                </nav>
             </div>
-        }
+            <div class="col-sm-6 text-right">
+                <small class="text-muted">
+                    <i class="fa fa-info-circle"></i>
+                    Trang <strong>@Model.PageNow</strong> / <strong>@Model.TotalPage</strong>
+                    (Hiển thị <strong>@Model.Data.Count()</strong> / <strong>@Model.TotalCount</strong> shipping)
+                </small>
+            </div>
+        </div>
+
     </div>
 </div>
