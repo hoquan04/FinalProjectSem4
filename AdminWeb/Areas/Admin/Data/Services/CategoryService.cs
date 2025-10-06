@@ -1,4 +1,4 @@
-﻿using AdminWeb.Areas.Admin.Models;
+using AdminWeb.Areas.Admin.Models;
 using System.Text;
 using System.Text.Json;
 
@@ -275,6 +275,48 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 Console.WriteLine($"❌ Error calling GET Paged API: {ex.Message}");
                 return new PagedResponse<CategoryViewModel>();
             }
+        }
+
+        /// <summary>
+        /// 🚀 GET API - Lấy categories phân trang (PagedResponse) cho AdminWeb
+        /// </summary>
+        public async Task<PagedResponse<CategoryViewModel>> GetCategoriesPagedAsync(int pageNow = 1, int pageSize = 10)
+        {
+            var url = $"{ApiConstants.CategoryApi}/admin/page?pageNow={pageNow}&pageSize={pageSize}";
+            try
+            {
+                Console.WriteLine($"📡 [GetCategoriesPagedAsync] Calling API: {url}");
+                var response = await _httpClient.GetAsync(url);
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                
+                Console.WriteLine($"📊 [GetCategoriesPagedAsync] Response Status: {response.StatusCode}");
+                Console.WriteLine($"📨 [GetCategoriesPagedAsync] Response Content: {jsonContent}");
+                
+                if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonContent))
+                {
+                    try
+                    {
+                        var apiResponse = JsonSerializer.Deserialize<ApiResponse<PagedResponse<CategoryViewModel>>>(jsonContent, _jsonOptions);
+                        Console.WriteLine($"✅ [GetCategoriesPagedAsync] API Success: {apiResponse?.Success}");
+                        Console.WriteLine($"📦 [GetCategoriesPagedAsync] Data Count: {apiResponse?.Data?.Data?.Count ?? 0}");
+                        Console.WriteLine($"📄 [GetCategoriesPagedAsync] Page Info: {apiResponse?.Data?.PageNow}/{apiResponse?.Data?.TotalPage} (Total: {apiResponse?.Data?.TotalCount})");
+                        return apiResponse?.Data ?? new PagedResponse<CategoryViewModel>();
+                    }
+                    catch (JsonException jsonEx)
+                    {
+                        Console.WriteLine($"❌ [GetCategoriesPagedAsync] JSON Parse Error: {jsonEx.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"❌ [GetCategoriesPagedAsync] Error Response: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [GetCategoriesPagedAsync] Exception: {ex.Message}");
+            }
+            return new PagedResponse<CategoryViewModel>();
         }
 
         /// <summary>

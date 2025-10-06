@@ -1,4 +1,5 @@
-@model List<AdminWeb.Areas.Admin.Models.CategoryViewModel>
+@using AdminWeb.Areas.Admin.Models
+@model PagedResponse<AdminWeb.Areas.Admin.Models.CategoryViewModel>
 @{
     ViewData["Title"] = "Danh sách danh mục";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -26,9 +27,9 @@
         
         <div class="row">
             <form asp-action="Index" method="get">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="input-group">
-                        <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm..." class="input-sm form-control">
+                        <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm danh mục..." class="input-sm form-control">
                         <span class="input-group-btn">
                             <button type="submit" class="btn btn-sm btn-primary">
                                 <i class="fa fa-search"></i> Tìm kiếm
@@ -37,7 +38,16 @@
                     </div>
                 </div>
 
-                <div class="col-sm-8 text-right">
+                <div class="col-sm-2">
+                    <select name="pageSize" class="form-control input-sm" onchange="this.form.submit()">
+                        <option value="2" selected="@(ViewBag.PageSize == 2)">2 danh mục/trang</option>
+                        <option value="5" selected="@(ViewBag.PageSize == 5)">5 danh mục/trang</option>
+                        <option value="10" selected="@(ViewBag.PageSize == 10)">10 danh mục/trang</option>
+                        <option value="20" selected="@(ViewBag.PageSize == 20)">20 danh mục/trang</option>
+                    </select>
+                </div>
+
+                <div class="col-sm-7 text-right">
                     <a asp-action="Create" class="btn btn-primary">
                         <i class="fa fa-plus"></i> Thêm mới
                     </a>
@@ -78,9 +88,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null && Model.Any())
+                    @if (Model?.Data != null && Model.Data.Any())
                     {
-                        @foreach (var item in Model)
+                        foreach (var item in Model.Data)
                         {
                             <tr>
                                 <td>@(stt++)</td>
@@ -148,14 +158,37 @@
             </table>
         </div>
 
+        <!-- 📌 Phân trang -->
+        @if (Model != null && Model.TotalPage > 1)
+        {
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item @(Model.PageNow == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pageNow="@(Model.PageNow - 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchString="@ViewBag.SearchString">«</a>
+                    </li>
+
+                    @for (int i = 1; i <= Model.TotalPage; i++)
+                    {
+                        <li class="page-item @(Model.PageNow == i ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pageNow="@i" asp-route-pageSize="@Model.PageSize" asp-route-searchString="@ViewBag.SearchString">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(Model.PageNow == Model.TotalPage ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pageNow="@(Model.PageNow + 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchString="@ViewBag.SearchString">»</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+
         @* Footer info *@
-        @if (Model != null && Model.Any())
+        @if (Model?.Data != null && Model.Data.Any())
         {
             <div class="row mt-3">
                 <div class="col-sm-6">
                     <small class="text-muted">
                         <i class="fa fa-info-circle"></i>
-                        Hiển thị <strong>@Model.Count</strong> danh mục
+                        Hiển thị <strong>@Model.Data.Count</strong> danh mục trên trang @Model.PageNow/@Model.TotalPage (Tổng: @Model.TotalCount danh mục)
                         @if (!string.IsNullOrEmpty(ViewBag.SearchString))
                         {
                             <span>cho từ khóa "<strong>@ViewBag.SearchString</strong>"</span>
