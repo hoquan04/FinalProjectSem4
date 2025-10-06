@@ -63,6 +63,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();  // ← Thêm dòng này
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 // Program.cs
 builder.Services.AddScoped<CheckoutRepository>();
 
