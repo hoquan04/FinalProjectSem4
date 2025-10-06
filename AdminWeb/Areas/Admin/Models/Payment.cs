@@ -1,4 +1,4 @@
-﻿namespace AdminWeb.Areas.Admin.Models
+namespace AdminWeb.Areas.Admin.Models
 {
     public class Payment
     {
@@ -18,7 +18,8 @@
         CashOnDelivery,
         CreditCard,
         Momo,
-        BankTransfer
+        BankTransfer,
+        VNPay
     }
 
     public enum PaymentStatus

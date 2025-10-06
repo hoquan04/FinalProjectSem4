@@ -35,7 +35,8 @@ namespace API.Models
         CashOnDelivery,
         CreditCard,
         Momo,
-        BankTransfer
+        BankTransfer,
+        VNPay
     }
 
     public enum PaymentStatus

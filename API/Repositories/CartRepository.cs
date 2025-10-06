@@ -3,6 +3,7 @@ using API.Models;
 using API.Models.DTOs;
 using API.Repositories.IRepositories;
 using API.Repositories.RestAPI;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
@@ -29,7 +30,10 @@ namespace API.Repositories
                     ProductName = c.Product.Name,
                     ImageUrl = c.Product.ImageUrl,
                     Price = c.Product.Price,
-                    Quantity = c.Quantity
+                    Quantity = c.Quantity,
+                    Description = c.Product.Description,
+                    StockQuantity = c.Product.StockQuantity,
+                    CreatedAt = c.Product.CreatedAt
                 }).ToListAsync();
 
             return new APIRespone<IEnumerable<CartDto>>
@@ -39,6 +43,7 @@ namespace API.Repositories
                 Data = data
             };
         }
+
 
         // Thêm vào giỏ hàng
         public async Task<APIRespone<CartDto>> AddToCartAsync(int userId, int productId, int quantity)
@@ -166,5 +171,6 @@ namespace API.Repositories
                 }
             };
         }
+      
     }
 }

@@ -273,6 +273,23 @@ namespace API.Repositories
                 Data = response
             };
         }
+        public async Task<APIRespone<IEnumerable<Order>>> GetByUserIdAsync(int userId)
+        {
+            var orders = await _context.Orders
+                .Include(o => o.Shipping)
+                .Include(o => o.OrderDetails).ThenInclude(od => od.Product)
+                .Include(o => o.Payments)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return new APIRespone<IEnumerable<Order>>
+            {
+                Success = true,
+                Message = "Lấy lịch sử đơn hàng theo UserId thành công",
+                Data = orders
+            };
+        }
 
     }
 }
