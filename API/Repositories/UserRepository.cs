@@ -48,11 +48,14 @@ namespace API.Repositories
                 model.Password = null; // clear input
             }
 
-            // Nếu Role chưa set (giá trị mặc định 0 = Customer), ép thành Admin
-            if (model.Role == 0)
+            
+            // Nếu chưa chọn vai trò (ví dụ null hoặc không gửi lên), mặc định là Customer
+            // Không được tự động ép sang Admin
+            if (!Enum.IsDefined(typeof(UserRole), model.Role))
             {
-                model.Role = UserRole.Admin;
+                model.Role = UserRole.Customer;
             }
+
 
             _context.Users.Add(model);
             await _context.SaveChangesAsync();
