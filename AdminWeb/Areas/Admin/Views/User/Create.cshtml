@@ -1,4 +1,4 @@
-﻿@model AdminWeb.Areas.Admin.Models.UserCreateModel
+@model AdminWeb.Areas.Admin.Models.UserCreateModel
 @{
     ViewData["Title"] = "Thêm người dùng mới";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -74,9 +74,10 @@
                         <div class="col-sm-10">
                             <select asp-for="Role" class="form-control">
                                 <option value="">-- Chọn vai trò --</option>
-                                <option value="admin">Quản trị</option>
-                                <option value="user">Người dùng</option>
+                                <option value="Admin">Quản trị</option>
+                                <option value="Customer">Người dùng</option>
                             </select>
+
                             <span asp-validation-for="Role" class="text-danger"></span>
                         </div>
                     </div>
@@ -127,15 +128,20 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-
     <script>
         $(document).ready(function () {
-            $('#userForm').on('submit', function () {
+            $('#userForm').on('submit', function (e) {
+                // nếu form không hợp lệ -> chặn submit
+                if (!$(this).valid()) {
+                    e.preventDefault();
+                    return;
+                }
+
                 var $btn = $('#btnSubmit');
                 $btn.prop('disabled', true)
                     .html('<i class="fa fa-spinner fa-spin"></i> Đang gửi API...');
-                // Form sẽ submit bình thường, không cần AJAX nếu API trả response đúng
             });
         });
     </script>
+
 }

@@ -23,7 +23,7 @@ namespace API.Models
             // Lưu trong DB, không bind từ JSON, không trả ra JSON
             [BindNever]                 // ⬅️ quan trọng: model binder bỏ qua => không bị validate [Required]
             [JsonIgnore]                // không serialize ra JSON
-            [Required, StringLength(255)]
+            [StringLength(255)]
             public string PasswordHash { get; set; } = string.Empty;
 
             public string? Address { get; set; }
