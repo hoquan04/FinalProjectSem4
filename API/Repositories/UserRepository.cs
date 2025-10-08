@@ -41,54 +41,55 @@ namespace API.Repositories
         {
             var response = new APIRespone<User>();
 
-            // Nếu truyền Password thì hash
-            if (!string.IsNullOrWhiteSpace(model.Password))
-            {
-                model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
-                model.Password = null; // clear input
-            }
+            // ✅ Bắt buộc có password khi tạo
+            if (string.IsNullOrWhiteSpace(model.Password))
+                return new APIRespone<User>
+                {
+                    Success = false,
+                    Message = "Password là bắt buộc"
+                };
 
-            // Nếu Role chưa set (giá trị mặc định 0 = Customer), ép thành Admin
-            if (model.Role == 0)
-            {
-                model.Role = UserRole.Admin;
-            }
+            // (khuyến nghị) chặn trùng email
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
+                return new APIRespone<User>
+                {
+                    Success = false,
+                    Message = "Email đã tồn tại"
+                };
+
+            // ✅ Hash
+            model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            model.Password = null;
+
+            // ✅ KHÔNG auto nâng quyền; giữ nguyên model.Role gửi từ UI
+            // ✅ CreatedAt: có default ở entity (UtcNow), có thể để nguyên
 
             _context.Users.Add(model);
             await _context.SaveChangesAsync();
 
-            // Không trả hash ra ngoài
+            // Không cần set rỗng vì đã JsonIgnore, nhưng giữ cũng không sao
             model.PasswordHash = string.Empty;
 
             response.Data = model;
             response.Success = true;
-            response.Message = "Thêm người dùng thành công (Admin mặc định)";
+            response.Message = "Thêm người dùng thành công";
             return response;
         }
 
         public async Task<APIRespone<User>> UpdateUserAsync(int id, User model)
         {
-            var response = new APIRespone<User>();
             var user = await _context.Users.FindAsync(id);
             if (user == null)
-            {
-                response.Success = false;
-                response.Message = "Không tìm thấy người dùng";
-                return response;
-            }
+                return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
 
             user.FullName = model.FullName;
             user.Email = model.Email;
             user.Phone = model.Phone;
             user.Address = model.Address;
-            //user.PasswordHash = model.PasswordHash;
-            //user.Role = model.Role;
+            user.Role = model.Role;   // ✅ Cho phép đổi quyền từ UI admin
 
             await _context.SaveChangesAsync();
-            response.Data = user;
-            response.Success = true;
-            response.Message = "Cập nhật thành công";
-            return response;
+            return new APIRespone<User> { Success = true, Data = user, Message = "Cập nhật thành công" };
         }
 
         public async Task<APIRespone<bool>> DeleteUserAsync(int id)

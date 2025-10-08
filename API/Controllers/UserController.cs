@@ -1,96 +1,88 @@
-﻿
-using API.Data;
 using API.Models;
 using API.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
 {
-    [ApiController] // Đánh dấu là API Controller
-    [Route("api/[controller]")] // => route mặc định: api/user
-    public class UserController : ControllerBase
+    private readonly IUserRepository _userRepository;
+    public UserController(IUserRepository userRepository) { _userRepository = userRepository; }
+
+    // Tùy bạn: chỉ Admin mới xem danh sách người dùng?
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
     {
-        private readonly IUserRepository _userRepository;
-        //private readonly DataContext _context;
+        var response = await _userRepository.GetAllUsersAsync();
+        return Ok(response);
+    }
 
-        // Inject repository và DataContext
-        public UserController(IUserRepository userRepository)
-        {
-            _userRepository = userRepository;
-            //_context = context;
-        }
+    [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var response = await _userRepository.GetUserByIdAsync(id);
+        if (!response.Success || response.Data == null) return NotFound(response);
+        return Ok(response);
+    }
 
-        // GET: api/user
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var response = await _userRepository.GetAllUsersAsync();
-            return Ok(response);
-        }
+    [HttpPost]
+    [Authorize(Roles = "Admin")] // ✅ chỉ Admin được tạo và chọn Role
+    public async Task<IActionResult> Create([FromBody] User model)
+    {
+        // ✅ Không validate PasswordHash (đã BindNever + nullable nhưng thêm cho chắc)
+        ModelState.Remove(nameof(API.Models.User.PasswordHash));
 
-        // GET: api/user/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var response = await _userRepository.GetUserByIdAsync(id);
+        if (string.IsNullOrWhiteSpace(model.Password))
+            return BadRequest(new { message = "Password là bắt buộc" });
 
-            if (!response.Success || response.Data == null)
-                return NotFound(response);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return Ok(response);
-        }
+        var response = await _userRepository.CreateUserAsync(model);
+        if (!response.Success) return BadRequest(response);
 
-        // POST: api/user
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] User model)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+        return CreatedAtAction(nameof(GetById), new { id = response.Data?.UserId }, response);
+    }
 
-            var response = await _userRepository.CreateUserAsync(model);
-            if (!response.Success) return BadRequest(response);
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(int id, [FromBody] User model)
+    {
+        ModelState.Remove(nameof(API.Models.User.PasswordHash));
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(GetById), new { id = response.Data?.UserId }, response);
-        }
+        var response = await _userRepository.UpdateUserAsync(id, model);
+        if (!response.Success) return NotFound(response);
+        return Ok(response);
+    }
 
-        // PUT: api/user/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] User model)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var response = await _userRepository.DeleteUserAsync(id);
+        if (!response.Success) return NotFound(response);
+        return Ok(response);
+    }
 
-            var response = await _userRepository.UpdateUserAsync(id, model);
-            if (!response.Success) return NotFound(response);
+    [HttpGet("page")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetPage(int pageNow = 1, int pageSize = 10)
+    {
+        var response = await _userRepository.GetPageAsync(pageNow, pageSize);
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpGet("search")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Search([FromQuery] string keyword)
+    {
+        if (string.IsNullOrWhiteSpace(keyword))
+            return BadRequest(new { Success = false, Message = "Keyword không được để trống" });
 
-        // DELETE: api/user/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var response = await _userRepository.DeleteUserAsync(id);
-            if (!response.Success) return NotFound(response);
-
-            return Ok(response);
-        }
-
-        // GET: api/user/page?pageNow=1&pageSize=10
-        [HttpGet("page")]
-        public async Task<IActionResult> GetPage(int pageNow = 1, int pageSize = 10)
-        {
-            var response = await _userRepository.GetPageAsync(pageNow, pageSize);
-            return Ok(response);
-        }
-
-        [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string keyword)
-        {
-            if (string.IsNullOrWhiteSpace(keyword))
-                return BadRequest(new { Success = false, Message = "Keyword không được để trống" });
-
-            var response = await _userRepository.SearchUsersAsync(keyword);
-
-            return Ok(response);
-        }
+        var response = await _userRepository.SearchUsersAsync(keyword);
+        return Ok(response);
     }
 }

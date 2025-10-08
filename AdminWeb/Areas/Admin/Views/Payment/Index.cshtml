@@ -53,8 +53,9 @@
 						   class="input-sm form-control w-100" />
 				</div>
 
-        <div class="col-sm-3">
-            <select name="status" class="form-control input-sm w-100">
+				<div class="col-sm-3">
+					<select name="status" class="form-control input-sm w-100">
+						<option value="">-- Tất cả trạng thái --</option>
 						@foreach (PaymentStatus s in Enum.GetValues(typeof(PaymentStatus)))
 						{
 							var text = s switch
@@ -65,20 +66,18 @@
 								_ => s.ToString()
 							};
 
+							// Nếu status đang được chọn → selected
 							if (ViewBag.Status != null && (PaymentStatus)ViewBag.Status == s)
 							{
 								<option value="@s" selected>@text</option>
 							}
 							else
 							{
-								
-							}
-							{
 								<option value="@s">@text</option>
 							}
 						}
-            </select>
-        </div>
+					</select>
+				</div>
 
         <div class="col-sm-6 text-right">
             <button type="submit" class="btn btn-sm btn-primary">
