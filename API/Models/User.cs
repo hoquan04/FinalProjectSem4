@@ -1,3 +1,4 @@
+// File: Models/User.cs
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -20,10 +21,13 @@ namespace API.Models
         [Phone, StringLength(15)]
         public string? Phone { get; set; }
 
+        // Lưu trong DB, không bind từ JSON, không serialize ra ngoài
         [BindNever]
         [JsonIgnore]
         [StringLength(255)]
-        public string PasswordHash { get; set; } = string.Empty;
+        public string? PasswordHash { get; set; } // ❗ KHÔNG [Required], KHÔNG default ""
+
+      
 
         public string? Address { get; set; }
 
@@ -36,6 +40,7 @@ namespace API.Models
         [NotMapped]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? Password { get; set; }
+
 
         [JsonIgnore] public ICollection<Order>? Orders { get; set; }
         [JsonIgnore] public ICollection<Review>? Reviews { get; set; }
@@ -53,4 +58,5 @@ namespace API.Models
         Admin = 1,
         Shipper = 2
     }
+
 }

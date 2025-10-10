@@ -23,14 +23,6 @@
 
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    @* Password *@
-                    <div class="form-group">
-                        <label asp-for="PasswordHash" class="col-sm-2 control-label"></label>
-                        <div class="col-sm-10">
-                            <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Nhập mật khẩu">
-                            <span asp-validation-for="PasswordHash" class="text-danger"></span>
-                        </div>
-                    </div>
 
                     @* Email *@
                     <div class="form-group">
@@ -68,21 +60,30 @@
                         </div>
                     </div>
 
-                    @* Vai trò *@
-                    <div class="form-group">
-                        <label asp-for="Role" class="col-sm-2 control-label"></label>
-                        <div class="col-sm-10">
-                            <select asp-for="Role" class="form-control">
-                                <option value="">-- Chọn vai trò --</option>
-                                <option value="Admin">Quản trị viên</option>
-                                <option value="Customer">Người dùng</option>
-                                <option value="Shipper">Nhân viên giao hàng</option> <!-- 👈 thêm dòng này -->
-                            </select>
 
+					@* Password *@
+					<div class="form-group">
+						<label asp-for="Password" class="col-sm-2 control-label"></label>
+						<div class="col-sm-10">
+							<input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu">
+							<span asp-validation-for="Password" class="text-danger"></span>
+						</div>
+					</div>
 
-                            <span asp-validation-for="Role" class="text-danger"></span>
-                        </div>
-                    </div>
+					@* Vai trò *@
+					<div class="form-group">
+						<label asp-for="Role" class="col-sm-2 control-label"></label>
+						<div class="col-sm-10">
+							<select asp-for="Role" class="form-control">
+								<option value="">-- Chọn vai trò --</option>
+								<option value="1">Quản trị (Admin)</option>     @* 1 = Admin *@
+								<option value="0">Người dùng (Customer)</option> @* 0 = Customer *@
+                  <option value="Shipper">Nhân viên giao hàng</option>
+							</select>
+							<span asp-validation-for="Role" class="text-danger"></span>
+						</div>
+					</div>
+
 
                     <div class="hr-line-dashed"></div>
 
