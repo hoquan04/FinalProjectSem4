@@ -83,13 +83,23 @@ namespace AdminWeb.Areas.Admin.Controllers
             ViewBag.ShippingAddress = shipping?.Address ?? "";
 
 
-            // Trạng thái
+            // ✅ Chỉ cho phép chọn "Xác nhận" và "Hủy"
+            var allowedStatuses = new[]
+            {
+                OrderStatus.Confirmed, // Xác nhận
+                OrderStatus.Cancelled  // Hủy
+};
+
             ViewBag.statusList = new SelectList(
-                Enum.GetValues(typeof(OrderStatus))
-                    .Cast<OrderStatus>()
-                    .Select(s => new { Value = s, Text = s.ToString() }),
+                allowedStatuses.Select(s => new
+                {
+                    Value = s,
+                    Text = s == OrderStatus.Confirmed ? "Xác nhận" :
+                           s == OrderStatus.Cancelled ? "Hủy" : s.ToString()
+                }),
                 "Value", "Text", order.Status
             );
+
 
             return View(order);
         }

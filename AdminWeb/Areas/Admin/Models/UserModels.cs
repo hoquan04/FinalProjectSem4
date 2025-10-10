@@ -1,4 +1,4 @@
-﻿
+
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -26,6 +26,15 @@ namespace AdminWeb.Areas.Admin.Models
 
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedAt { get; set; }
+        // 🧩 Thêm 3 property mới cho chức năng shipper
+        [Display(Name = "Ảnh CCCD mặt trước")]
+        public string? CccdFrontUrl { get; set; }
+
+        [Display(Name = "Ảnh CCCD mặt sau")]
+        public string? CccdBackUrl { get; set; }
+
+        [Display(Name = "Đang chờ duyệt Shipper")]
+        public bool IsShipperRequestPending { get; set; } = false;
     }
 
     public class UserCreateModel

@@ -118,8 +118,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.Urls.Add("http://localhost:7245");
-//app.Urls.Add("http://0.0.0.0:7245");
+//app.Urls.Add("http://localhost:7245");
+app.Urls.Add("http://0.0.0.0:7245");
 
 Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
 Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");

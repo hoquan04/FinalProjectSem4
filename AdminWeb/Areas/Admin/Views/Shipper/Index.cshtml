@@ -1,0 +1,92 @@
+@model List<AdminWeb.Areas.Admin.Models.UserViewModel>
+@{
+    ViewBag.Title = "Yêu cầu đăng ký Shipper";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">📋 Yêu cầu đăng ký Shipper</h2>
+    <button type="button" class="btn btn-outline-secondary btn-sm" title="Làm mới" onclick="location.reload();">
+        <i class="fa fa-sync"></i>
+    </button>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">@TempData["Message"]</div>
+}
+
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th style="width:60px">#</th>
+            <th>Tên người dùng</th>
+            <th>Email</th>
+            <th>Số điện thoại</th>
+            <th class="text-center">Ảnh CCCD</th>
+            <th style="width:180px;">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model == null || !Model.Any())
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    Không có yêu cầu nào đang chờ duyệt
+                </td>
+            </tr>
+        }
+        else
+        {
+            int index = 1;
+            foreach (var u in Model)
+            {
+                <tr>
+                    <td>@(index++)</td>
+                    <td>@u.FullName</td>
+                    <td>@u.Email</td>
+                    <td>@u.Phone</td>
+                    <td class="text-center">
+                        @if (!string.IsNullOrEmpty(u.CccdFrontUrl) || !string.IsNullOrEmpty(u.CccdBackUrl))
+                        {
+                            <div class="d-flex justify-content-center gap-2">
+                                @if (!string.IsNullOrEmpty(u.CccdFrontUrl))
+                                {
+                                    <a href="@u.CccdFrontUrl" target="_blank">
+                                        <img src="@u.CccdFrontUrl" alt="Mặt trước"
+                                             style="width:80px; height:60px; object-fit:cover; border-radius:5px; border:1px solid #ccc;" />
+                                    </a>
+                                }
+                                @if (!string.IsNullOrEmpty(u.CccdBackUrl))
+                                {
+                                    <a href="@u.CccdBackUrl" target="_blank">
+                                        <img src="@u.CccdBackUrl" alt="Mặt sau"
+                                             style="width:80px; height:60px; object-fit:cover; border-radius:5px; border:1px solid #ccc;" />
+                                    </a>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có ảnh CCCD</span>
+                        }
+                    </td>
+
+                    <td>
+                        <form asp-action="Approve" method="post" class="d-inline">
+                            <input type="hidden" name="userId" value="@u.UserId" />
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fa fa-check"></i> Duyệt
+                            </button>
+                        </form>
+                        <form asp-action="Reject" method="post" class="d-inline">
+                            <input type="hidden" name="userId" value="@u.UserId" />
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fa fa-times"></i> Từ chối
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

@@ -159,12 +159,13 @@ namespace API.Data
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Notifications - FIX CASCADE CONFLICT
+            // ✅ Sửa dòng này để tránh Multiple Cascade Path
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.Order)
-                .WithMany()
+                .WithMany(o => o.Notifications)
                 .HasForeignKey(n => n.OrderId)
-                .OnDelete(DeleteBehavior.NoAction);  // Đổi từ SetNull thành NoAction
+                .OnDelete(DeleteBehavior.Restrict);
+
 
 
             // Index để tăng hiệu suất query thông báo

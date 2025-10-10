@@ -110,14 +110,24 @@ namespace AdminWeb.Areas.Admin.Data.Services
         /// </summary>
         public async Task<ApiResponse<PagedResponse<Order>>> GetOrderPageAsync(int pageNow = 1, int pageSize = 10)
         {
-            return await _httpClient.GetFromJsonAsync<ApiResponse<PagedResponse<Order>>>(
-                $"{ApiConstants.OrderApi}/page?pageNow={pageNow}&pageSize={pageSize}", _options
-            ) ?? new ApiResponse<PagedResponse<Order>>
+            var url = $"{ApiConstants.OrderApi}/page?pageNow={pageNow}&pageSize={pageSize}";
+            var response = await _httpClient.GetAsync(url);
+            var raw = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"[DEBUG] API Response: {raw}");
+
+            if (!response.IsSuccessStatusCode)
             {
-                Success = false,
-                Message = "Không parse được dữ liệu từ API"
-            };
+                return new ApiResponse<PagedResponse<Order>>
+                {
+                    Success = false,
+                    Message = $"API lỗi {response.StatusCode}: {raw}"
+                };
+            }
+
+            return JsonSerializer.Deserialize<ApiResponse<PagedResponse<Order>>>(raw, _options)
+                   ?? new ApiResponse<PagedResponse<Order>> { Success = false, Message = "Parse lỗi JSON" };
         }
+
 
         /// <summary>
         /// 🔍 Tìm kiếm đơn hàng

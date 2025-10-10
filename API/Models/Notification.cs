@@ -46,6 +46,7 @@ namespace API.Models
 
     public enum NotificationType
     {
+        RoleUpdate,
         Order,          // Thông báo về đơn hàng
         Payment,        // Thông báo về thanh toán
         Shipping,       // Thông báo về vận chuyển
