@@ -40,9 +40,11 @@ namespace AdminWeb.Areas.Admin.Data.Services
             }
             catch (Exception ex)
             {
-                
+                Console.WriteLine($"❌ Error in GetAllShippingAsync: {ex.Message}");
                 return new List<Shipping>();
             }
+
+
         }
 
         public async Task<Shipping?> GetShippingByIdAsync(int id)

@@ -42,6 +42,7 @@ builder.Services.AddScoped<CategoryService>();
 
 builder.Services.AddHttpClient<ProductService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddHttpClient<ShipperService>();
 
 
 builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
@@ -159,7 +160,7 @@ app.MapGet("/", () => Results.Redirect("/Admin/Account/Login"));
 
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Category}/{action=Index}/{id?}");
+    pattern: "{area:exists}/{controller=Dashborad}/{action=Index}/{id?}");
 
 // Sử dụng localization
 // Sử dụng localization

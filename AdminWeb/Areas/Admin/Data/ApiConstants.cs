@@ -27,6 +27,9 @@ namespace AdminWeb.Areas.Admin.Data
 
         public static string ReviewApi => $"{BaseUrl}Review"; // Thêm dòng này
         public static string ShippingApi => $"{BaseUrl}Shipping"; // Thêm dòng này
+        public static string ShipperApi = $"{BaseUrl}shipper";
+
+
 
     }
 }

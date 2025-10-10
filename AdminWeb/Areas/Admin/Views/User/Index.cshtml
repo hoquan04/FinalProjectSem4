@@ -1,4 +1,4 @@
-﻿@model List<AdminWeb.Areas.Admin.Models.UserViewModel>
+@model List<AdminWeb.Areas.Admin.Models.UserViewModel>
 
 
 @{
@@ -101,6 +101,10 @@
                                     @if (item.Role == AdminWeb.Areas.Admin.Models.UserRole.Admin)
                                     {
                                         <span class="badge badge-danger">Admin</span>
+                                    }
+                                    else if (item.Role == AdminWeb.Areas.Admin.Models.UserRole.Shipper)
+                                    {
+                                        <span class="badge badge-warning">Shipper</span>
                                     }
                                     else
                                     {

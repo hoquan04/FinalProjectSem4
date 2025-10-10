@@ -5,44 +5,52 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace API.Models
 {
-        public class User
-        {
-            [Key]
-            [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-            public int UserId { get; set; }
+    public class User
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int UserId { get; set; }
 
-            [Required, StringLength(100)]
-            public string FullName { get; set; } = string.Empty;
+        [Required, StringLength(100)]
+        public string FullName { get; set; } = string.Empty;
 
-            [Required, EmailAddress, StringLength(100)]
-            public string Email { get; set; } = string.Empty;
+        [Required, EmailAddress, StringLength(100)]
+        public string Email { get; set; } = string.Empty;
 
-            [Phone, StringLength(15)]
-            public string? Phone { get; set; }
+        [Phone, StringLength(15)]
+        public string? Phone { get; set; }
 
-            // Lưu trong DB, không bind từ JSON, không trả ra JSON
-            [BindNever]                 // ⬅️ quan trọng: model binder bỏ qua => không bị validate [Required]
-            [JsonIgnore]                // không serialize ra JSON
-            [StringLength(255)]
-            public string PasswordHash { get; set; } = string.Empty;
+        [BindNever]
+        [JsonIgnore]
+        [StringLength(255)]
+        public string PasswordHash { get; set; } = string.Empty;
 
-            public string? Address { get; set; }
+        public string? Address { get; set; }
 
-            public UserRole Role { get; set; } = UserRole.Customer;
+        // ⚙️ Enum có converter để xuất ra dạng string (Customer, Admin, Shipper)
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public UserRole Role { get; set; } = UserRole.Customer;
 
-            public DateTime? CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
+        [NotMapped]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Password { get; set; }
 
-            // Chỉ nhận vào từ body khi Register/Login, không map DB, không trả ra khi null
-            [NotMapped]
-            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-            public string? Password { get; set; }
+        [JsonIgnore] public ICollection<Order>? Orders { get; set; }
+        [JsonIgnore] public ICollection<Review>? Reviews { get; set; }
 
+        // 🆕 Các trường mới cho đăng ký shipper
+        public string? CccdFrontUrl { get; set; } // ảnh CCCD mặt trước
+        public string? CccdBackUrl { get; set; }  // ảnh CCCD mặt sau
+        public bool IsShipperRequestPending { get; set; } = false;
+    }
 
-            // Nav props – tránh vòng lặp
-            [JsonIgnore] public ICollection<Order>? Orders { get; set; }
-            [JsonIgnore] public ICollection<Review>? Reviews { get; set; }
-        }
-
-        public enum UserRole { Customer, Admin }
+    // ⚙️ Enum nên đặt thứ tự rõ ràng (cho DB lưu int) và đồng bộ với AdminWeb
+    public enum UserRole
+    {
+        Customer = 0,
+        Admin = 1,
+        Shipper = 2
+    }
 }

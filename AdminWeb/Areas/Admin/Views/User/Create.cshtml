@@ -74,9 +74,11 @@
                         <div class="col-sm-10">
                             <select asp-for="Role" class="form-control">
                                 <option value="">-- Chọn vai trò --</option>
-                                <option value="Admin">Quản trị</option>
+                                <option value="Admin">Quản trị viên</option>
                                 <option value="Customer">Người dùng</option>
+                                <option value="Shipper">Nhân viên giao hàng</option> <!-- 👈 thêm dòng này -->
                             </select>
+
 
                             <span asp-validation-for="Role" class="text-danger"></span>
                         </div>

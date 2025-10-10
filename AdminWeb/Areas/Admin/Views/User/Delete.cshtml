@@ -1,4 +1,4 @@
-﻿@model AdminWeb.Areas.Admin.Models.UserViewModel
+@model AdminWeb.Areas.Admin.Models.UserViewModel
 @{
     ViewData["Title"] = "Xác nhận xóa người dùng";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -18,7 +18,8 @@
             <div class="ibox-content">
 
                 @{
-                    var role = Model.Role != null ? Model.Role.ToString() : "";
+                    var role = Model.Role.ToString() ?? "";
+
                 }
 
                 @if (string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
