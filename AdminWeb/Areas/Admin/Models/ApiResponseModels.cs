@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 namespace AdminWeb.Areas.Admin.Models
 {
     /// <summary>
@@ -16,11 +16,11 @@ namespace AdminWeb.Areas.Admin.Models
     /// </summary>
     public class PagedResponse<T>
     {
-        public IEnumerable<T> Data { get; set; } = new List<T>();
-        public int PageNow { get; set; }
-        public int PageSize { get; set; }
-        public int TotalPage { get; set; }
-        public int TotalCount { get; set; }
+        public List<T> Data { get; set; } = new List<T>();
+        public int PageNow { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public int TotalPage { get; set; } = 1;
+        public int TotalCount { get; set; } = 0;
     }
 
     /// <summary>

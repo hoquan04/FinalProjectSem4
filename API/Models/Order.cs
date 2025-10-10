@@ -16,10 +16,7 @@ namespace API.Models
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Trạng thái đơn hàng là bắt buộc")]
-
-       
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-
 
         [Required(ErrorMessage = "Tổng tiền không được để trống")]
         [Range(0, 9999999999.99, ErrorMessage = "Tổng tiền phải lớn hơn hoặc bằng 0")]
@@ -27,24 +24,39 @@ namespace API.Models
 
         public int ShippingId { get; set; }
 
-        // Navigation
-   
-        public User? Users { get; set; }
-       
-        public Shipping? Shipping { get; set; }
+        // 🔹 Navigation Properties
+
+        [ForeignKey(nameof(UserId))]
+        [JsonIgnore]
+        public User Users { get; set; } = null!; // ✅ luôn có User
+
+        [ForeignKey(nameof(ShippingId))]
+        [JsonIgnore]
+        public Shipping Shipping { get; set; } = null!; // ✅ luôn có Shipping
 
         [JsonIgnore]
-        public ICollection<OrderDetail>? OrderDetails { get; set; }
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>(); // ✅ không bao giờ null
+
         [JsonIgnore]
-        public ICollection<Payment>? Payments { get; set; }
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>(); // ✅ không null
+
+        [JsonIgnore]
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>(); // ✅ không null
+
+        // 🚚 Shipper có thể null
+        public int? ShipperId { get; set; }
+
+        [ForeignKey(nameof(ShipperId))]
+        [JsonIgnore]
+        public User? Shipper { get; set; }
     }
 
     public enum OrderStatus
     {
-        Pending,
-        Confirmed,
-        Shipping,
-        Completed,
-        Cancelled
+        Pending,     // Đang chờ xác nhận
+        Confirmed,   // Đã xác nhận
+        Shipping,    // Đang giao
+        Completed,   // Hoàn tất
+        Cancelled    // Đã hủy
     }
 }

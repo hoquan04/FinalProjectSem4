@@ -1,0 +1,236 @@
+@{
+    ViewData["Title"] = "Bảng điều khiển";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <!-- Tổng quan -->
+    <div class="col-lg-3 col-md-6">
+        <div class="ibox bg-primary color-white">
+            <div class="ibox-title">
+                <h5>Tổng sản phẩm</h5>
+            </div>
+            <div class="ibox-content text-center">
+                <h1 class="no-margins">120</h1>
+                <small>Sản phẩm đang kinh doanh</small>
+                <div><i class="fa fa-cubes fa-2x mt-2"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="ibox bg-success color-white">
+            <div class="ibox-title">
+                <h5>Tổng đơn hàng</h5>
+            </div>
+            <div class="ibox-content text-center">
+                <h1 class="no-margins">580</h1>
+                <small>Đơn hàng đã xử lý</small>
+                <div><i class="fa fa-shopping-cart fa-2x mt-2"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="ibox bg-warning color-white">
+            <div class="ibox-title">
+                <h5>Người dùng</h5>
+            </div>
+            <div class="ibox-content text-center">
+                <h1 class="no-margins">340</h1>
+                <small>Khách hàng đăng ký</small>
+                <div><i class="fa fa-users fa-2x mt-2"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="ibox bg-danger color-white">
+            <div class="ibox-title">
+                <h5>Doanh thu tháng</h5>
+            </div>
+            <div class="ibox-content text-center">
+                <h1 class="no-margins">75,000,000 đ</h1>
+                <small>Doanh thu tháng hiện tại</small>
+                <div><i class="fa fa-line-chart fa-2x mt-2"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<!-- Biểu đồ -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Doanh thu 12 tháng gần nhất</h5>
+            </div>
+            <div class="ibox-content">
+                <canvas id="revenueChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Tỷ lệ trạng thái đơn hàng</h5>
+            </div>
+            <div class="ibox-content">
+                <canvas id="orderStatusChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bảng đơn hàng mới nhất -->
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Đơn hàng mới nhất</h5>
+            </div>
+            <div class="ibox-content">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#1001</td>
+                            <td>Nguyễn Văn A</td>
+                            <td>01/10/2025</td>
+                            <td>1.500.000 đ</td>
+                            <td><span class="badge bg-success">Hoàn tất</span></td>
+                        </tr>
+                        <tr>
+                            <td>#1002</td>
+                            <td>Trần Thị B</td>
+                            <td>02/10/2025</td>
+                            <td>950.000 đ</td>
+                            <td><span class="badge bg-warning">Đang giao</span></td>
+                        </tr>
+                        <tr>
+                            <td>#1003</td>
+                            <td>Lê Văn C</td>
+                            <td>03/10/2025</td>
+                            <td>2.100.000 đ</td>
+                            <td><span class="badge bg-info">Đã xác nhận</span></td>
+                        </tr>
+                        <tr>
+                            <td>#1004</td>
+                            <td>Phạm Duy D</td>
+                            <td>04/10/2025</td>
+                            <td>870.000 đ</td>
+                            <td><span class="badge bg-danger">Đã hủy</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .ibox {
+            background: #fff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+            overflow: hidden;
+        }
+
+        .ibox-title {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e7eaec;
+            font-weight: 600;
+        }
+
+        .ibox-content {
+            padding: 15px;
+        }
+
+        .ibox.bg-primary {
+            background-color: #1c84c6;
+        }
+
+        .ibox.bg-success {
+            background-color: #1ab394;
+        }
+
+        .ibox.bg-warning {
+            background-color: #f8ac59;
+        }
+
+        .ibox.bg-danger {
+            background-color: #ed5565;
+        }
+
+        .color-white {
+            color: white !important;
+        }
+
+        .no-margins {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // === Biểu đồ doanh thu giả lập ===
+        const ctxRevenue = document.getElementById('revenueChart');
+        new Chart(ctxRevenue, {
+            type: 'line',
+            data: {
+                labels: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: [2, 3, 5, 6, 4, 8, 10, 12, 9, 11, 14, 16],
+                    borderColor: '#1ab394',
+                    backgroundColor: 'rgba(26,179,148,0.2)',
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: {
+                plugins: { legend: { display: true } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: v => v + "tr" } }
+                }
+            }
+        });
+
+        // === Biểu đồ tỷ lệ trạng thái đơn hàng giả lập ===
+        const ctxStatus = document.getElementById('orderStatusChart');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Hoàn tất', 'Đang giao', 'Đã hủy', 'Chờ xác nhận'],
+                datasets: [{
+                    data: [45, 30, 10, 15],
+                    backgroundColor: ['#1ab394', '#f8ac59', '#ed5565', '#1c84c6'],
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    </script>
+}

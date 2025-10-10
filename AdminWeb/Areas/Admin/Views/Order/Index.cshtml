@@ -4,9 +4,18 @@
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
 }
+<div class="clearfix mb-3" style="display: table; width: 100%;">
+    <div style="display: table-cell; vertical-align: middle;">
+        <h2 class="m-0" style="margin: 0;">Quản lý đơn hàng</h2>
+    </div>
+    <div style="display: table-cell; vertical-align: middle; text-align: right;">
+        <button type="button" class="btn btn-default btn-sm" title="Làm mới" onclick="location.reload();">
+            <i class="fa fa-refresh"></i>
+        </button>
+    </div>
+</div>
 
-<h2 class="mb-3">Quản lý đơn hàng</h2>
-
+<br/>
 <!-- 🔍 Form tìm kiếm -->
 <form asp-action="Search" method="post" class="mb-3">
     <div class="row">
@@ -72,8 +81,8 @@
             {
                 <tr>
                     <td>@order.OrderId</td>
-                    <td>@order.Users?.FullName</td>
-                    <td>@order.Users?.Email</td>
+                    <td>@order.Shipping?.RecipientName</td>
+                    <td>@order.Shipping?.Email</td>
                     <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
                     <td>
                         @switch (order.Status)

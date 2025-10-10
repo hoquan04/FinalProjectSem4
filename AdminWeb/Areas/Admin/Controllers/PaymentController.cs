@@ -18,10 +18,10 @@ namespace AdminWeb.Areas.Admin.Controllers
         }
 
         public async Task<IActionResult> Index(
-    int? paymentId,
-    PaymentStatus? status,
-    int page = 1,
-    int pageSize = 10)
+            int? paymentId,
+            PaymentStatus? status,
+            int page = 1,
+            int pageSize = 10)
         {
             ViewBag.PaymentId = paymentId;
             ViewBag.Status = status;
@@ -44,6 +44,11 @@ namespace AdminWeb.Areas.Admin.Controllers
 
                 ViewBag.TotalPages = totalPages;
                 ViewBag.TotalRecords = totalRecords;
+
+
+                ViewBag.TotalPages = totalPages;
+                ViewBag.TotalRecords = totalRecords;
+                ViewBag.PageNow = page;
 
                 return View(items);
             }

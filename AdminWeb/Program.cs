@@ -16,8 +16,7 @@ Console.InputEncoding = Encoding.UTF8;
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
-builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
-builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
+
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
@@ -43,6 +42,14 @@ builder.Services.AddScoped<CategoryService>();
 
 builder.Services.AddHttpClient<ProductService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddHttpClient<ShipperService>();
+
+
+builder.Services.AddHttpClient<IReviewApiService, ReviewApiService>();
+builder.Services.AddScoped<IReviewApiService, ReviewApiService>();
+
+builder.Services.AddHttpClient<ShippingApiService>();
+builder.Services.AddScoped<ShippingApiService>();
 
 builder.Services.AddHttpClient<PaymentService>();
 
@@ -153,7 +160,7 @@ app.MapGet("/", () => Results.Redirect("/Admin/Account/Login"));
 
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Category}/{action=Index}/{id?}");
+    pattern: "{area:exists}/{controller=Dashborad}/{action=Index}/{id?}");
 
 // Sử dụng localization
 // Sử dụng localization

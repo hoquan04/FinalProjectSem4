@@ -9,17 +9,35 @@ namespace API.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
+        private readonly IFavoriteRepository _favoriteRepository;
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, IFavoriteRepository favoriteRepository)
         {
             _productRepository = productRepository;
+            _favoriteRepository = favoriteRepository;
         }
 
         // GET: api/product
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? page = null, [FromQuery] int? pageSize = null)
         {
+            // Nếu có tham số phân trang, trả về dữ liệu phân trang
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var pagedResponse = await _productRepository.GetPageAsync(page.Value, pageSize.Value);
+                return Ok(pagedResponse);
+            }
+            
+            // Nếu không có tham số phân trang, trả về tất cả như cũ
             var response = await _productRepository.GetAllAsync();
+            return Ok(response);
+        }
+
+        // GET: api/product/newest?count=4
+        [HttpGet("newest")]
+        public async Task<IActionResult> GetNewest([FromQuery] int count = 4)
+        {
+            var response = await _productRepository.GetNewestProductsAsync(count);
             return Ok(response);
         }
 
@@ -30,6 +48,40 @@ namespace API.Controllers
             var response = await _productRepository.GetByIdAsync(id);
             if (!response.Success) return NotFound(response);
             return Ok(response);
+        }
+
+        // GET: api/product/5/with-favorite-info?userId=1
+        [HttpGet("{id}/with-favorite-info")]
+        public async Task<IActionResult> GetByIdWithFavoriteInfo(int id, [FromQuery] int? userId = null)
+        {
+            var productResponse = await _productRepository.GetByIdAsync(id);
+            if (!productResponse.Success) return NotFound(productResponse);
+
+            // Lấy số lượng yêu thích
+            var favoriteCountResponse = await _favoriteRepository.GetFavoriteCountByProductIdAsync(id);
+            int favoriteCount = favoriteCountResponse.Success ? favoriteCountResponse.Data : 0;
+
+            // Kiểm tra user có yêu thích không (nếu có userId)
+            bool isFavorite = false;
+            if (userId.HasValue && userId.Value > 0)
+            {
+                var checkFavoriteResponse = await _favoriteRepository.CheckIsFavoriteAsync(userId.Value, id);
+                isFavorite = checkFavoriteResponse.Success && checkFavoriteResponse.Data;
+            }
+
+            var result = new
+            {
+                Success = productResponse.Success,
+                Message = productResponse.Message,
+                Data = new
+                {
+                    Product = productResponse.Data,
+                    FavoriteCount = favoriteCount,
+                    IsFavorite = isFavorite
+                }
+            };
+
+            return Ok(result);
         }
 
         // POST: api/product
@@ -88,6 +140,50 @@ namespace API.Controllers
         {
             var response = await _productRepository.SearchProductsAsync(term);
             return Ok(response);
+        }
+
+        // GET: api/product/admin/page?pageNow=1&pageSize=10 - For AdminWeb
+        [HttpGet("admin/page")]
+        public async Task<IActionResult> GetPageForAdmin(int pageNow = 1, int pageSize = 10)
+        {
+            var response = await _productRepository.GetPageAsync(pageNow, pageSize);
+            
+            if (!response.Success)
+                return BadRequest(response);
+
+            // Convert Product to ProductViewModel for AdminWeb
+            var productViewModels = response.Data.Data.Select(p => new
+            {
+                ProductId = p.ProductId,
+                CategoryId = p.CategoryId,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                ImageUrl = p.ImageUrl,
+                CreatedAt = p.CreatedAt,
+                Category = p.Category != null ? new
+                {
+                    CategoryId = p.Category.CategoryId,
+                    Name = p.Category.Name
+                } : null
+            }).ToList();
+
+            var adminPagedResponse = new
+            {
+                Data = productViewModels,
+                PageNow = response.Data.PageNow,
+                PageSize = response.Data.PageSize,
+                TotalPage = response.Data.TotalPage,
+                TotalCount = response.Data.TotalCount
+            };
+
+            return Ok(new
+            {
+                Success = response.Success,
+                Data = adminPagedResponse,
+                Message = response.Message
+            });
         }
     }
 }

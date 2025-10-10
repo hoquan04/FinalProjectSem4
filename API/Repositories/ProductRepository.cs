@@ -335,5 +335,31 @@ namespace API.Repositories
 
             return response;
         }
+
+        // Lấy sản phẩm mới nhất
+        public async Task<APIRespone<IEnumerable<Product>>> GetNewestProductsAsync(int count)
+        {
+            var response = new APIRespone<IEnumerable<Product>>();
+
+            try
+            {
+                var data = await _context.Products
+                    .Include(p => p.Category)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Take(count)
+                    .ToListAsync();
+
+                response.Success = true;
+                response.Data = data;
+                response.Message = "Lấy sản phẩm mới nhất thành công";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Lỗi khi lấy sản phẩm mới nhất: {ex.Message}";
+            }
+
+            return response;
+        }
     }
 }

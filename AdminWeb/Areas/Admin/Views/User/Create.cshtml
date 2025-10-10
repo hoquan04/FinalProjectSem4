@@ -60,6 +60,7 @@
                         </div>
                     </div>
 
+
 					@* Password *@
 					<div class="form-group">
 						<label asp-for="Password" class="col-sm-2 control-label"></label>
@@ -77,10 +78,12 @@
 								<option value="">-- Chọn vai trò --</option>
 								<option value="1">Quản trị (Admin)</option>     @* 1 = Admin *@
 								<option value="0">Người dùng (Customer)</option> @* 0 = Customer *@
+                  <option value="Shipper">Nhân viên giao hàng</option>
 							</select>
 							<span asp-validation-for="Role" class="text-danger"></span>
 						</div>
 					</div>
+
 
                     <div class="hr-line-dashed"></div>
 
@@ -128,15 +131,20 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-
     <script>
         $(document).ready(function () {
-            $('#userForm').on('submit', function () {
+            $('#userForm').on('submit', function (e) {
+                // nếu form không hợp lệ -> chặn submit
+                if (!$(this).valid()) {
+                    e.preventDefault();
+                    return;
+                }
+
                 var $btn = $('#btnSubmit');
                 $btn.prop('disabled', true)
                     .html('<i class="fa fa-spinner fa-spin"></i> Đang gửi API...');
-                // Form sẽ submit bình thường, không cần AJAX nếu API trả response đúng
             });
         });
     </script>
+
 }

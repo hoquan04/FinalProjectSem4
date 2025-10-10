@@ -1,6 +1,7 @@
 using API.Data;
 using API.Repositories;
 using API.Repositories.IRepositories;
+using API.Repositories.Services;
 using API.Repositories.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ builder.Services.AddControllers()
         o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+builder.Services.AddHttpContextAccessor();
 
 // ✅ Swagger + JWT config
 builder.Services.AddEndpointsApiExplorer();
@@ -50,9 +52,24 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+ builder.Services.AddScoped<IUserRepository, UserRepository>();
+ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IShippingRepository, ShippingRepository>();
+builder.Services.AddScoped<ShippingService>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();  // ← Thêm dòng này
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+// Program.cs
+builder.Services.AddScoped<CheckoutRepository>();
+
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
 
 // ✅ JWT Auth
 var jwt = builder.Configuration.GetSection("Jwt");
@@ -100,6 +117,17 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
+
+//app.Urls.Add("http://localhost:7245");
+app.Urls.Add("http://0.0.0.0:7245");
+
+Console.WriteLine("🚀 API Server đang chạy tại: http://localhost:7245");
+Console.WriteLine("📖 Swagger UI: http://localhost:7245/swagger");
+Console.WriteLine("📦 Category API: http://localhost:7245/api/category");
+Console.WriteLine("📦 Product API: http://localhost:7245/api/product");
+Console.WriteLine("❤️ Favorite API: http://localhost:7245/api/favorite");  // ← Thêm dòng này
+
+Console.WriteLine("📁 File Upload API: http://localhost:7245/api/file");
 
 // Map Controllers
 app.MapControllers();

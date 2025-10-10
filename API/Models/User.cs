@@ -27,23 +27,36 @@ namespace API.Models
         [StringLength(255)]
         public string? PasswordHash { get; set; } // ❗ KHÔNG [Required], KHÔNG default ""
 
+      
+
         public string? Address { get; set; }
 
-        // Cho phép UI admin gửi "Admin"/"Customer" (xem lưu ý Program.cs)
+        // ⚙️ Enum có converter để xuất ra dạng string (Customer, Admin, Shipper)
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public UserRole Role { get; set; } = UserRole.Customer;
 
-        // Dùng UTC và để non-nullable cho nhất quán
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
-        // Chỉ nhận qua body khi tạo/cập nhật mật khẩu; không map DB
         [NotMapped]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? Password { get; set; }
 
-        // Nav props – tránh vòng lặp JSON
+
         [JsonIgnore] public ICollection<Order>? Orders { get; set; }
         [JsonIgnore] public ICollection<Review>? Reviews { get; set; }
+
+        // 🆕 Các trường mới cho đăng ký shipper
+        public string? CccdFrontUrl { get; set; } // ảnh CCCD mặt trước
+        public string? CccdBackUrl { get; set; }  // ảnh CCCD mặt sau
+        public bool IsShipperRequestPending { get; set; } = false;
     }
 
-    public enum UserRole { Customer = 0, Admin = 1 }
+    // ⚙️ Enum nên đặt thứ tự rõ ràng (cho DB lưu int) và đồng bộ với AdminWeb
+    public enum UserRole
+    {
+        Customer = 0,
+        Admin = 1,
+        Shipper = 2
+    }
+
 }

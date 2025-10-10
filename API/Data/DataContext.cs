@@ -19,6 +19,12 @@ namespace API.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Shipping> Shippings { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+
+        public DbSet<Favorite> Favorites { get; set; }
+
+        public DbSet<Notification> Notifications { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -113,7 +119,59 @@ namespace API.Data
                 .HasMany(s => s.Orders)
                 .WithOne(o => o.Shipping)
                 .HasForeignKey(o => o.ShippingId);
-        }
 
+            // Cart
+            modelBuilder.Entity<Cart>()
+                .HasOne(c => c.Users)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Cart>()
+                .HasOne(c => c.Product)
+                .WithMany()
+                .HasForeignKey(c => c.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // Favorites
+            modelBuilder.Entity<Favorite>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Favorite>()
+                .HasOne(f => f.Product)
+                .WithMany()
+                .HasForeignKey(f => f.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Tạo unique constraint để tránh duplicate favorites
+            modelBuilder.Entity<Favorite>()
+                .HasIndex(f => new { f.UserId, f.ProductId })
+                .IsUnique();
+
+            // Notifications
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ✅ Sửa dòng này để tránh Multiple Cascade Path
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Order)
+                .WithMany(o => o.Notifications)
+                .HasForeignKey(n => n.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            // Index để tăng hiệu suất query thông báo
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
+
+        }
     }
 }

@@ -21,20 +21,57 @@
                 <dt class="col-sm-3">Mã đơn hàng:</dt>
                 <dd class="col-sm-9">#@order.OrderId</dd>
 
-                <dt class="col-sm-3">Khách hàng:</dt>
+                <dt class="col-sm-3">Người nhận:</dt>
                 <dd class="col-sm-9">@order.CustomerName</dd>
 
                 <dt class="col-sm-3">Email:</dt>
                 <dd class="col-sm-9">@order.Email</dd>
 
+                <dt class="col-sm-3">Số điện thoại:</dt>
+                <dd class="col-sm-9">@order.PhoneNumber</dd>
+
                 <dt class="col-sm-3">Địa chỉ giao hàng:</dt>
-                <dd class="col-sm-9">@order.Address</dd>
+                <dd class="col-sm-9">
+                    @order.Address
+                    @if (!string.IsNullOrEmpty(order.City))
+                    {
+                        <span>, @order.City</span>
+                    }
+                    @if (!string.IsNullOrEmpty(order.PostalCode))
+                    {
+                        <span> (@order.PostalCode)</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Phí vận chuyển:</dt>
+                <dd class="col-sm-9">@((order.ShippingFee ?? 0).ToString("N0")) đ</dd>
+
 
                 <dt class="col-sm-3">Ngày đặt hàng:</dt>
                 <dd class="col-sm-9">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</dd>
 
                 <dt class="col-sm-3">Trạng thái:</dt>
                 <dd class="col-sm-9">@order.Status</dd>
+                <dt class="col-sm-3">Thanh toán:</dt>
+                <dd class="col-sm-9">
+                    @if (order.PaymentStatus == PaymentStatus.Paid)
+                    {
+                        <span class="badge bg-success">Đã thanh toán</span>
+                    }
+                    else if (order.PaymentStatus == PaymentStatus.Pending)
+                    {
+                        <span class="badge bg-warning text-dark">Chưa thanh toán</span>
+                    }
+                    else if (order.PaymentStatus == PaymentStatus.Failed)
+                    {
+                        <span class="badge bg-danger">Thanh toán thất bại</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Không có thông tin</span>
+                    }
+                </dd>
+
             </dl>
         </div>
     </div>
@@ -63,8 +100,6 @@
                     {
                         <tr>
                             <td>
-                           
-
                                 @if (!string.IsNullOrEmpty(item.ImageUrl))
                                 {
                                     <img src="@(item.ImageUrl.StartsWith("http") ? item.ImageUrl : $"http://localhost:7245{item.ImageUrl}")"
