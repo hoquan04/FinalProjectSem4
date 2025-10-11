@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -9,17 +9,18 @@ namespace AdminWeb.Areas.Admin.Data.Services
     public class UserService
     {
         private readonly HttpClient _httpClient;
-        private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+        private readonly JsonSerializerOptions _jsonOptions =
+            new() { PropertyNameCaseInsensitive = true };
+
         // Base API url (khai báo ở ApiConstants hoặc appsettings)
         private readonly string _userApi = ApiConstants.UserApi; // ví dụ "http://localhost:7245/api/user"
 
         public UserService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            // nếu muốn set base address: _httpClient.BaseAddress = new Uri(ApiConstants.BaseApiUrl);
         }
 
-        // Lấy toàn bộ users (trả về List<UserViewModel>)
+        // Lấy toàn bộ users (List<UserViewModel>)
         public async Task<List<UserViewModel>> GetAllUsersAsync()
         {
             var resp = await _httpClient.GetAsync(_userApi);
@@ -30,7 +31,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
             return apiResp?.Data ?? new List<UserViewModel>();
         }
 
-        // Lấy theo id (trả về UserViewModel? để controller check null)
+        // Lấy theo id
         public async Task<UserViewModel?> GetUserByIdAsync(int id)
         {
             var resp = await _httpClient.GetAsync($"{_userApi}/{id}");
@@ -41,14 +42,12 @@ namespace AdminWeb.Areas.Admin.Data.Services
             return apiResp?.Data;
         }
 
-        // Tìm kiếm (trả List<UserViewModel>)
+        // Tìm kiếm
         public async Task<List<UserViewModel>> SearchUsersAsync(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword)) return new List<UserViewModel>();
 
-            // Sửa endpoint đúng với API
             var resp = await _httpClient.GetAsync($"{_userApi}/search?keyword={Uri.EscapeDataString(keyword)}");
-
             if (!resp.IsSuccessStatusCode) return new List<UserViewModel>();
 
             var body = await resp.Content.ReadAsStringAsync();
@@ -56,7 +55,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
             return apiResp?.Data ?? new List<UserViewModel>();
         }
 
-        // Tạo user (trả ApiResponse<UserViewModel> để controller kiểm tra Success)
+        // Tạo user
         public async Task<ApiResponse<UserViewModel>> CreateUserAsync(UserCreateModel model)
         {
             var json = JsonSerializer.Serialize(model);
@@ -96,13 +95,36 @@ namespace AdminWeb.Areas.Admin.Data.Services
             }
         }
 
-        // Xóa user (trả ApiResponse<bool>)
+        // Xóa user
         public async Task<ApiResponse<bool>> DeleteUserAsync(int id)
         {
             var resp = await _httpClient.DeleteAsync($"{_userApi}/{id}");
             var body = await resp.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<ApiResponse<bool>>(body, _jsonOptions)
                    ?? new ApiResponse<bool> { Success = false, Message = "Không nhận được phản hồi" };
+        }
+
+        // ✅ LẤY TRANG NGƯỜI DÙNG (có search)
+        // Backend nên hỗ trợ endpoint dạng: GET /api/user/page?search=&page=1&pageSize=10
+        public async Task<ApiResponse<PagedResponse<UserViewModel>>> GetUserPageAsync(string? search, int page = 1, int pageSize = 10)
+        {
+            // ✅ backend nhận pageNow, không phải page
+            var url = $"{_userApi}/page?pageNow={page}&pageSize={pageSize}";
+            // Tuỳ backend: search có thể là search, searchString, keyword...
+            if (!string.IsNullOrWhiteSpace(search))
+                url += $"&search={Uri.EscapeDataString(search)}";
+
+            try
+            {
+                var resp = await _httpClient.GetAsync(url);
+                var body = await resp.Content.ReadAsStringAsync();
+                var parsed = JsonSerializer.Deserialize<ApiResponse<PagedResponse<UserViewModel>>>(body, _jsonOptions);
+                return parsed ?? new ApiResponse<PagedResponse<UserViewModel>> { Success = false, Message = "Không parse được dữ liệu từ API" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<PagedResponse<UserViewModel>> { Success = false, Message = ex.Message };
+            }
         }
     }
 }
