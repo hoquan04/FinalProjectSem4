@@ -1,4 +1,4 @@
-﻿@model AdminWeb.Areas.Admin.Models.ReviewViewModel
+@model AdminWeb.Areas.Admin.Models.ReviewViewModel
 @{
     ViewData["Title"] = "Chi tiết đánh giá";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -12,7 +12,7 @@
                     <h3 class="card-title">
                         <i class="fas fa-star"></i> Chi tiết đánh giá #@Model.ReviewId
                     </h3>
-                    <div class="card-tools">
+                    @* <div class="card-tools">
                         <a asp-action="Index" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Quay lại danh sách
                         </a>
@@ -22,7 +22,7 @@
                         <a asp-action="Delete" asp-route-id="@Model.ReviewId" class="btn btn-danger btn-sm">
                             <i class="fas fa-trash"></i> Xóa
                         </a>
-                    </div>
+                    </div> *@
                 </div>
 
                 <div class="card-body">
@@ -99,11 +99,11 @@
                                         </dd>
                                     </dl>
 
-                                    <div class="mt-3">
+                                    @* <div class="mt-3">
                                         <a asp-action="ByProduct" asp-route-productId="@Model.ProductId" class="btn btn-outline-info btn-sm">
                                             <i class="fas fa-list"></i> Xem tất cả đánh giá sản phẩm này
                                         </a>
-                                    </div>
+                                    </div> *@
                                 </div>
                             </div>
                         </div>
@@ -129,11 +129,11 @@
                                         </dd>
                                     </dl>
 
-                                    <div class="mt-3">
+                                    @* <div class="mt-3">
                                         <a asp-action="ByUser" asp-route-userId="@Model.UserId" class="btn btn-outline-success btn-sm">
                                             <i class="fas fa-list"></i> Xem tất cả đánh giá của người dùng
                                         </a>
-                                    </div>
+                                    </div> *@
                                 </div>
                             </div>
                         </div>
@@ -176,12 +176,12 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="btn-group btn-block" role="group">
-                                <a asp-action="Edit" asp-route-id="@Model.ReviewId" class="btn btn-warning">
+                                @* <a asp-action="Edit" asp-route-id="@Model.ReviewId" class="btn btn-warning">
                                     <i class="fas fa-edit"></i> Chỉnh sửa đánh giá
                                 </a>
                                 <a asp-action="Delete" asp-route-id="@Model.ReviewId" class="btn btn-danger">
                                     <i class="fas fa-trash"></i> Xóa đánh giá
-                                </a>
+                                </a> *@
                                 <a asp-action="Index" class="btn btn-secondary">
                                     <i class="fas fa-list"></i> Danh sách đánh giá
                                 </a>

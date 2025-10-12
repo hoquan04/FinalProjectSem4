@@ -2,6 +2,7 @@ using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Models;
 using AdminWeb.Areas.Admin.Models.DTOs;
 using AdminWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Globalization;
@@ -9,6 +10,7 @@ using System.Globalization;
 namespace AdminWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class OrderController : Controller
     {
         private readonly OrderService _orderService;
@@ -23,7 +25,8 @@ namespace AdminWeb.Areas.Admin.Controllers
         // 📌 Danh sách đơn hàng có phân trang
         public async Task<IActionResult> Index(int pageNow = 1, int pageSize = 10)
         {
-            var response = await _orderService.GetOrderPageAsync(pageNow, pageSize);
+            var response = await _orderService.GetAllOrdersAsync(pageNow, pageSize);
+
             if (!response.Success) return View("Error", response.Message);
 
             return View(response.Data);

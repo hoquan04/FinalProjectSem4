@@ -20,7 +20,6 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetById(int id)
     {
         var response = await _userRepository.GetUserByIdAsync(id);

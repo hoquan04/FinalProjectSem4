@@ -42,7 +42,7 @@ public class Shipping
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    [JsonIgnore]
+
     public ICollection<Order>? Orders { get; set; }
     // ✅ Constructor tự động random PostalCode nếu null
     public Shipping()

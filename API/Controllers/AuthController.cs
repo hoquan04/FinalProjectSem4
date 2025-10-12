@@ -201,22 +201,29 @@ namespace API.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] SignUpModel req)
         {
+            // Với [ApiController], ModelState invalid sẽ tự trả 400, nhưng để rõ ràng vẫn check:
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            // Chuẩn hoá đầu vào
+            var email = req.Email?.Trim().ToLowerInvariant();
+            var firstName = req.FirstName?.Trim();
+            var lastName = req.LastName?.Trim();
+            var phone = req.Phone?.Trim();
+            var address = req.Address?.Trim();
 
             if (req.Password != req.ConfirmPassword)
                 return BadRequest(new { message = "Password và ConfirmPassword không khớp" });
 
-            if (_ctx.Users.Any(u => u.Email == req.Email))
+            if (_ctx.Users.Any(u => u.Email == email))
                 return BadRequest(new { message = "Email đã tồn tại" });
-
-            // Ghép họ + tên thành FullName
-            string fullName = $"{req.FirstName} {req.LastName}".Trim();
 
             var user = new User
             {
-                FullName = fullName,
-                Email = req.Email,
+                FullName = $"{firstName} {lastName}".Trim(),
+                Email = email!,
+                Phone = phone,
+                Address = address,
                 Role = UserRole.Customer,
                 CreatedAt = DateTime.UtcNow,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password)
@@ -225,10 +232,19 @@ namespace API.Controllers
             _ctx.Users.Add(user);
             _ctx.SaveChanges();
 
-            return Ok(new
+            return StatusCode(201, new
             {
                 message = "Đăng ký thành công",
-                user = new { user.UserId, user.FullName, user.Email, user.Role }
+                user = new
+                {
+                    user.UserId,
+                    user.FullName,
+                    user.Email,
+                    user.Phone,
+                    user.Address,
+                    Role = user.Role.ToString(),
+                    user.CreatedAt
+                }
             });
         }
 

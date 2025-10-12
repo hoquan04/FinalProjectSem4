@@ -52,6 +52,7 @@ builder.Services.AddHttpClient<ShippingApiService>();
 builder.Services.AddScoped<ShippingApiService>();
 
 builder.Services.AddHttpClient<PaymentService>();
+builder.Services.AddHttpClient<DashboardService>();
 
 // Cấu hình localization cho tiếng Việt
 builder.Services.Configure<RequestLocalizationOptions>(options =>

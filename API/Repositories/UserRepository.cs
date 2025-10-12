@@ -86,35 +86,65 @@ namespace API.Repositories
             if (user == null)
                 return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
 
+            // 🧩 Nếu client không gửi role hợp lệ thì giữ nguyên role cũ
+            if (!Enum.IsDefined(typeof(UserRole), model.Role))
+                model.Role = user.Role;
+
             user.FullName = model.FullName;
             user.Email = model.Email;
             user.Phone = model.Phone;
             user.Address = model.Address;
-            user.Role = model.Role;   // ✅ Cho phép đổi quyền từ UI admin
+            user.Role = model.Role;
 
             await _context.SaveChangesAsync();
-            return new APIRespone<User> { Success = true, Data = user, Message = "Cập nhật thành công" };
+
+            return new APIRespone<User>
+            {
+                Success = true,
+                Data = user,
+                Message = "Cập nhật thành công"
+            };
         }
+
 
         public async Task<APIRespone<bool>> DeleteUserAsync(int id)
         {
             var response = new APIRespone<bool>();
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Data = false;
+                    response.Message = "Không tìm thấy người dùng";
+                    return response;
+                }
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+
+                response.Success = true;
+                response.Data = true;
+                response.Message = "Xóa người dùng thành công";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Xảy ra khi có ràng buộc khóa ngoại
+                response.Success = false;
+                response.Data = false;
+                response.Message = "Không thể xóa người dùng vì có dữ liệu liên quan (đơn hàng, thanh toán, hoặc thông báo).";
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Data = false;
-                response.Message = "Không tìm thấy người dùng";
-                return response;
+                response.Message = "Lỗi máy chủ: " + ex.Message;
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            response.Data = true;
-            response.Success = true;
-            response.Message = "Xóa thành công";
             return response;
         }
+
 
         public async Task<APIRespone<List<User>>> SearchUsersAsync(string searchTerm)
         {

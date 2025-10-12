@@ -1,11 +1,13 @@
 
-using Microsoft.AspNetCore.Mvc;
 using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AdminWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class ShipperController : Controller
     {
         private readonly ShipperService _shipperService;

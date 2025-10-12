@@ -66,25 +66,7 @@ namespace API.Repositories
         }
 
 
-        public async Task<APIRespone<IEnumerable<Order>>> GetAllAsync()
-        {
-            var orders = await _context.Orders
-                .Include(o => o.Users)
-                .Include(o => o.Shipping)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .Include(o => o.Payments)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
-
-            return new APIRespone<IEnumerable<Order>>
-            {
-                Success = true,
-                Message = "Lấy danh sách tất cả đơn hàng thành công",
-                Data = orders
-            };
-        }
-
+        
         public async Task<APIRespone<Order>> GetByIdAsync(int id)
         {
             var order = await _context.Orders
@@ -210,46 +192,37 @@ namespace API.Repositories
             };
         }
 
-        public async Task<APIRespone<PagedResponse<Order>>> Search(int pageNow, int pageSize, SearchOrder search)
+        public async Task<APIRespone<PagedResponse<OrderDisplayDto>>> Searchdto(int pageNow, int pageSize, SearchOrder search)
         {
             var query = _context.Orders
-                .Include(o => o.Users)
                 .Include(o => o.Shipping)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .Include(o => o.Payments)
                 .AsQueryable();
 
-            // 🔎 Tìm theo từ khóa
+            // 🔍 Tìm kiếm theo từ khóa
             if (!string.IsNullOrEmpty(search.Keyword))
             {
                 var keyword = search.Keyword.ToLower();
 
                 if (int.TryParse(search.Keyword, out int orderId))
                 {
-                    // Nếu nhập số thì tìm theo Mã đơn
                     query = query.Where(o => o.OrderId == orderId);
                 }
                 else if (Enum.TryParse<OrderStatus>(search.Keyword, true, out var status))
                 {
-                    // Nếu nhập đúng tên trạng thái thì tìm theo Trạng thái
                     query = query.Where(o => o.Status == status);
                 }
                 else
                 {
                     query = query.Where(o =>
-                         (o.Shipping != null && (
-                             (o.Shipping.RecipientName ?? "").ToLower().Contains(keyword) ||
-                             (o.Shipping.Email ?? "").ToLower().Contains(keyword) ||
-                             (o.Shipping.Address ?? "").ToLower().Contains(keyword)
-                         ))
-                     );
-
+                        (o.Shipping != null && (
+                            (o.Shipping.RecipientName ?? "").ToLower().Contains(keyword) ||
+                            (o.Shipping.Email ?? "").ToLower().Contains(keyword) ||
+                            (o.Shipping.Address ?? "").ToLower().Contains(keyword)
+                        )));
                 }
             }
 
-            // 📅 Lọc theo ngày
-            // 📅 Lọc theo ngày - SỬA LẠI
+            // 📅 Lọc theo ngày đặt
             if (search.FromDate.HasValue)
             {
                 var from = search.FromDate.Value.Date;
@@ -264,15 +237,12 @@ namespace API.Repositories
 
             // 💰 Lọc theo tổng tiền
             if (search.MinAmount.HasValue)
-            {
                 query = query.Where(o => o.TotalAmount >= search.MinAmount.Value);
-            }
-            if (search.MaxAmount.HasValue)
-            {
-                query = query.Where(o => o.TotalAmount <= search.MaxAmount.Value);
-            }
 
-            // 📌 Phân trang
+            if (search.MaxAmount.HasValue)
+                query = query.Where(o => o.TotalAmount <= search.MaxAmount.Value);
+
+            // 📊 Phân trang
             var totalCount = await query.CountAsync();
             var totalPage = (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -280,9 +250,19 @@ namespace API.Repositories
                 .OrderByDescending(o => o.OrderDate)
                 .Skip((pageNow - 1) * pageSize)
                 .Take(pageSize)
+                .Select(o => new OrderDisplayDto
+                {
+                    OrderId = o.OrderId,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    Status = o.Status.ToString(),
+                    RecipientName = o.Shipping != null ? o.Shipping.RecipientName : null,
+                    Email = o.Shipping != null ? o.Shipping.Email : null,
+                    Address = o.Shipping != null ? o.Shipping.Address : null
+                })
                 .ToListAsync();
 
-            var response = new PagedResponse<Order>
+            var response = new PagedResponse<OrderDisplayDto>
             {
                 Data = data,
                 PageNow = pageNow,
@@ -291,13 +271,14 @@ namespace API.Repositories
                 TotalCount = totalCount
             };
 
-            return new APIRespone<PagedResponse<Order>>
+            return new APIRespone<PagedResponse<OrderDisplayDto>>
             {
                 Success = true,
                 Message = "Tìm kiếm đơn hàng thành công",
                 Data = response
             };
         }
+
         public async Task<APIRespone<IEnumerable<Order>>> GetByUserIdAsync(int userId)
         {
             var orders = await _context.Orders
@@ -392,21 +373,39 @@ namespace API.Repositories
             };
         }
 
-        public async Task<APIRespone<IEnumerable<Order>>> GetAvailableOrdersForShipperAsync()
+        public async Task<APIRespone<IEnumerable<ShipperOrderDto>>> GetAvailableOrdersForShipperAsync()
         {
             var orders = await _context.Orders
                 .Include(o => o.Shipping)
                 .Include(o => o.Payments)
-                .Where(o => o.Status == OrderStatus.Confirmed) // chỉ lấy đơn đã xác nhận, chưa giao
+                .Where(o => o.Status == OrderStatus.Confirmed)
+                .Select(o => new ShipperOrderDto
+                {
+                    OrderId = o.OrderId,
+                    TotalAmount = o.TotalAmount,
+                    CustomerName = o.Shipping != null ? o.Shipping.RecipientName : "Ẩn danh",
+                    PhoneNumber = o.Shipping != null ? o.Shipping.PhoneNumber : "Không có",
+                    Email = o.Shipping.Email ?? "",
+                    Address = o.Shipping.Address ?? "",
+                    City = o.Shipping.City ?? "",
+                    PostalCode = o.Shipping.PostalCode ?? "",
+                    ShippingFee = o.Shipping.ShippingFee ?? 0,
+                    Status = o.Status.ToString(),
+                    PaymentStatus = o.Payments
+                        .OrderByDescending(p => p.PaymentId)
+                        .Select(p => p.PaymentStatus.ToString())
+                        .FirstOrDefault() ?? "Chưa thanh toán"
+                })
                 .ToListAsync();
 
-            return new APIRespone<IEnumerable<Order>>
+            return new APIRespone<IEnumerable<ShipperOrderDto>>
             {
                 Success = true,
                 Data = orders,
                 Message = "Danh sách đơn hàng có thể nhận giao"
             };
         }
+
         public async Task<APIRespone<Order>> AssignOrderToShipperAsync(int orderId, int shipperId)
         {
             var order = await _context.Orders.FindAsync(orderId);
@@ -474,15 +473,29 @@ namespace API.Repositories
         {
             var order = await _context.Orders
                 .Include(o => o.Payments)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.ShipperId == shipperId);
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (order == null)
-                return new APIRespone<Order> { Success = false, Message = "Không tìm thấy đơn hàng của bạn" };
+                return new APIRespone<Order>
+                {
+                    Success = false,
+                    Message = "Không tìm thấy đơn hàng"
+                };
+
+            if (order.ShipperId != shipperId)
+                return new APIRespone<Order>
+                {
+                    Success = false,
+                    Message = "Bạn không phải là shipper của đơn hàng này"
+                };
 
             if (order.Status != OrderStatus.Shipping)
-                return new APIRespone<Order> { Success = false, Message = "Đơn hàng không ở trạng thái giao hàng" };
+                return new APIRespone<Order>
+                {
+                    Success = false,
+                    Message = "Đơn hàng chưa được giao hoặc đã hoàn tất"
+                };
 
-            // ✅ Cập nhật Payment
             var payment = order.Payments?.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
             if (payment != null)
             {
@@ -493,6 +506,17 @@ namespace API.Repositories
             order.Status = OrderStatus.Completed;
             await _context.SaveChangesAsync();
 
+            await _notificationRepo.AddAsync(new Notification
+            {
+                UserId = order.UserId,
+                OrderId = order.OrderId,
+                Title = "Đơn hàng đã được giao thành công",
+                Message = $"Đơn hàng #{order.OrderId} của bạn đã được giao thành công.",
+                Type = NotificationType.Shipping,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+
             return new APIRespone<Order>
             {
                 Success = true,
@@ -501,5 +525,57 @@ namespace API.Repositories
             };
         }
 
+        public async Task<APIRespone<PagedResponse<OrderDisplayDto>>> GetAllAsync(int pageNow = 1, int pageSize = 10)
+        {
+            var query = _context.Orders
+                .Include(o => o.Shipping)
+                .OrderByDescending(o => o.OrderDate)
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync();
+            var totalPage = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var data = await query
+                .Skip((pageNow - 1) * pageSize)
+                .Take(pageSize)
+                .Select(o => new OrderDisplayDto
+                {
+                    OrderId = o.OrderId,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    Status = o.Status.ToString(),
+                    RecipientName = o.Shipping != null ? o.Shipping.RecipientName : null,
+                    Email = o.Shipping != null ? o.Shipping.Email : null,
+                    Address = o.Shipping != null ? o.Shipping.Address : null
+                })
+                .ToListAsync();
+
+            var response = new PagedResponse<OrderDisplayDto>
+            {
+                Data = data,
+                PageNow = pageNow,
+                PageSize = pageSize,
+                TotalPage = totalPage,
+                TotalCount = totalCount
+            };
+
+            return new APIRespone<PagedResponse<OrderDisplayDto>>
+            {
+                Success = true,
+                Message = "Lấy danh sách đơn hàng có phân trang thành công",
+                Data = response
+            };
+        }
+
+
+        Task<APIRespone<IEnumerable<Order>>> IType<Order>.GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<APIRespone<PagedResponse<Order>>> IOrderRepository.Search(int pageNow, int pageSize, SearchOrder search)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -36,25 +36,35 @@ namespace AdminWeb.Areas.Admin.Models
         [Display(Name = "Đang chờ duyệt Shipper")]
         public bool IsShipperRequestPending { get; set; } = false;
     }
-
     public class UserCreateModel
     {
-        [Required, StringLength(100)]
+        [Required(ErrorMessage = "Họ và tên không được để trống")]
+        [StringLength(100, ErrorMessage = "Họ và tên tối đa 100 ký tự")]
+        [Display(Name = "Họ và tên")]
         public string FullName { get; set; } = string.Empty;
 
-        [Required, EmailAddress, StringLength(100)]
+        [Required(ErrorMessage = "Email không được để trống")]
+        [EmailAddress(ErrorMessage = "Địa chỉ email không hợp lệ")]
+        [StringLength(100, ErrorMessage = "Email tối đa 100 ký tự")]
+        [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Phone, StringLength(15)]
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [StringLength(15, ErrorMessage = "Số điện thoại tối đa 15 ký tự")]
+        [Display(Name = "Số điện thoại")]
         public string? Phone { get; set; }
 
+        [Display(Name = "Địa chỉ")]
         public string? Address { get; set; }
 
-        [Required, MinLength(6)]
-        public string Password { get; set; } = string.Empty;   // ✅ ĐÚNG KEY
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
+        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
+        [Display(Name = "Mật khẩu")]
+        public string Password { get; set; } = string.Empty;
 
-        [Range(0, 1)]
-        public int Role { get; set; } = 0;                     // 0=Customer, 1=Admin
+        [Range(0, 1, ErrorMessage = "Vai trò không hợp lệ")]
+        [Display(Name = "Vai trò")]
+        public int Role { get; set; } = 0; // 0 = Customer, 1 = Admin
     }
 
     public class UserEditModel

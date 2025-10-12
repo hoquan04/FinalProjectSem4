@@ -94,36 +94,39 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#btnDelete').click(async function (e) {
-                e.preventDefault();
+                    $('#btnDelete').click(async function (e) {
+            e.preventDefault();
 
-                if (!confirm('Bạn có chắc chắn muốn xóa người dùng "@Model.FullName" không?')) {
-                    return false;
-                }
+            if (!confirm('Bạn có chắc chắn muốn xóa người dùng "@Model.FullName" không?')) {
+                return false;
+            }
 
-                var $btn = $(this);
-                $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang xóa...');
+            var $btn = $(this);
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang xóa...');
 
-                try {
-                    const resp = await fetch(`@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi/@Model.UserId`, {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+            try {
+                const resp = await fetch(`@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi/@Model.UserId`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-                    if (!resp.ok) {
-                        const errData = await resp.json();
-                        $('#apiError').show().text(JSON.stringify(errData));
-                        $btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Xác nhận xóa');
-                        return;
-                    }
+                const text = await resp.text(); // đọc raw text
 
-                    // Xóa thành công -> redirect về Index
-                    window.location.href = '@Url.Action("Index")';
-                } catch (err) {
-                    $('#apiError').show().text("Lỗi khi xóa: " + err);
+                if (!resp.ok) {
+                    const errMsg = text || "Xóa thất bại";
+                    $('#apiError').show().text(errMsg);
                     $btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Xác nhận xóa');
+                    return;
                 }
-            });
+
+                // ✅ Nếu không có nội dung trả về thì vẫn thành công
+                window.location.href = '@Url.Action("Index")';
+            } catch (err) {
+                $('#apiError').show().text("Lỗi khi xóa: " + err);
+                $btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Xác nhận xóa');
+            }
+        });
+
         });
     </script>
 }

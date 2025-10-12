@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace AdminWeb.Areas.Admin.Models
 {
     public class Order
@@ -5,6 +7,7 @@ namespace AdminWeb.Areas.Admin.Models
         public int OrderId { get; set; }
         public int UserId { get; set; }
         public DateTime OrderDate { get; set; }
+        [Required(ErrorMessage = "Trạng thái đơn hàng là bắt buộc")]
         public OrderStatus Status { get; set; } 
         public decimal TotalAmount { get; set; }
         public int ShippingId { get; set; }

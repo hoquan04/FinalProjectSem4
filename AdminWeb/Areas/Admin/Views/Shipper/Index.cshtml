@@ -1,3 +1,4 @@
+@using AdminWeb.Areas.Admin.Data
 @model List<AdminWeb.Areas.Admin.Models.UserViewModel>
 @{
     ViewBag.Title = "Yêu cầu đăng ký Shipper";
@@ -49,17 +50,22 @@
                         @if (!string.IsNullOrEmpty(u.CccdFrontUrl) || !string.IsNullOrEmpty(u.CccdBackUrl))
                         {
                             <div class="d-flex justify-content-center gap-2">
+                                @* Ảnh mặt trước *@
                                 @if (!string.IsNullOrEmpty(u.CccdFrontUrl))
                                 {
-                                    <a href="@u.CccdFrontUrl" target="_blank">
-                                        <img src="@u.CccdFrontUrl" alt="Mặt trước"
+                                    <a href="@($"{AdminWeb.Areas.Admin.Data.ApiConstants.ImageSocurce}{u.CccdFrontUrl}")" target="_blank">
+                                        <img src="@($"{AdminWeb.Areas.Admin.Data.ApiConstants.ImageSocurce}{u.CccdFrontUrl}")"
+                                             alt="Mặt trước"
                                              style="width:80px; height:60px; object-fit:cover; border-radius:5px; border:1px solid #ccc;" />
                                     </a>
                                 }
+
+                                @* Ảnh mặt sau *@
                                 @if (!string.IsNullOrEmpty(u.CccdBackUrl))
                                 {
-                                    <a href="@u.CccdBackUrl" target="_blank">
-                                        <img src="@u.CccdBackUrl" alt="Mặt sau"
+                                    <a href="@($"{AdminWeb.Areas.Admin.Data.ApiConstants.ImageSocurce}{u.CccdBackUrl}")" target="_blank">
+                                        <img src="@($"{AdminWeb.Areas.Admin.Data.ApiConstants.ImageSocurce}{u.CccdBackUrl}")"
+                                             alt="Mặt sau"
                                              style="width:80px; height:60px; object-fit:cover; border-radius:5px; border:1px solid #ccc;" />
                                     </a>
                                 }
