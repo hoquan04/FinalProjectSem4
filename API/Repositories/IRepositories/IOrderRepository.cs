@@ -9,12 +9,14 @@ namespace API.Repositories.IRepositories
         Task<APIRespone<IEnumerable<Order>>> GetByUserIdAsync(int userId);
         Task<APIRespone<IEnumerable<Order>>> GetOrdersForShipperAsync();
 
-        Task<APIRespone<Order>> CompleteOrderByShipperAsync(int orderId);
-        Task<APIRespone<IEnumerable<Order>>> GetAvailableOrdersForShipperAsync();
+        Task<APIRespone<IEnumerable<ShipperOrderDto>>> GetAvailableOrdersForShipperAsync();
 
         Task<APIRespone<Order>> AssignOrderToShipperAsync(int orderId, int shipperId);
         Task<APIRespone<IEnumerable<object>>> GetOrdersOfShipperAsync(int shipperId);
         Task<APIRespone<Order>> CompleteOrderByShipperAsync(int orderId, int shipperId);
+        Task<APIRespone<PagedResponse<OrderDisplayDto>>> GetAllAsync(int pageNow = 1, int pageSize = 10);
+        Task<APIRespone<PagedResponse<OrderDisplayDto>>> Searchdto(int pageNow, int pageSize, SearchOrder search);
+
 
     }
 }

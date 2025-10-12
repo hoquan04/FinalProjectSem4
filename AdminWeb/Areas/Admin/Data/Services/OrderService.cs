@@ -25,21 +25,30 @@ namespace AdminWeb.Areas.Admin.Data.Services
         #region ====== ORDER ======
 
         /// <summary>
-        /// 🚀 Lấy tất cả đơn hàng
+        /// 🚀 Lấy danh sách đơn hàng có phân trang (OrderDisplayDto)
         /// </summary>
-        public async Task<ApiResponse<IEnumerable<Order>>> GetAllOrdersAsync()
+        public async Task<ApiResponse<PagedResponse<OrderDisplayDto>>> GetAllOrdersAsync(int pageNow = 1, int pageSize = 10)
         {
-            return await _httpClient.GetFromJsonAsync<ApiResponse<IEnumerable<Order>>>(
-                $"{ApiConstants.OrderApi}", _options
-            ) ?? new ApiResponse<IEnumerable<Order>>
+            var url = $"{ApiConstants.OrderApi}?pageNow={pageNow}&pageSize={pageSize}";
+            var response = await _httpClient.GetAsync(url);
+            var raw = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"[DEBUG] API Response: {raw}");
+
+            if (!response.IsSuccessStatusCode)
             {
-                Success = false,
-                Message = "Không parse được dữ liệu từ API"
-            };
+                return new ApiResponse<PagedResponse<OrderDisplayDto>>
+                {
+                    Success = false,
+                    Message = $"API lỗi {response.StatusCode}: {raw}"
+                };
+            }
+
+            return JsonSerializer.Deserialize<ApiResponse<PagedResponse<OrderDisplayDto>>>(raw, _options)
+                   ?? new ApiResponse<PagedResponse<OrderDisplayDto>> { Success = false, Message = "Parse lỗi JSON" };
         }
 
         /// <summary>
-        /// 🚀 Lấy đơn hàng theo ID
+        /// 🚀 Lấy đơn hàng theo ID (Order chi tiết)
         /// </summary>
         public async Task<ApiResponse<Order>> GetOrderByIdAsync(int id)
         {
@@ -106,50 +115,26 @@ namespace AdminWeb.Areas.Admin.Data.Services
         }
 
         /// <summary>
-        /// 🚀 Lấy danh sách đơn hàng có phân trang
+        /// 🔍 Tìm kiếm đơn hàng (OrderDisplayDto)
         /// </summary>
-        public async Task<ApiResponse<PagedResponse<Order>>> GetOrderPageAsync(int pageNow = 1, int pageSize = 10)
-        {
-            var url = $"{ApiConstants.OrderApi}/page?pageNow={pageNow}&pageSize={pageSize}";
-            var response = await _httpClient.GetAsync(url);
-            var raw = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"[DEBUG] API Response: {raw}");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return new ApiResponse<PagedResponse<Order>>
-                {
-                    Success = false,
-                    Message = $"API lỗi {response.StatusCode}: {raw}"
-                };
-            }
-
-            return JsonSerializer.Deserialize<ApiResponse<PagedResponse<Order>>>(raw, _options)
-                   ?? new ApiResponse<PagedResponse<Order>> { Success = false, Message = "Parse lỗi JSON" };
-        }
-
-
-        /// <summary>
-        /// 🔍 Tìm kiếm đơn hàng
-        /// </summary>
-        public async Task<ApiResponse<PagedResponse<Order>>> SearchOrderAsync(SearchOrder search, int pageNow = 1, int pageSize = 10)
+        public async Task<ApiResponse<PagedResponse<OrderDisplayDto>>> SearchOrderAsync(SearchOrder search, int pageNow = 1, int pageSize = 10)
         {
             var response = await _httpClient.PostAsJsonAsync(
-                $"{ApiConstants.OrderApi}/search?pageNow={pageNow}&pageSize={pageSize}", search
+                $"{ApiConstants.OrderApi}/searchdto?pageNow={pageNow}&pageSize={pageSize}", search
             );
 
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                return new ApiResponse<PagedResponse<Order>>
+                return new ApiResponse<PagedResponse<OrderDisplayDto>>
                 {
                     Success = false,
                     Message = $"API lỗi {response.StatusCode}: {error}"
                 };
             }
 
-            return await response.Content.ReadFromJsonAsync<ApiResponse<PagedResponse<Order>>>(_options)
-                   ?? new ApiResponse<PagedResponse<Order>>
+            return await response.Content.ReadFromJsonAsync<ApiResponse<PagedResponse<OrderDisplayDto>>>(_options)
+                   ?? new ApiResponse<PagedResponse<OrderDisplayDto>>
                    {
                        Success = false,
                        Message = "Không parse được dữ liệu từ API"

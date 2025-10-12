@@ -1,12 +1,13 @@
 using API.Data;
 using API.Repositories;
 using API.Repositories.IRepositories;
-using API.Repositories.Services;
 using API.Repositories.Repositories;
+using API.Repositories.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,14 @@ builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
         o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+
+        // ✅ Enum converter chấp nhận "Admin", "admin", "Shipper", ...
+        o.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+        );
     });
+
 builder.Services.AddHttpContextAccessor();
 
 // ✅ Swagger + JWT config

@@ -1,8 +1,9 @@
-﻿using AdminWeb.Areas.Admin.Data.Services;
+using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Filters;
 using AdminWeb.Areas.Admin.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AdminWeb.Areas.Admin.Controllers
 {
@@ -59,7 +60,6 @@ namespace AdminWeb.Areas.Admin.Controllers
             return View(model);
         }
 
-        // GET: chỉnh sửa
         public async Task<IActionResult> Edit(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -78,8 +78,13 @@ namespace AdminWeb.Areas.Admin.Controllers
                 Address = user.Address,
                 Role = user.Role
             };
+
+            // ✅ Dropdown Role
+            ViewBag.RoleList = new SelectList(Enum.GetValues(typeof(UserRole)));
+
             return View(editModel);
         }
+
 
         // POST: chỉnh sửa
         [HttpPost, ValidateAntiForgeryToken]
@@ -112,7 +117,7 @@ namespace AdminWeb.Areas.Admin.Controllers
         }
 
         // POST: xóa
-        [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var result = await _userService.DeleteUserAsync(id);

@@ -1,58 +1,50 @@
+@model AdminWeb.Areas.Admin.Data.Services.DashboardStatsViewModel
 @{
     ViewData["Title"] = "Bảng điều khiển";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
 
 <div class="row">
-    <!-- Tổng quan -->
     <div class="col-lg-3 col-md-6">
-        <div class="ibox bg-primary color-white">
-            <div class="ibox-title">
-                <h5>Tổng sản phẩm</h5>
-            </div>
-            <div class="ibox-content text-center">
-                <h1 class="no-margins">120</h1>
+        <div class="ibox bg-primary color-white text-center">
+            <div class="ibox-title"><h5>Tổng sản phẩm</h5></div>
+            <div class="ibox-content">
+                <h1 class="no-margins">@Model.TotalProducts</h1>
                 <small>Sản phẩm đang kinh doanh</small>
-                <div><i class="fa fa-cubes fa-2x mt-2"></i></div>
             </div>
         </div>
     </div>
 
     <div class="col-lg-3 col-md-6">
-        <div class="ibox bg-success color-white">
-            <div class="ibox-title">
-                <h5>Tổng đơn hàng</h5>
-            </div>
-            <div class="ibox-content text-center">
-                <h1 class="no-margins">580</h1>
+        <div class="ibox bg-success color-white text-center">
+            <div class="ibox-title"><h5>Tổng đơn hàng</h5></div>
+            <div class="ibox-content">
+                <h1 class="no-margins">@Model.TotalOrders</h1>
                 <small>Đơn hàng đã xử lý</small>
-                <div><i class="fa fa-shopping-cart fa-2x mt-2"></i></div>
             </div>
         </div>
     </div>
 
     <div class="col-lg-3 col-md-6">
-        <div class="ibox bg-warning color-white">
-            <div class="ibox-title">
-                <h5>Người dùng</h5>
-            </div>
-            <div class="ibox-content text-center">
-                <h1 class="no-margins">340</h1>
+        <div class="ibox bg-warning color-white text-center">
+            <div class="ibox-title"><h5>Người dùng</h5></div>
+            <div class="ibox-content">
+                <h1 class="no-margins">@Model.TotalUsers</h1>
                 <small>Khách hàng đăng ký</small>
-                <div><i class="fa fa-users fa-2x mt-2"></i></div>
             </div>
         </div>
     </div>
 
     <div class="col-lg-3 col-md-6">
-        <div class="ibox bg-danger color-white">
-            <div class="ibox-title">
-                <h5>Doanh thu tháng</h5>
-            </div>
-            <div class="ibox-content text-center">
-                <h1 class="no-margins">75,000,000 đ</h1>
-                <small>Doanh thu tháng hiện tại</small>
-                <div><i class="fa fa-line-chart fa-2x mt-2"></i></div>
+        <div class="ibox bg-danger color-white text-center">
+            <div class="ibox-title"><h5>Doanh thu</h5></div>
+            <div class="ibox-content">
+                <h1 class="no-margins">@Model.TotalRevenue.ToString("N0") đ</h1>
+                <small>Tổng doanh thu</small>
             </div>
         </div>
     </div>
@@ -60,13 +52,10 @@
 
 <hr />
 
-<!-- Biểu đồ -->
 <div class="row">
     <div class="col-lg-8">
         <div class="ibox">
-            <div class="ibox-title">
-                <h5>Doanh thu 12 tháng gần nhất</h5>
-            </div>
+            <div class="ibox-title"><h5>Doanh thu 12 tháng</h5></div>
             <div class="ibox-content">
                 <canvas id="revenueChart" height="160"></canvas>
             </div>
@@ -75,9 +64,7 @@
 
     <div class="col-lg-4">
         <div class="ibox">
-            <div class="ibox-title">
-                <h5>Tỷ lệ trạng thái đơn hàng</h5>
-            </div>
+            <div class="ibox-title"><h5>Tỷ lệ trạng thái đơn hàng</h5></div>
             <div class="ibox-content">
                 <canvas id="orderStatusChart" height="160"></canvas>
             </div>
@@ -85,13 +72,10 @@
     </div>
 </div>
 
-<!-- Bảng đơn hàng mới nhất -->
 <div class="row mt-4">
     <div class="col-lg-12">
         <div class="ibox">
-            <div class="ibox-title">
-                <h5>Đơn hàng mới nhất</h5>
-            </div>
+            <div class="ibox-title"><h5>Đơn hàng mới nhất</h5></div>
             <div class="ibox-content">
                 <table class="table table-striped table-hover">
                     <thead>
@@ -104,132 +88,108 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#1001</td>
-                            <td>Nguyễn Văn A</td>
-                            <td>01/10/2025</td>
-                            <td>1.500.000 đ</td>
-                            <td><span class="badge bg-success">Hoàn tất</span></td>
-                        </tr>
-                        <tr>
-                            <td>#1002</td>
-                            <td>Trần Thị B</td>
-                            <td>02/10/2025</td>
-                            <td>950.000 đ</td>
-                            <td><span class="badge bg-warning">Đang giao</span></td>
-                        </tr>
-                        <tr>
-                            <td>#1003</td>
-                            <td>Lê Văn C</td>
-                            <td>03/10/2025</td>
-                            <td>2.100.000 đ</td>
-                            <td><span class="badge bg-info">Đã xác nhận</span></td>
-                        </tr>
-                        <tr>
-                            <td>#1004</td>
-                            <td>Phạm Duy D</td>
-                            <td>04/10/2025</td>
-                            <td>870.000 đ</td>
-                            <td><span class="badge bg-danger">Đã hủy</span></td>
-                        </tr>
+                        @if (Model.RecentOrders.Any())
+                        {
+                            foreach (var o in Model.RecentOrders)
+                            {
+                                <tr>
+                                    <td>#@o.OrderId</td>
+                                    <td>@(o.Shipping?.RecipientName ?? "N/A")</td>
+                                    <td>@o.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@($"{o.TotalAmount:N0} đ")</td>
+                                    <td><span class="badge bg-info">@o.Status</span></td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="text-center text-muted">Không có đơn hàng nào</td></tr>
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-
 @section Styles {
     <style>
-        .ibox {
-            background: #fff;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,.05);
-            overflow: hidden;
+        /* 🎨 Ghi đè chữ trắng mặc định trong ibox */
+        .ibox.bg-primary,
+        .ibox.bg-success,
+        .ibox.bg-warning,
+        .ibox.bg-danger {
+            color: #000 !important; /* chữ đen */
         }
 
-        .ibox-title {
-            padding: 10px 15px;
-            border-bottom: 1px solid #e7eaec;
-            font-weight: 600;
+        .ibox-title h5,
+        .ibox-content h1,
+        .ibox-content small {
+            color: #000 !important; /* tiêu đề và nội dung đều đen */
         }
 
-        .ibox-content {
-            padding: 15px;
-        }
-
+        /* 👇 Nếu bạn muốn giữ nền màu sáng hơn để dễ đọc */
         .ibox.bg-primary {
-            background-color: #1c84c6;
+            background-color: #d9edf7 !important; /* xanh nhạt */
         }
 
         .ibox.bg-success {
-            background-color: #1ab394;
+            background-color: #dff0d8 !important; /* xanh lá nhạt */
         }
 
         .ibox.bg-warning {
-            background-color: #f8ac59;
+            background-color: #fcf8e3 !important; /* vàng nhạt */
         }
 
         .ibox.bg-danger {
-            background-color: #ed5565;
-        }
-
-        .color-white {
-            color: white !important;
-        }
-
-        .no-margins {
-            margin: 0;
-            font-size: 32px;
-        }
-
-        .table th, .table td {
-            vertical-align: middle;
+            background-color: #f2dede !important; /* đỏ nhạt */
         }
     </style>
 }
-
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // === Biểu đồ doanh thu giả lập ===
-        const ctxRevenue = document.getElementById('revenueChart');
-        new Chart(ctxRevenue, {
-            type: 'line',
+        const orderStatusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrderStatusStats));
+        const monthlyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue));
+
+        // 🧠 Map số -> chữ tiếng Việt
+        const statusLabels = {
+            "0": "Chờ xác nhận",
+            "1": "Đã xác nhận",
+            "2": "Đang giao",
+            "3": "Hoàn tất",
+            "4": "Đã hủy"
+        };
+
+        // === Biểu đồ trạng thái đơn hàng ===
+        new Chart(document.getElementById('orderStatusChart'), {
+            type: 'doughnut',
             data: {
-                labels: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                labels: orderStatusData.map(s => statusLabels[s.Status] || "Không xác định"),
                 datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: [2, 3, 5, 6, 4, 8, 10, 12, 9, 11, 14, 16],
-                    borderColor: '#1ab394',
-                    backgroundColor: 'rgba(26,179,148,0.2)',
-                    tension: 0.3,
-                    fill: true,
+                    data: orderStatusData.map(s => s.Count),
+                    backgroundColor: ['#1ab394', '#f8ac59', '#ed5565', '#1c84c6', '#888']
                 }]
             },
             options: {
-                plugins: { legend: { display: true } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { callback: v => v + "tr" } }
+                plugins: {
+                    legend: { position: 'bottom' }
                 }
             }
         });
 
-        // === Biểu đồ tỷ lệ trạng thái đơn hàng giả lập ===
-        const ctxStatus = document.getElementById('orderStatusChart');
-        new Chart(ctxStatus, {
-            type: 'doughnut',
+        // === Biểu đồ doanh thu ===
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
             data: {
-                labels: ['Hoàn tất', 'Đang giao', 'Đã hủy', 'Chờ xác nhận'],
+                labels: monthlyRevenue.map(m => m.Month),
                 datasets: [{
-                    data: [45, 30, 10, 15],
-                    backgroundColor: ['#1ab394', '#f8ac59', '#ed5565', '#1c84c6'],
-                    hoverOffset: 6
+                    label: 'Doanh thu (VNĐ)',
+                    data: monthlyRevenue.map(m => m.Revenue),
+                    borderColor: '#1ab394',
+                    backgroundColor: 'rgba(26,179,148,0.2)',
+                    fill: true,
+                    tension: 0.3
                 }]
-            },
-            options: {
-                plugins: { legend: { position: 'bottom' } }
             }
         });
     </script>

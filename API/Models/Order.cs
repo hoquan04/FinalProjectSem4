@@ -25,14 +25,13 @@ namespace API.Models
         public int ShippingId { get; set; }
 
         // 🔹 Navigation Properties
-
         [ForeignKey(nameof(UserId))]
         [JsonIgnore]
-        public User Users { get; set; } = null!; // ✅ luôn có User
+        public User? Users { get; set; }   // ✅ Cho phép null
 
         [ForeignKey(nameof(ShippingId))]
-        [JsonIgnore]
-        public Shipping Shipping { get; set; } = null!; // ✅ luôn có Shipping
+        public Shipping? Shipping { get; set; }  // ✅ Cho phép null
+
 
         [JsonIgnore]
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>(); // ✅ không bao giờ null

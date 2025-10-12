@@ -118,11 +118,14 @@
                                            class="btn btn-sm btn-warning" title="Chỉnh sửa">
                                             <i class="fa fa-edit"></i> Sửa
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.UserId"
-                                           class="btn btn-sm btn-danger" title="Xóa"
-                                           onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');">
-                                            <i class="fa fa-trash"></i> Xóa
-                                        </a>
+                                        <form asp-action="DeleteConfirmed" asp-route-id="@item.UserId" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng @item.FullName?');">
+                                                <i class="fa fa-trash"></i> Xóa
+                                            </button>
+                                        </form>
+
                                     </div>
                                 </td>
                             </tr>

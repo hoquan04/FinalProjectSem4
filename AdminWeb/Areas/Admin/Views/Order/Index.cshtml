@@ -1,12 +1,14 @@
 @using AdminWeb.Areas.Admin.Models
-@model PagedResponse<AdminWeb.Areas.Admin.Models.Order>
+@model PagedResponse<AdminWeb.Areas.Admin.Models.DTOs.OrderDisplayDto>
+
 
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
 }
+
 <div class="clearfix mb-3" style="display: table; width: 100%;">
     <div style="display: table-cell; vertical-align: middle;">
-        <h2 class="m-0" style="margin: 0;">Quản lý đơn hàng</h2>
+        <h2 class="m-0">Quản lý đơn hàng</h2>
     </div>
     <div style="display: table-cell; vertical-align: middle; text-align: right;">
         <button type="button" class="btn btn-default btn-sm" title="Làm mới" onclick="location.reload();">
@@ -15,7 +17,8 @@
     </div>
 </div>
 
-<br/>
+<br />
+
 <!-- 🔍 Form tìm kiếm -->
 <form asp-action="Search" method="post" class="mb-3">
     <div class="row">
@@ -26,30 +29,26 @@
         </div>
 
         <div class="col-md-2">
-            <div class="input-group">
-                <input type="text" name="FromDate" id="FromDate" class="form-control"
-                       placeholder="Từ ngày"
-                       value="@(ViewBag.SearchModel?.FromDate?.ToString("dd/MM/yyyy"))" />
-                <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-            </div>
+            <input type="text" name="FromDate" id="FromDate" class="form-control"
+                   placeholder="Từ ngày"
+                   value="@(ViewBag.SearchModel?.FromDate?.ToString("dd/MM/yyyy"))" />
         </div>
 
         <div class="col-md-2">
-            <div class="input-group">
-                <input type="text" name="ToDate" id="ToDate" class="form-control"
-                       placeholder="Đến ngày"
-                       value="@(ViewBag.SearchModel?.ToDate?.ToString("dd/MM/yyyy"))" />
-                <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-            </div>
+            <input type="text" name="ToDate" id="ToDate" class="form-control"
+                   placeholder="Đến ngày"
+                   value="@(ViewBag.SearchModel?.ToDate?.ToString("dd/MM/yyyy"))" />
         </div>
 
         <div class="col-md-2">
-            <input type="number" name="MinAmount" class="form-control" placeholder="Từ tổng tiền"
+            <input type="number" name="MinAmount" class="form-control"
+                   placeholder="Từ tổng tiền"
                    value="@(ViewBag.SearchModel?.MinAmount)" />
         </div>
 
         <div class="col-md-2">
-            <input type="number" name="MaxAmount" class="form-control" placeholder="Đến tổng tiền"
+            <input type="number" name="MaxAmount" class="form-control"
+                   placeholder="Đến tổng tiền"
                    value="@(ViewBag.SearchModel?.MaxAmount)" />
         </div>
 
@@ -59,18 +58,17 @@
     </div>
 </form>
 
-
 <!-- 📋 Bảng danh sách đơn hàng -->
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Mã đơn</th>
-            <th>Khách hàng</th>
+            <th>Người nhận</th>
             <th>Email</th>
             <th>Ngày đặt</th>
             <th>Trạng thái</th>
             <th>Tổng tiền</th>
-            <th>Vận chuyển</th>
+            <th>Địa chỉ</th>
             <th>Thao tác</th>
         </tr>
     </thead>
@@ -81,28 +79,38 @@
             {
                 <tr>
                     <td>@order.OrderId</td>
-                    <td>@order.Shipping?.RecipientName</td>
-                    <td>@order.Shipping?.Email</td>
+                    <td>@order.RecipientName</td>
+                    <td>@order.Email</td>
                     <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
                     <td>
-                        @switch (order.Status)
+                        @if (order.Status == "Pending")
                         {
-                            case OrderStatus.Pending:
-                                <span class="badge bg-warning">Chờ xử lý</span>; break;
-                            case OrderStatus.Confirmed:
-                                <span class="badge bg-info">Đã xác nhận</span>; break;
-                            case OrderStatus.Shipping:
-                                <span class="badge bg-primary">Đang giao</span>; break;
-                            case OrderStatus.Completed:
-                                <span class="badge bg-success">Hoàn tất</span>; break;
-                            case OrderStatus.Cancelled:
-                                <span class="badge bg-danger">Đã hủy</span>; break;
+                            <span class="badge bg-warning">Chờ xử lý</span>
+                        }
+                        else if (order.Status == "Confirmed")
+                        {
+                            <span class="badge bg-info">Đã xác nhận</span>
+                        }
+                        else if (order.Status == "Shipping")
+                        {
+                            <span class="badge bg-primary">Đang giao</span>
+                        }
+                        else if (order.Status == "Completed")
+                        {
+                            <span class="badge bg-success">Hoàn tất</span>
+                        }
+                        else if (order.Status == "Cancelled")
+                        {
+                            <span class="badge bg-danger">Đã hủy</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@order.Status</span>
                         }
                     </td>
                     <td>@order.TotalAmount.ToString("N0") đ</td>
-                    <td>@order.Shipping?.Address</td>
+                    <td>@order.Address</td>
                     <td>
-
                         <a asp-area="Admin" asp-controller="Order" asp-action="OrderDetail"
                            asp-route-orderId="@order.OrderId"
                            class="btn btn-sm btn-primary">Chi tiết</a>
@@ -110,14 +118,13 @@
                         <a asp-action="Edit" asp-route-id="@order.OrderId"
                            class="btn btn-sm btn-warning">Sửa</a>
 
-                        <form asp-action="Delete" asp-route-id="@order.OrderId" method="post" style="display:inline">
+                        @* <form asp-action="Delete" asp-route-id="@order.OrderId" method="post" style="display:inline">
                             <button type="submit" class="btn btn-sm btn-danger"
                                     onclick="return confirm('Bạn có chắc chắn muốn xóa đơn này?');">
                                 Xóa
                             </button>
-                        </form>
+                        </form> *@
                     </td>
-
                 </tr>
             }
         }
@@ -134,7 +141,7 @@
 @if (Model != null && Model.TotalPage > 1)
 {
     <nav>
-        <ul class="pagination">
+        <ul class="pagination justify-content-center">
             <li class="page-item @(Model.PageNow == 1 ? "disabled" : "")">
                 <a class="page-link" asp-action="Index" asp-route-pageNow="@(Model.PageNow - 1)" asp-route-pageSize="@Model.PageSize">«</a>
             </li>
@@ -152,6 +159,7 @@
         </ul>
     </nav>
 }
+
 @section Scripts {
     <script>
         $(function () {
@@ -164,4 +172,3 @@
         });
     </script>
 }
-

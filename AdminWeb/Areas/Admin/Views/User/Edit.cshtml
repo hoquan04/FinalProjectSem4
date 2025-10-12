@@ -1,4 +1,4 @@
-﻿@model AdminWeb.Areas.Admin.Models.UserEditModel
+@model AdminWeb.Areas.Admin.Models.UserEditModel
 @{
     ViewData["Title"] = "Chỉnh sửa người dùng";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -56,6 +56,17 @@
                             <span asp-validation-for="Address" class="text-danger"></span>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label asp-for="Role" class="col-sm-2 control-label">Vai trò</label>
+                        <div class="col-sm-10">
+                            <select asp-for="Role" class="form-control">
+                                <option value="Customer">Khách hàng</option>
+                                <option value="Admin">Quản trị</option>
+                                @* <option value="Shipper">Shipper</option> *@
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+                    </div>
 
                     <div class="hr-line-dashed"></div>
 
@@ -91,84 +102,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
-
-    <script>
-        $(document).ready(function () {
-
-            // Spinner khi submit
-            $('#editUserForm').on('submit', async function (e) {
-                e.preventDefault();
-
-                var $btn = $('#btnSubmit');
-                $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang cập nhật...');
-
-                var model = {
-                    UserId: $('input[name="UserId"]').val(),
-                    FullName: $('input[name="FullName"]').val(),
-                    Email: $('input[name="Email"]').val(),
-                    Phone: $('input[name="Phone"]').val(),
-                    Address: $('input[name="Address"]').val()
-                };
-
-                // Lấy PasswordHash hiện tại từ server để giữ nguyên nếu API bắt buộc
-                try {
-                    const respGet = await fetch(`@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi/${model.UserId}`);
-                    const dataGet = await respGet.json();
-                    model.PasswordHash = dataGet.data?.passwordHash || "";
-                } catch (err) {
-                    $('#apiError').show().text("Không lấy được password hiện tại: " + err);
-                    $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Cập nhật');
-                    return;
-                }
-
-                // Gửi PUT
-                try {
-                    const resp = await fetch(`@AdminWeb.Areas.Admin.Data.ApiConstants.UserApi/${model.UserId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(model)
-                    });
-
-                    if (!resp.ok) {
-                        const errData = await resp.json();
-                        $('#apiError').show().text(JSON.stringify(errData));
-                        $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Cập nhật');
-                        return;
-                    }
-
-                    // Thành công -> redirect về Index
-                    window.location.href = '@Url.Action("Index")';
-
-                } catch (err) {
-                    $('#apiError').show().text("Lỗi khi cập nhật: " + err);
-                    $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Cập nhật');
-                }
-            });
-
-            // Fix ChartJS crash nếu canvas không tồn tại
-            function initChart(canvasId, data, options, type = 'doughnut') {
-                var ctx = document.getElementById(canvasId);
-                if (!ctx) return;
-                new Chart(ctx.getContext('2d'), {
-                    type: type,
-                    data: data,
-                    options: options
-                });
-            }
-
-            initChart("doughnutChart", {
-                labels: ["App", "Software", "Laptop"],
-                datasets: [{ data: [300, 50, 100], backgroundColor: ["#a3e1d4", "#dedede", "#9CC3DA"] }]
-            }, { responsive: false, legend: { display: false } });
-
-            initChart("doughnutChart2", {
-                labels: ["App", "Software", "Laptop"],
-                datasets: [{ data: [70, 27, 85], backgroundColor: ["#a3e1d4", "#dedede", "#9CC3DA"] }]
-            }, { responsive: false, legend: { display: false } });
-
-        });
-    </script>
-}

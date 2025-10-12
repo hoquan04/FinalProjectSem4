@@ -1,6 +1,4 @@
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@* 
 @model AdminWeb.Areas.Admin.Models.ShippingEditModel
 @{
     ViewData["Title"] = "Chỉnh sửa Shipping";
@@ -19,12 +17,10 @@
             </div>
             <div class="ibox-content">
 
-                @* Form để PUT API *@
                 <form asp-action="Edit" method="post" class="form-horizontal">
                     <input asp-for="ShippingId" type="hidden" />
                     @Html.AntiForgeryToken()
 
-                    @* Validation summary - hiển thị lỗi chung *@
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
                         <label asp-for="RecipientName" class="col-sm-2 control-label"></label>
@@ -96,7 +92,6 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    @* Buttons *@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
                             <button type="submit" class="btn btn-primary" id="btnSubmit">
@@ -121,9 +116,9 @@
     <script>
         console.log('🔧 Edit script loaded');
 
-        // JavaScript để show loading khi submit
+
         $('#btnSubmit').click(function(e) {
-            e.preventDefault(); // Ngăn submit mặc định
+            e.preventDefault(); 
 
             console.log('🖱️ Edit button clicked');
             console.log('🎯 CategoryId:', @Model.ShippingId);
@@ -131,7 +126,6 @@
             var $btn = $(this);
             var $form = $btn.closest('form');
 
-            // Kiểm tra validation trước khi submit
             if (!$form.valid()) {
                 console.log('❌ Form validation failed');
                 return false;
@@ -140,21 +134,18 @@
             console.log('✅ Form validation passed');
             console.log('🚀 Submitting form to:', $form.attr('action'));
 
-            // Show loading state
             $btn.prop('disabled', true)
                 .html('<i class="fa fa-spinner fa-spin"></i> Đang cập nhật...');
 
-            // Submit form manually
             $form.submit();
         });
 
-        // Log form submit event
         $('form').on('submit', function(e) {
             console.log('📤 Form is being submitted');
             console.log('🎯 Form action:', $(this).attr('action'));
             console.log('🎯 Form method:', $(this).attr('method'));
 
-            // Log form data
+
             var formData = new FormData(this);
             console.log('📋 Form data:');
             for (var pair of formData.entries()) {
@@ -162,28 +153,27 @@
             }
         });
 
-        // Reset button nếu có lỗi validation
         $('form').on('invalid-form.validate', function() {
             console.log('❌ Form validation failed - resetting button');
             $('#btnSubmit').prop('disabled', false)
                           .html('<i class="fa fa-save"></i> Cập nhật Shipping');
         });
 
-        // Thêm timeout để reset button nếu quá lâu
+
         var submitTimeout;
         $('form').on('submit', function() {
             submitTimeout = setTimeout(function() {
                 $('#btnSubmit').prop('disabled', false)
                               .html('<i class="fa fa-save"></i> Cập nhật Shipping');
                 alert('Thao tác mất quá nhiều thời gian. Vui lòng kiểm tra kết nối API và thử lại.');
-            }, 30000); // 30 giây timeout
+            }, 30000); 
         });
 
-        // Clear timeout khi page unload
+
         $(window).on('beforeunload', function() {
             if (submitTimeout) {
                 clearTimeout(submitTimeout);
             }
         });
     </script>
-}
+} *@

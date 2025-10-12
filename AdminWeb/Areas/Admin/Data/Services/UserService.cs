@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -72,6 +72,15 @@ namespace AdminWeb.Areas.Admin.Data.Services
         {
             try
             {
+                //// 🩵 Lấy dữ liệu cũ từ API để giữ nguyên Role nếu không thay đổi
+                //var currentUser = await GetUserByIdAsync(id);
+                //if (currentUser == null)
+                //    return new ApiResponse<UserViewModel> { Success = false, Message = "Không tìm thấy người dùng" };
+
+                //// ✅ Nếu model.Role rỗng thì giữ role cũ
+                //if (model.Role == null || string.IsNullOrEmpty(model.Role.ToString()))
+                //    model.Role = currentUser.Role;
+
                 var json = JsonSerializer.Serialize(model);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 var resp = await _httpClient.PutAsync($"{_userApi}/{id}", content);
@@ -95,6 +104,7 @@ namespace AdminWeb.Areas.Admin.Data.Services
                 return new ApiResponse<UserViewModel> { Success = false, Message = ex.Message };
             }
         }
+
 
         // Xóa user (trả ApiResponse<bool>)
         public async Task<ApiResponse<bool>> DeleteUserAsync(int id)

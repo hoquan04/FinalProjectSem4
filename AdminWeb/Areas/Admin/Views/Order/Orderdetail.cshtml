@@ -25,7 +25,10 @@
                 <dd class="col-sm-9">@order.CustomerName</dd>
 
                 <dt class="col-sm-3">Email:</dt>
-                <dd class="col-sm-9">@order.Email</dd>
+                <dd class="col-sm-9">
+                    @(string.IsNullOrWhiteSpace(order.Email) ? "Không có email" : order.Email)
+                </dd>
+
 
                 <dt class="col-sm-3">Số điện thoại:</dt>
                 <dd class="col-sm-9">@order.PhoneNumber</dd>

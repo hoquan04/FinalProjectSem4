@@ -9,6 +9,8 @@ namespace AdminWeb.Areas.Admin.Data
 
 
         public static string BaseUrl => $"http://{Domain}:{Port}/api/";
+        public static string ImageSocurce => $"http://{Domain}:{Port}";
+
         public static string CategoryApi => $"{BaseUrl}category";
         public static string UserApi => $"{BaseUrl}user";
 
