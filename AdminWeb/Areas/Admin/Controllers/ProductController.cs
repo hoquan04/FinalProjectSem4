@@ -23,7 +23,7 @@ namespace AdminWeb.Areas.Admin.Controllers
         /// </summary>
         public async Task<IActionResult> Index(string? searchString, int? categoryId, int pageNow = 1, int pageSize = 2)
         {
-            Console.WriteLine($"📋 [ProductController.Ind    qex] Bắt đầu - SearchString: {searchString}, CategoryId: {categoryId}");
+            Console.WriteLine($"📋 [ProductController.Index] Bắt đầu - SearchString: {searchString}, CategoryId: {categoryId}");
             
             ViewBag.SearchString = searchString;
             ViewBag.CategoryId = categoryId;
@@ -77,6 +77,40 @@ namespace AdminWeb.Areas.Admin.Controllers
                 ViewBag.ErrorDetail = "Vui lòng kiểm tra API đã chạy chưa hoặc kết nối mạng.";
                 ViewBag.Categories = new List<CategoryViewModel>();
                 return View(new PagedResponse<ProductViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// GET: /Admin/Product/Details/5 - Hiển thị chi tiết product (read-only)
+        /// </summary>
+        public async Task<IActionResult> Details(int id)
+        {
+            Console.WriteLine($"👁️ [ProductController.Details GET] Hiển thị chi tiết sản phẩm ID: {id}");
+
+            try
+            {
+                var product = await _productService.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    Console.WriteLine($"⚠️ [ProductController.Details GET] Không tìm thấy sản phẩm ID: {id}");
+                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                Console.WriteLine($"✅ [ProductController.Details GET] Lấy sản phẩm thành công: {product.Name}");
+
+                // Lấy categories để hiển thị tên category
+                var categories = await _categoryService.GetAllCategoriesAsync();
+                ViewBag.Categories = categories;
+                
+                Console.WriteLine($"✅ [ProductController.Details GET] Lấy {categories.Count} categories thành công");
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [ProductController.Details GET] Lỗi: {ex.Message}");
+                TempData["ErrorMessage"] = $"Lỗi khi tải sản phẩm: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
 
