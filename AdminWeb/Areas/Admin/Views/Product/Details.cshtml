@@ -1,0 +1,250 @@
+@model AdminWeb.Areas.Admin.Models.ProductViewModel
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]: @Model.Name</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-sm btn-warning">
+                        <i class="fa fa-edit"></i> Chỉnh sửa
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                
+                @* Form hiển thị thông tin (read-only) *@
+                <div class="form-horizontal">
+                    
+                    @* Trường ID sản phẩm *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">ID sản phẩm</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <span class="badge badge-primary">@Model.ProductId</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    @* Trường Tên sản phẩm *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Tên sản phẩm</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <strong>@Model.Name</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Trường Danh mục *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Danh mục</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                @if (Model.Category != null)
+                                {
+                                    <span class="badge badge-info">@Model.Category.Name</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa phân loại</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Trường Mô tả *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Mô tả</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                @if (!string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <span>@Model.Description</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa có mô tả</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Trường Giá *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Giá</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <strong class="text-success h4">@Model.Price.ToString("N0") VNĐ</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Trường Số lượng tồn kho *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Số lượng tồn kho</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                @if (Model.StockQuantity > 0)
+                                {
+                                    <span class="badge badge-success">@Model.StockQuantity sản phẩm</span>
+                                    @if (Model.StockQuantity <= 10)
+                                    {
+                                        <small class="text-warning ml-2">
+                                            <i class="fa fa-exclamation-triangle"></i> Sắp hết hàng
+                                        </small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Hết hàng</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Trường Ngày tạo *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Ngày tạo</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                <small class="text-muted ml-2">
+                                    (@Model.CreatedAt.ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo("vi-VN")))
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+                    
+                    @* Buttons *@
+                    <div class="form-group">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-warning">
+                                <i class="fa fa-edit"></i> Chỉnh sửa sản phẩm
+                            </a>
+                            <a asp-action="Index" class="btn btn-default">
+                                <i class="fa fa-list"></i> Danh sách sản phẩm
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.ProductId" class="btn btn-danger">
+                                <i class="fa fa-trash"></i> Xóa sản phẩm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        @* Hiển thị hình ảnh sản phẩm *@
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Hình ảnh sản phẩm</h5>
+            </div>
+            <div class="ibox-content d-flex align-items-center justify-content-center" style="min-height: 300px;">
+                <div class="text-center">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@(Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{AdminWeb.Areas.Admin.Data.ApiConstants.BaseUrl.Replace("/api/", "")}{Model.ImageUrl}")" 
+                             alt="@Model.Name" 
+                             style="max-width: 100%; max-height: 250px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" 
+                             class="img-responsive">
+                        <p class="text-muted mt-2">
+                            <small>Ảnh sản phẩm: @Model.Name</small>
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="text-muted">
+                            <i class="fa fa-image fa-5x mb-3" style="color: #ddd;"></i>
+                            <p class="h5">Chưa có hình ảnh</p>
+                            <small>Sản phẩm này chưa có ảnh minh họa</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Thông tin bổ sung *@
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Thông tin bổ sung</h5>
+            </div>
+            <div class="ibox-content">
+                <dl class="dl-horizontal">
+                    <dt>Trạng thái:</dt>
+                    <dd>
+                        @if (Model.StockQuantity > 0)
+                        {
+                            <span class="label label-primary">Còn hàng</span>
+                        }
+                        else
+                        {
+                            <span class="label label-danger">Hết hàng</span>
+                        }
+                    </dd>
+                    
+                    <dt>Giá trị tồn kho:</dt>
+                    <dd>
+                        <strong class="text-info">@((Model.Price * Model.StockQuantity).ToString("N0")) VNĐ</strong>
+                    </dd>
+                    
+                    @if (Model.Category != null)
+                    {
+                        <dt>Danh mục:</dt>
+                        <dd>@Model.Category.Name</dd>
+                    }
+                    
+                    <dt>Mã sản phẩm:</dt>
+                    <dd>SP-@Model.ProductId.ToString("D6")</dd>
+                </dl>
+
+                @* Actions nhanh *@
+                <div class="btn-group btn-group-justified mt-3" role="group">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@Model.ProductId" 
+                           class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i> Sửa
+                        </a>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Delete" asp-route-id="@Model.ProductId" 
+                           class="btn btn-danger btn-sm">
+                            <i class="fa fa-trash"></i> Xóa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        console.log('👁️ Product Details loaded');
+        console.log('📦 Product ID: @Model.ProductId');
+        console.log('🏷️ Product Name: @Model.Name');
+        console.log('💰 Price: @Model.Price VNĐ');
+        console.log('📊 Stock: @Model.StockQuantity');
+        
+        $(document).ready(function() {
+            // Highlight important info
+            $('.badge, .label').addClass('animated pulse');
+            
+            // Add tooltips to actions
+            $('[title]').tooltip();
+            
+            // Log product details for debugging
+            console.log('✅ Product details view initialized successfully');
+        });
+    </script>
+}
