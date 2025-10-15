@@ -1,4 +1,4 @@
-﻿using AdminWeb.Areas.Admin.Data.Services;
+using AdminWeb.Areas.Admin.Data.Services;
 using AdminWeb.Areas.Admin.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -61,7 +61,7 @@ namespace AdminWeb.Areas.Admin.Controllers
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
-            return RedirectToAction("Index", "User", new { area = "Admin" });
+            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
         }
 
         public async Task<IActionResult> Logout()

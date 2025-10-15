@@ -53,14 +53,18 @@
                 </a>
             </li>
 
-            <li class="has-submenu">
+            @* <li class="has-submenu">
                 <a href="#"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">Sản phẩm</span><span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse">
                     <li><a asp-action="Index" asp-controller="Product">Danh sách sản phẩm</a></li>
                     <li><a asp-action="Create" asp-controller="Product">Tạo sản phẩm</a></li>
                 </ul>
+            </li> *@
+            <li>
+                <a asp-action="Index" asp-controller="Product">
+                    <i class="fa fa-bar-chart-o"></i> <span class="nav-label">Sản phẩm</span>
+                </a>
             </li>
-
             <li>
                 <a asp-action="Index" asp-controller="Order">
                     <i class="fa fa-shopping-cart"></i> <span class="nav-label">Đơn hàng</span>

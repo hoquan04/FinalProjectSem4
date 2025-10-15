@@ -26,7 +26,7 @@ namespace API.Repositories
             _context.Orders.Add(entity);
             await _context.SaveChangesAsync();
 
-            // 🆕 Gửi thông báo xác nhận đơn hàng mới
+            // 🆕 Gửi thông báo trong hệ thống
             await _notificationRepo.AddAsync(new Notification
             {
                 UserId = entity.UserId,
@@ -38,13 +38,45 @@ namespace API.Repositories
                 CreatedAt = DateTime.UtcNow
             });
 
+            // 📧 Gửi email xác nhận đặt hàng
+            try
+            {
+                // Lấy thông tin người nhận email
+                var shipping = await _context.Shippings.FirstOrDefaultAsync(s => s.ShippingId == entity.ShippingId);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == entity.UserId);
+
+                var emailTo = shipping?.Email ?? user?.Email;
+
+                if (!string.IsNullOrEmpty(emailTo))
+                {
+                    string subject = $"Xác nhận đơn hàng #{entity.OrderId}";
+                    string message = $@"
+                <h3>Xin chào {(shipping?.RecipientName ?? user?.FullName) ?? "Quý khách"},</h3>
+                <p>Cảm ơn bạn đã đặt hàng tại cửa hàng của chúng tôi!</p>
+                <p><b>Mã đơn hàng:</b> #{entity.OrderId}</p>
+                <p><b>Ngày đặt:</b> {entity.OrderDate:dd/MM/yyyy HH:mm}</p>
+                <p><b>Tổng tiền:</b> {entity.TotalAmount:N0} đ</p>
+                <p><b>Trạng thái:</b> {entity.Status}</p>
+                <br/>
+                <p>Chúng tôi sẽ liên hệ sớm để xác nhận và giao hàng cho bạn.</p>
+                <p>Trân trọng,<br/><b>Đội ngũ cửa hàng</b></p>";
+
+                    await _emailSender.SendEmailAsync(emailTo, subject, message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi gửi email xác nhận đơn hàng: {ex.Message}");
+            }
+
             return new APIRespone<Order>
             {
                 Success = true,
-                Message = "Thêm đơn hàng thành công",
+                Message = "Thêm đơn hàng thành công và đã gửi email xác nhận",
                 Data = entity
             };
         }
+
 
         public async Task<APIRespone<bool>> DeleteAsync(int id)
         {
@@ -111,34 +143,66 @@ namespace API.Repositories
                 };
             }
 
+            // ✅ Lưu lại thông tin shipper cũ trước khi cập nhật
+            var oldShipperId = order.ShipperId;
+            var oldStatus = order.Status;
+
+            // ✅ Cập nhật giá trị mới
             _context.Entry(order).CurrentValues.SetValues(entity);
             await _context.SaveChangesAsync();
-            // 🧠 Gửi thông báo cho người dùng khi trạng thái đơn hàng thay đổi
-            await _notificationRepo.AddAsync(new Notification
+
+            // 🧠 Gửi thông báo khi trạng thái đơn hàng thay đổi
+            if (oldStatus != order.Status)
             {
-                UserId = order.UserId,
-                OrderId = order.OrderId,
-                Title = "Cập nhật trạng thái đơn hàng",
-                Message = $"Đơn hàng #{order.OrderId} đã được cập nhật sang trạng thái: {order.Status}.",
-                Type = NotificationType.Order,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            });
+                await _notificationRepo.AddAsync(new Notification
+                {
+                    UserId = order.UserId,
+                    OrderId = order.OrderId,
+                    Title = "Cập nhật trạng thái đơn hàng",
+                    Message = $"Đơn hàng #{order.OrderId} đã được cập nhật sang trạng thái: {order.Status}.",
+                    Type = NotificationType.Order,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            // 🧠 Gửi thông báo khi shipper được thay đổi
+            if (oldShipperId != order.ShipperId && order.ShipperId != null)
+            {
+                await _notificationRepo.AddAsync(new Notification
+                {
+                    UserId = order.UserId,
+                    OrderId = order.OrderId,
+                    Title = "Cập nhật thông tin giao hàng",
+                    Message = $"Đơn hàng #{order.OrderId} đã được gán cho shipper mới.",
+                    Type = NotificationType.Shipping,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
 
             try
             {
                 var email = order.Shipping?.Email;
                 if (!string.IsNullOrEmpty(email))
                 {
-                    string subject = $"Cập nhật trạng thái đơn hàng #{order.OrderId}";
+                    string subject = $"Cập nhật đơn hàng #{order.OrderId}";
                     string message = $@"
-                        <h3>Xin chào {order.Shipping?.RecipientName},</h3>
-                        <p>Đơn hàng <strong>#{order.OrderId}</strong> đã được cập nhật.</p>
-                        <p><b>Trạng thái mới:</b> {order.Status}</p>
-                        <p><b>Ngày đặt:</b> {order.OrderDate:dd/MM/yyyy}</p>
-                        <p><b>Tổng tiền:</b> {order.TotalAmount:N0} đ</p>
-                        <br/>
-                        <p>Cảm ơn bạn đã mua sắm tại cửa hàng!</p>";
+                <h3>Xin chào {order.Shipping?.RecipientName},</h3>
+                <p>Đơn hàng <strong>#{order.OrderId}</strong> của bạn vừa được cập nhật.</p>
+                <p><b>Trạng thái hiện tại:</b> {order.Status}</p>";
+
+                    // ➕ Nếu có thay đổi shipper, thêm nội dung vào email
+                    if (oldShipperId != order.ShipperId && order.ShipperId != null)
+                    {
+                        message += "<p><b>Shipper mới</b> đã được chỉ định để giao đơn hàng của bạn.</p>";
+                    }
+
+                    message += $@"
+                <p><b>Ngày đặt:</b> {order.OrderDate:dd/MM/yyyy}</p>
+                <p><b>Tổng tiền:</b> {order.TotalAmount:N0} đ</p>
+                <br/>
+                <p>Cảm ơn bạn đã mua sắm tại cửa hàng!</p>";
 
                     await _emailSender.SendEmailAsync(email, subject, message);
                 }
@@ -152,9 +216,10 @@ namespace API.Repositories
             {
                 Success = true,
                 Message = "Cập nhật đơn hàng thành công và đã gửi thông báo email",
-                Data = entity
+                Data = order
             };
         }
+
 
         public async Task<APIRespone<PagedResponse<Order>>> GetPageAsync(int pageNow, int pageSize)
         {
@@ -408,7 +473,11 @@ namespace API.Repositories
 
         public async Task<APIRespone<Order>> AssignOrderToShipperAsync(int orderId, int shipperId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.Shipping)
+                .Include(o => o.Users)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
             if (order == null)
                 return new APIRespone<Order> { Success = false, Message = "Không tìm thấy đơn hàng" };
 
@@ -426,6 +495,42 @@ namespace API.Repositories
 
             await _context.SaveChangesAsync();
 
+            // 🔔 Thông báo trong hệ thống
+            await _notificationRepo.AddAsync(new Notification
+            {
+                UserId = order.UserId,
+                OrderId = order.OrderId,
+                Title = "Đơn hàng đã được gán shipper",
+                Message = $"Đơn hàng #{order.OrderId} đã được giao cho shipper {shipper.FullName}.",
+                Type = NotificationType.Shipping,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // 📧 Gửi email cho khách hàng
+            try
+            {
+                var email = order.Shipping?.Email;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    string subject = $"Đơn hàng #{order.OrderId} đang được giao";
+                    string message = $@"
+                <h3>Xin chào {order.Shipping?.RecipientName},</h3>
+                <p>Đơn hàng <strong>#{order.OrderId}</strong> của bạn đã được gán cho shipper <b>{shipper.FullName}</b>.</p>
+                <p><b>Trạng thái hiện tại:</b> {order.Status}</p>
+                <p><b>Ngày đặt:</b> {order.OrderDate:dd/MM/yyyy}</p>
+                <p><b>Tổng tiền:</b> {order.TotalAmount:N0} đ</p>
+                <br/>
+                <p>Shipper sẽ liên hệ sớm để giao hàng. Cảm ơn bạn đã mua sắm tại cửa hàng!</p>";
+
+                    await _emailSender.SendEmailAsync(email, subject, message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi gửi email khi gán shipper: {ex.Message}");
+            }
+
             return new APIRespone<Order>
             {
                 Success = true,
@@ -433,6 +538,7 @@ namespace API.Repositories
                 Message = $"Shipper (ID: {shipperId}) đã nhận đơn #{orderId}"
             };
         }
+
 
         public async Task<APIRespone<IEnumerable<object>>> GetOrdersOfShipperAsync(int shipperId)
         {
@@ -473,28 +579,18 @@ namespace API.Repositories
         {
             var order = await _context.Orders
                 .Include(o => o.Payments)
+                .Include(o => o.Shipping)
+                .Include(o => o.Users)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (order == null)
-                return new APIRespone<Order>
-                {
-                    Success = false,
-                    Message = "Không tìm thấy đơn hàng"
-                };
+                return new APIRespone<Order> { Success = false, Message = "Không tìm thấy đơn hàng" };
 
             if (order.ShipperId != shipperId)
-                return new APIRespone<Order>
-                {
-                    Success = false,
-                    Message = "Bạn không phải là shipper của đơn hàng này"
-                };
+                return new APIRespone<Order> { Success = false, Message = "Bạn không phải là shipper của đơn hàng này" };
 
             if (order.Status != OrderStatus.Shipping)
-                return new APIRespone<Order>
-                {
-                    Success = false,
-                    Message = "Đơn hàng chưa được giao hoặc đã hoàn tất"
-                };
+                return new APIRespone<Order> { Success = false, Message = "Đơn hàng chưa được giao hoặc đã hoàn tất" };
 
             var payment = order.Payments?.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
             if (payment != null)
@@ -506,6 +602,7 @@ namespace API.Repositories
             order.Status = OrderStatus.Completed;
             await _context.SaveChangesAsync();
 
+            // 🔔 Thông báo trong hệ thống
             await _notificationRepo.AddAsync(new Notification
             {
                 UserId = order.UserId,
@@ -517,6 +614,30 @@ namespace API.Repositories
                 CreatedAt = DateTime.UtcNow
             });
 
+            // 📧 Gửi email thông báo hoàn tất
+            try
+            {
+                var email = order.Shipping?.Email;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    string subject = $"Đơn hàng #{order.OrderId} đã giao thành công";
+                    string message = $@"
+                <h3>Xin chào {order.Shipping?.RecipientName},</h3>
+                <p>Đơn hàng <strong>#{order.OrderId}</strong> của bạn đã được giao thành công.</p>
+                <p><b>Trạng thái:</b> {order.Status}</p>
+                <p><b>Ngày hoàn tất:</b> {DateTime.Now:dd/MM/yyyy HH:mm}</p>
+                <p><b>Tổng tiền:</b> {order.TotalAmount:N0} đ</p>
+                <br/>
+                <p>Cảm ơn bạn đã mua sắm tại cửa hàng!</p>";
+
+                    await _emailSender.SendEmailAsync(email, subject, message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi gửi email khi hoàn tất giao hàng: {ex.Message}");
+            }
+
             return new APIRespone<Order>
             {
                 Success = true,
@@ -524,6 +645,7 @@ namespace API.Repositories
                 Message = $"Shipper #{shipperId} đã hoàn tất giao đơn #{orderId}"
             };
         }
+
 
         public async Task<APIRespone<PagedResponse<OrderDisplayDto>>> GetAllAsync(int pageNow = 1, int pageSize = 10)
         {

@@ -293,7 +293,7 @@ namespace API.Controllers
             {
                 message = "Đăng nhập thành công",
                 token,
-                user = new { user.UserId, user.FullName, user.Email, user.Role, user.CreatedAt }
+                user = new { user.UserId, user.FullName, user.Email, user.Role, user.CreatedAt, user.Phone, user.Address, }
             });
         }
     }

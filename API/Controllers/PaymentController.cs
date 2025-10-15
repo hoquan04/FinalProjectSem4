@@ -1,7 +1,10 @@
+using API.Data;
 using API.Models;
 using API.Models.DTOs;
 using API.Repositories.IRepositories;
+using API.Repositories.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -103,5 +106,8 @@ namespace API.Controllers
             var response = await _paymentRepository.SearchPaymentsAsync(keyword);
             return Ok(response);
         }
+
+
+
     }
 }
