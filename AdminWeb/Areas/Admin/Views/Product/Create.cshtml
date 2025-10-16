@@ -30,7 +30,7 @@
                         <label asp-for="Name" class="col-sm-2 control-label"></label>
                         <div class="col-sm-10">
                             <input asp-for="Name" class="form-control" 
-                                   placeholder="Nhập tên sản phẩm (ví dụ: iPhone 15, MacBook Pro...)">
+                                   placeholder="Nhập tên sản phẩm (ví dụ: Táo, cam, dưa hấu...)">
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
                     </div>
@@ -126,17 +126,24 @@
     </div>
     
     <div class="col-lg-4">
-        
+
         @* Preview image *@
         <div class="ibox">
             <div class="ibox-title">
                 <h5>Xem trước hình ảnh</h5>
             </div>
-            <div class="ibox-content d-flex align-items-center justify-content-center" style="min-height: 250px;">
+
+            <div class="ibox-content"
+                 style="min-height: 250px; display: flex; align-items: center; justify-content: center;">
                 <div class="text-center">
-                    <img id="imagePreview" src="#" alt="Preview" 
-                         style="max-width: 100%; max-height: 200px; display: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
+                    <img id="imagePreview" src="#" alt="Preview"
+                         style="max-width: 100%; max-height: 200px;
+                        display: none;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        margin: 0 auto;"
                          class="img-responsive">
+
                     <div id="noImageText" class="text-muted">
                         <i class="fa fa-image fa-4x mb-3" style="color: #ddd;"></i>
                         <p class="h6">Chọn file để xem trước hình ảnh</p>
@@ -144,6 +151,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

@@ -54,7 +54,21 @@
                 <dd class="col-sm-9">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</dd>
 
                 <dt class="col-sm-3">Trạng thái:</dt>
-                <dd class="col-sm-9">@order.Status</dd>
+                <dd class="col-sm-9">
+                    @{
+                        var statusText = order.Status switch
+                        {
+                            OrderStatus.Pending => "Đang chờ xử lý",
+                            OrderStatus.Confirmed => "Đã xác nhận",
+                            OrderStatus.Shipping => "Đang giao hàng",
+                            OrderStatus.Completed => "Hoàn thành",
+                            OrderStatus.Cancelled => "Đã hủy",
+                            _ => "Không xác định"
+                        };
+                    }
+                    <span>@statusText</span>
+                </dd>
+
                 <dt class="col-sm-3">Thanh toán:</dt>
                 <dd class="col-sm-9">
                     @if (order.PaymentStatus == PaymentStatus.Paid)
