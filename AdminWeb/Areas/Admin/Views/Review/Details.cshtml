@@ -4,377 +4,148 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card card-primary">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-star"></i> Chi tiết đánh giá #@Model.ReviewId
-                    </h3>
-                    @* <div class="card-tools">
-                        <a asp-action="Index" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
-                        </a>
-                        <a asp-action="Edit" asp-route-id="@Model.ReviewId" class="btn btn-warning btn-sm">
-                            <i class="fas fa-edit"></i> Chỉnh sửa
-                        </a>
-                        <a asp-action="Delete" asp-route-id="@Model.ReviewId" class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash"></i> Xóa
-                        </a>
-                    </div> *@
+<div class="row">
+    <div class="col-lg-8">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>@ViewData["Title"]</h5>
+                <div class="ibox-tools">
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+
                 </div>
+            </div>
+            <div class="ibox-content">
 
-                <div class="card-body">
-                    <!-- Alert Messages -->
-                    @if (TempData["ErrorMessage"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <i class="icon fas fa-ban"></i> @TempData["ErrorMessage"]
+                @* Form hiển thị thông tin (read-only) *@
+                <div class="form-horizontal">
+
+                    @* Trường ID sản phẩm *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">ID đánh giá</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <span class="badge badge-primary">@Model.ReviewId</span>
+                            </p>
                         </div>
-                    }
+                    </div>
 
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <i class="icon fas fa-check"></i> @TempData["SuccessMessage"]
+                    @* Trường Tên sản phẩm *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Tên sản phẩm</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <strong>@(Model.ProductName ?? "Không có thông tin")</strong>
+                            </p>
                         </div>
-                    }
+                    </div>
 
-                    <div class="row">
-                        <!-- Review Info Section -->
-                        <div class="col-md-12">
-                            <div class="info-box bg-light">
-                                <span class="info-box-icon bg-primary">
-                                    <i class="fas fa-star"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Thông tin đánh giá</span>
-                                    <div class="info-box-number">
-                                        <div class="rating-display mb-2">
-                                            @for (int i = 1; i <= 5; i++)
-                                            {
-                                                if (i <= Model.Rating)
-                                                {
-                                                    <i class="fas fa-star text-warning"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="far fa-star text-muted"></i>
-                                                }
-                                            }
-                                            <span class="rating-text">(@Model.Rating/5)</span>
-                                        </div>
-                                        <small class="text-muted">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                                        </small>
+                    @* Trường Tên sản phẩm *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Tên Người dùng</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <strong>@(Model.UserFullName ?? "Không có thông tin")</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Trường Mô tả *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Mô tả</label>
+                        <div class="col-sm-10">
+                            <div class="card-body">
+                                @if (!string.IsNullOrWhiteSpace(Model.Comment))
+                                {
+                                    <div class="comment-content">
+                                        <blockquote class="quote-secondary">
+                                            <p>@Model.Comment</p>
+                                            <small class="text-muted">
+                                                @(Model.UserFullName ?? "Người dùng")
+                                            </small>
+                                        </blockquote>
                                     </div>
-                                </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-comment-slash fa-3x mb-3"></i>
+                                        <p>Không có bình luận nào được để lại</p>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <!-- Product Info -->
-                        <div class="col-md-6">
-                            <div class="card card-outline card-info">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-box"></i> Thông tin sản phẩm
-                                    </h3>
-                                </div>
-                                <div class="card-body">
-                                    <dl class="row">
-                                        <dt class="col-sm-4">Mã sản phẩm:</dt>
-                                        <dd class="col-sm-8">
-                                            <span class="badge badge-info">@Model.ProductId</span>
-                                        </dd>
-
-                                        <dt class="col-sm-4">Tên sản phẩm:</dt>
-                                        <dd class="col-sm-8">
-                                            <strong>@(Model.ProductName ?? "Không có thông tin")</strong>
-                                        </dd>
-                                    </dl>
-
-                                    @* <div class="mt-3">
-                                        <a asp-action="ByProduct" asp-route-productId="@Model.ProductId" class="btn btn-outline-info btn-sm">
-                                            <i class="fas fa-list"></i> Xem tất cả đánh giá sản phẩm này
-                                        </a>
-                                    </div> *@
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- User Info -->
-                        <div class="col-md-6">
-                            <div class="card card-outline card-success">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-user"></i> Thông tin người đánh giá
-                                    </h3>
-                                </div>
-                                <div class="card-body">
-                                    <dl class="row">
-                                        <dt class="col-sm-4">Mã người dùng:</dt>
-                                        <dd class="col-sm-8">
-                                            <span class="badge badge-success">@Model.UserId</span>
-                                        </dd>
-
-                                        <dt class="col-sm-4">Tên người dùng:</dt>
-                                        <dd class="col-sm-8">
-                                            <strong>@(Model.UserFullName ?? "Không có thông tin")</strong>
-                                        </dd>
-                                    </dl>
-
-                                    @* <div class="mt-3">
-                                        <a asp-action="ByUser" asp-route-userId="@Model.UserId" class="btn btn-outline-success btn-sm">
-                                            <i class="fas fa-list"></i> Xem tất cả đánh giá của người dùng
-                                        </a>
-                                    </div> *@
-                                </div>
-                            </div>
+                    @* Trường sao *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Đánh giá sao</label>
+                        <div class="form-control-static">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Model.Rating)
+                                {
+                                    <i class="fas fa-star text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star text-muted"></i>
+                                }
+                            }
+                            <span class="rating-text">(@Model.Rating/5)</span>
                         </div>
                     </div>
 
-                    <!-- Comment Section -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card card-outline card-warning">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-comment"></i> Bình luận
-                                    </h3>
-                                </div>
-                                <div class="card-body">
-                                    @if (!string.IsNullOrWhiteSpace(Model.Comment))
-                                    {
-                                        <div class="comment-content">
-                                            <blockquote class="quote-secondary">
-                                                <p>@Model.Comment</p>
-                                                <small class="text-muted">
-                                                    - @(Model.UserFullName ?? "Người dùng")
-                                                </small>
-                                            </blockquote>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="text-center text-muted py-4">
-                                            <i class="fas fa-comment-slash fa-3x mb-3"></i>
-                                            <p>Không có bình luận nào được để lại</p>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
+
+
+                    @* Trường Ngày tạo *@
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Ngày tạo</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                <small class="text-muted ml-2">
+                                    (@Model.CreatedAt.ToString("dddd, MMMM dd, yyyy", new System.Globalization.CultureInfo("vi-VN")))
+                                </small>
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="btn-group btn-block" role="group">
-                                @* <a asp-action="Edit" asp-route-id="@Model.ReviewId" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Chỉnh sửa đánh giá
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@Model.ReviewId" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i> Xóa đánh giá
-                                </a> *@
-                                <a asp-action="Index" class="btn btn-secondary">
-                                    <i class="fas fa-list"></i> Danh sách đánh giá
-                                </a>
-                            </div>
+                    <div class="hr-line-dashed"></div>
+
+                    @* Buttons *@
+                    @* <div class="form-group">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-warning">
+                                <i class="fa fa-edit"></i> Chỉnh sửa sản phẩm
+                            </a>
+                            <a asp-action="Index" class="btn btn-default">
+                                <i class="fa fa-list"></i> Danh sách sản phẩm
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.ProductId" class="btn btn-danger">
+                                <i class="fa fa-trash"></i> Xóa sản phẩm
+                            </a>
                         </div>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        .rating-display {
-            font-size: 1.5rem;
-        }
-
-        .rating-text {
-            font-size: 1rem;
-            margin-left: 10px;
-            font-weight: bold;
-        }
-
-        .info-box {
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .card-outline {
-            border-top: 3px solid;
-        }
-
-        .quote-secondary {
-            border-left: 4px solid #ffc107;
-            padding-left: 15px;
-            margin: 0;
-            background-color: #fefefe;
-            padding: 15px;
-            border-radius: 5px;
-        }
-
-            .quote-secondary p {
-                font-style: italic;
-                font-size: 1.1rem;
-                line-height: 1.6;
-                margin-bottom: 10px;
-                word-wrap: break-word;
-                word-break: break-word;
-                white-space: pre-wrap;
-            }
-
-        .comment-content {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .btn-group .btn {
-            flex: 1;
-        }
-
-        .badge {
-            font-size: 0.9rem;
-            padding: 0.5rem 0.8rem;
-        }
-
-        .card-title {
-            font-weight: 600;
-        }
-
-        .text-warning {
-            color: #ffc107 !important;
-        }
-
-        .fas.fa-star.text-warning {
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-
-        .fa-comment-slash {
-            opacity: 0.3;
-        }
-
-        /* Fix CSS syntax error */
-        @@media (max-width: 768px) {
-            .col-md-8.offset-md-2
-
-        {
-            margin-left: 0;
-            padding: 0 15px;
-        }
-
-        .btn-group {
-            flex-direction: column;
-        }
-
-            .btn-group .btn {
-                margin-bottom: 5px;
-            }
-
-        .rating-display {
-            text-align: center;
-        }
-
-        .card-header .card-tools {
-            margin-top: 10px;
-            text-align: center;
-        }
-
-            .card-header .card-tools .btn {
-                margin: 2px;
-            }
-
-        }
-
-        /* Animation keyframes */
-        @@keyframes fadeInScale {
-            0%
-
-        {
-            opacity: 0;
-            transform: scale(0.5);
-        }
-
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        }
-
-        /* Smooth transitions */
-        .btn {
-            transition: all 0.3s ease;
-        }
-
-            .btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            }
-
-        .card {
-            transition: box-shadow 0.3s ease;
-        }
-
-            .card:hover {
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            }
-    </style>
-}
-
 @section Scripts {
     <script>
+
         $(document).ready(function() {
-            // Auto-hide alerts
-            setTimeout(function() {
-                $('.alert').fadeOut();
-            }, 5000);
+            // Highlight important info
+            $('.badge, .label').addClass('animated pulse');
 
-            // Animate rating stars on load
-            $('.rating-display .fas.fa-star').each(function(index) {
-                $(this).css({
-                    'animation-delay': (index * 0.1) + 's',
-                    'animation': 'fadeInScale 0.5s ease-in-out'
-                });
-            });
+            // Add tooltips to actions
+            $('[title]').tooltip();
 
-            // Add smooth scroll for action buttons
-            $('.btn-group .btn').on('click', function(e) {
-                var href = $(this).attr('href');
-                if (!href || !href.startsWith('#')) return;
-
-                e.preventDefault();
-                var target = $(href);
-                if (target.length) {
-                    $('html, body').animate({
-                        scrollTop: target.offset().top - 100
-                    }, 500);
-                }
-            });
-
-            // Add loading state to action buttons
-            $('.btn-group .btn').on('click', function() {
-                if ($(this).attr('href') && !$(this).attr('href').startsWith('#')) {
-                    $(this).html('<i class="fas fa-spinner fa-spin"></i> ' + $(this).text());
-                }
-            });
+            // Log product details for debugging
+            console.log('✅ Review details view initialized successfully');
         });
     </script>
-}
-
-@{
-    await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }

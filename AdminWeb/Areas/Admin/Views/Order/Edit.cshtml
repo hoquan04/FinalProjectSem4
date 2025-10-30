@@ -48,12 +48,33 @@
     </div>
 
     <br/>
-    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <button type="submit" class="btn btn-primary" id="btnSubmit">Lưu thay đổi</button>
     <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+
 </form>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+            const btnSubmit = document.getElementById("btnSubmit");
+
+            if (btnSubmit) {
+                btnSubmit.addEventListener("click", function (e) {
+                    e.preventDefault(); // chặn submit mặc định
+
+                    const statusSelect = document.querySelector("select[name='Status']");
+                    const newStatus = statusSelect ? statusSelect.options[statusSelect.selectedIndex].text : "";
+
+                    if (confirm(`⚠️ Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng sang "${newStatus}" không?`)) {
+                        form.submit();
+                    }
+                });
+            }
+        });
+    </script>
 }

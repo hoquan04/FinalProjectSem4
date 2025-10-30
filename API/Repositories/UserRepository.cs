@@ -80,21 +80,54 @@ namespace API.Repositories
             return response;
         }
 
+        //public async Task<APIRespone<User>> UpdateUserAsync(int id, User model)
+        //{
+        //    var user = await _context.Users.FindAsync(id);
+        //    if (user == null)
+        //        return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
+
+        //    // 🧩 Nếu client không gửi role hợp lệ thì giữ nguyên role cũ
+        //    if (!Enum.IsDefined(typeof(UserRole), model.Role))
+        //        model.Role = user.Role;
+
+        //    user.FullName = model.FullName;
+        //    user.Email = model.Email;
+        //    user.Phone = model.Phone;
+        //    user.Address = model.Address;
+        //    user.Role = model.Role;
+
+        //    await _context.SaveChangesAsync();
+
+        //    return new APIRespone<User>
+        //    {
+        //        Success = true,
+        //        Data = user,
+        //        Message = "Cập nhật thành công"
+        //    };
+        //}
+
         public async Task<APIRespone<User>> UpdateUserAsync(int id, User model)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
                 return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
 
-            // 🧩 Nếu client không gửi role hợp lệ thì giữ nguyên role cũ
-            if (!Enum.IsDefined(typeof(UserRole), model.Role))
-                model.Role = user.Role;
+            // 🧩 Giữ nguyên giá trị cũ nếu client không gửi (null hoặc rỗng)
+            if (!string.IsNullOrWhiteSpace(model.FullName))
+                user.FullName = model.FullName;
 
-            user.FullName = model.FullName;
-            user.Email = model.Email;
-            user.Phone = model.Phone;
-            user.Address = model.Address;
-            user.Role = model.Role;
+            if (!string.IsNullOrWhiteSpace(model.Email))
+                user.Email = model.Email;
+
+            if (!string.IsNullOrWhiteSpace(model.Phone))
+                user.Phone = model.Phone;
+
+            if (!string.IsNullOrWhiteSpace(model.Address))
+                user.Address = model.Address;
+
+            // 🧩 Giữ nguyên Role
+            if (Enum.IsDefined(typeof(UserRole), model.Role))
+                user.Role = model.Role;
 
             await _context.SaveChangesAsync();
 
@@ -105,7 +138,6 @@ namespace API.Repositories
                 Message = "Cập nhật thành công"
             };
         }
-
 
         public async Task<APIRespone<bool>> DeleteUserAsync(int id)
         {
@@ -133,7 +165,7 @@ namespace API.Repositories
                 // Xảy ra khi có ràng buộc khóa ngoại
                 response.Success = false;
                 response.Data = false;
-                response.Message = "Không thể xóa người dùng vì có dữ liệu liên quan (đơn hàng, thanh toán, hoặc thông báo).";
+                response.Message = "Không thể xóa người dùng vì có dữ liệu liên quan (đơn hàng, thanh toán).";
             }
             catch (Exception ex)
             {
@@ -157,13 +189,28 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<APIRespone<PagedResponse<User>>> GetPageAsync(int pageNow, int pageSize)
+        public async Task<APIRespone<PagedResponse<User>>> GetPageAsync(int pageNow, int pageSize, string? search = null)
         {
+            if (pageNow <= 0) pageNow = 1;
+            if (pageSize <= 0) pageSize = 10;
+
             var response = new APIRespone<PagedResponse<User>>();
-            var totalCount = await _context.Users.CountAsync();
+
+            IQueryable<User> query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var keyword = search.Trim();
+                query = query.Where(u =>
+                    u.FullName.Contains(keyword) ||
+                    u.Email.Contains(keyword) ||
+                    u.Phone.Contains(keyword));
+            }
+
+            var totalCount = await query.CountAsync();
             var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
 
-            var data = await _context.Users
+            var data = await query
                 .OrderBy(u => u.UserId)
                 .Skip((pageNow - 1) * pageSize)
                 .Take(pageSize)
@@ -171,7 +218,7 @@ namespace API.Repositories
 
             response.Data = new PagedResponse<User>
             {
-                Data = data,
+                Data = data,                  // IEnumerable<User>
                 PageNow = pageNow,
                 PageSize = pageSize,
                 TotalCount = totalCount,
@@ -180,6 +227,7 @@ namespace API.Repositories
             response.Success = true;
             return response;
         }
+
 
 
         public async Task<APIRespone<User>> UpgradeToShipperAsync(int userId, string cccdImageUrl)
@@ -245,6 +293,56 @@ namespace API.Repositories
         //        return new APIRespone<User> { Success = true, Data = user, Message = "❌ Đã từ chối yêu cầu Shipper" };
         //    }
         //}
+        //public async Task<APIRespone<User>> ApproveShipperRequestAsync(int userId, bool isApproved)
+        //{
+        //    var user = await _context.Users.FindAsync(userId);
+        //    if (user == null)
+        //        return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
+
+        //    if (!user.IsShipperRequestPending)
+        //        return new APIRespone<User> { Success = false, Message = "Người này chưa gửi yêu cầu Shipper" };
+
+        //    if (isApproved)
+        //    {
+        //        user.Role = UserRole.Shipper;
+        //        user.IsShipperRequestPending = false;
+        //        await _context.SaveChangesAsync();
+
+        //        // ✅ Gửi thông báo cho user
+        //        await _notificationRepo.AddAsync(new Notification
+        //        {
+        //            UserId = user.UserId,
+        //            Title = "Yêu cầu Shipper đã được duyệt",
+        //            Message = "Chúc mừng! Bạn đã được chấp nhận trở thành Shipper.",
+        //            Type = NotificationType.RoleUpdate,
+        //            IsRead = false,
+        //            CreatedAt = DateTime.UtcNow
+        //        });
+
+        //        return new APIRespone<User> { Success = true, Data = user, Message = "✅ Đã phê duyệt Shipper" };
+        //    }
+        //    else
+        //    {
+        //        user.IsShipperRequestPending = false;
+        //        user.CccdFrontUrl = null;
+        //        user.CccdBackUrl = null;
+        //        await _context.SaveChangesAsync();
+
+        //        await _notificationRepo.AddAsync(new Notification
+        //        {
+        //            UserId = user.UserId,
+        //            Title = "Yêu cầu Shipper đã được duyệt",
+        //            Message = "Chúc mừng! Bạn đã được chấp nhận trở thành Shipper.",
+        //            Type = NotificationType.RoleUpdate, // ✅ đúng kiểu enum
+        //            IsRead = false,
+        //            CreatedAt = DateTime.UtcNow
+        //        });
+
+
+        //        return new APIRespone<User> { Success = true, Data = user, Message = "❌ Đã từ chối yêu cầu Shipper" };
+        //    }
+
+        //}
         public async Task<APIRespone<User>> ApproveShipperRequestAsync(int userId, bool isApproved)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -256,25 +354,31 @@ namespace API.Repositories
 
             if (isApproved)
             {
+                // ✅ Duyệt
                 user.Role = UserRole.Shipper;
                 user.IsShipperRequestPending = false;
                 await _context.SaveChangesAsync();
 
-                // ✅ Gửi thông báo cho user
                 await _notificationRepo.AddAsync(new Notification
                 {
                     UserId = user.UserId,
                     Title = "Yêu cầu Shipper đã được duyệt",
-                    Message = "Chúc mừng! Bạn đã được chấp nhận trở thành Shipper.",
+                    Message = "Chúc mừng! Bạn đã được chấp nhận trở thành Shipper của cửa hàng.",
                     Type = NotificationType.RoleUpdate,
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
 
-                return new APIRespone<User> { Success = true, Data = user, Message = "✅ Đã phê duyệt Shipper" };
+                return new APIRespone<User>
+                {
+                    Success = true,
+                    Data = user,
+                    Message = "✅ Đã phê duyệt Shipper"
+                };
             }
             else
             {
+                // ❌ Từ chối
                 user.IsShipperRequestPending = false;
                 user.CccdFrontUrl = null;
                 user.CccdBackUrl = null;
@@ -283,17 +387,21 @@ namespace API.Repositories
                 await _notificationRepo.AddAsync(new Notification
                 {
                     UserId = user.UserId,
-                    Title = "Yêu cầu Shipper đã được duyệt",
-                    Message = "Chúc mừng! Bạn đã được chấp nhận trở thành Shipper.",
-                    Type = NotificationType.RoleUpdate, // ✅ đúng kiểu enum
+                    Title = "Yêu cầu Shipper bị từ chối",
+                    Message = "Rất tiếc! Yêu cầu đăng ký Shipper của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin hoặc liên hệ quản trị viên để biết thêm chi tiết.",
+                    Type = NotificationType.RoleUpdate,
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
 
-
-                return new APIRespone<User> { Success = true, Data = user, Message = "❌ Đã từ chối yêu cầu Shipper" };
+                return new APIRespone<User>
+                {
+                    Success = true,
+                    Data = user,
+                    Message = "❌ Đã từ chối yêu cầu Shipper"
+                };
             }
-
         }
+
     }
 }

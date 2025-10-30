@@ -36,10 +36,11 @@ namespace API.Data
                 .IsUnique();
 
             modelBuilder.Entity<User>()
-                .HasMany(u => u.Orders)
-                .WithOne(o => o.Users)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+             .HasMany(u => u.Orders)
+             .WithOne(o => o.Users)
+             .HasForeignKey(o => o.UserId)
+             .OnDelete(DeleteBehavior.Restrict); 
+
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Reviews)
@@ -81,10 +82,11 @@ namespace API.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Order>()
-               .HasOne(o => o.Shipping)
-               .WithMany(s => s.Orders)
-               .HasForeignKey(o => o.ShippingId)
-               .OnDelete(DeleteBehavior.Cascade);
+     .HasOne(o => o.Shipper)
+     .WithMany()
+     .HasForeignKey(o => o.ShipperId)
+     .OnDelete(DeleteBehavior.Restrict); // 
+
 
             // OrderDetails
             modelBuilder.Entity<OrderDetail>()

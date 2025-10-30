@@ -124,8 +124,34 @@ namespace API.Controllers
 
 
         // PUT: /api/auth/profile  -> cập nhật tên/đt/địa chỉ
+        //[HttpPut("profile")]
+        //[Authorize] // cần JWT
+        //public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest req)
+        //{
+        //    var uid = User.FindFirstValue("uid");
+        //    if (string.IsNullOrEmpty(uid) || !int.TryParse(uid, out var userId))
+        //        return Unauthorized();
+
+        //    var user = await _ctx.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+        //    if (user == null) return NotFound(new { message = "Không tìm thấy người dùng" });
+
+        //    if (string.IsNullOrWhiteSpace(req.FullName))
+        //        return BadRequest(new { message = "Họ tên bắt buộc" });
+
+        //    user.FullName = req.FullName.Trim();
+        //    user.Phone = req.Phone;
+        //    user.Address = req.Address;
+
+        //    await _ctx.SaveChangesAsync();
+
+        //    return Ok(new
+        //    {
+        //        message = "Cập nhật hồ sơ thành công",
+        //        user = new { user.UserId, user.FullName, user.Email, user.Phone, user.Address, Role = user.Role.ToString(), user.CreatedAt }
+        //    });
+        //}
         [HttpPut("profile")]
-        [Authorize] // cần JWT
+        [Authorize]
         public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest req)
         {
             var uid = User.FindFirstValue("uid");
@@ -133,21 +159,34 @@ namespace API.Controllers
                 return Unauthorized();
 
             var user = await _ctx.Users.FirstOrDefaultAsync(x => x.UserId == userId);
-            if (user == null) return NotFound(new { message = "Không tìm thấy người dùng" });
+            if (user == null)
+                return NotFound(new { message = "Không tìm thấy người dùng" });
 
             if (string.IsNullOrWhiteSpace(req.FullName))
                 return BadRequest(new { message = "Họ tên bắt buộc" });
 
+            // ✅ Giữ nguyên dữ liệu cũ nếu null
             user.FullName = req.FullName.Trim();
-            user.Phone = req.Phone;
-            user.Address = req.Address;
+            if (!string.IsNullOrWhiteSpace(req.Phone))
+                user.Phone = req.Phone;
+            if (!string.IsNullOrWhiteSpace(req.Address))
+                user.Address = req.Address;
 
             await _ctx.SaveChangesAsync();
 
             return Ok(new
             {
                 message = "Cập nhật hồ sơ thành công",
-                user = new { user.UserId, user.FullName, user.Email, user.Phone, user.Address, Role = user.Role.ToString(), user.CreatedAt }
+                user = new
+                {
+                    user.UserId,
+                    user.FullName,
+                    user.Email,
+                    user.Phone,
+                    user.Address,
+                    Role = user.Role.ToString(),
+                    user.CreatedAt
+                }
             });
         }
 

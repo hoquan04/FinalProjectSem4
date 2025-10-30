@@ -131,7 +131,9 @@
             <div class="ibox-title">
                 <h5>Hình ảnh sản phẩm</h5>
             </div>
-            <div class="ibox-content d-flex align-items-center justify-content-center" style="min-height: 250px;">
+            <div class="ibox-content"
+                 style="min-height: 250px; display: flex; align-items: center; justify-content: center;">
+
                 <div class="text-center">
                     <img id="imagePreview" 
                          src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? (Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{AdminWeb.Areas.Admin.Data.ApiConstants.BaseUrl.Replace("/api/", "")}{Model.ImageUrl}") : "#")" 

@@ -68,9 +68,15 @@ public class UserController : ControllerBase
 
     [HttpGet("page")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetPage(int pageNow = 1, int pageSize = 10)
+    public async Task<IActionResult> GetPage(
+        [FromQuery] int pageNow = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null)
     {
-        var response = await _userRepository.GetPageAsync(pageNow, pageSize);
+        if (pageNow <= 0) pageNow = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        var response = await _userRepository.GetPageAsync(pageNow, pageSize, search);
         return Ok(response);
     }
 

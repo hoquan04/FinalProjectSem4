@@ -13,9 +13,9 @@
                     <a asp-action="Index" class="btn btn-sm btn-secondary">
                         <i class="fa fa-arrow-left"></i> Quay lại danh sách
                     </a>
-                    <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-sm btn-warning">
+                    @* <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-sm btn-warning">
                         <i class="fa fa-edit"></i> Chỉnh sửa
-                    </a>
+                    </a> *@
                 </div>
             </div>
             <div class="ibox-content">
@@ -155,9 +155,10 @@
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <img src="@(Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{AdminWeb.Areas.Admin.Data.ApiConstants.BaseUrl.Replace("/api/", "")}{Model.ImageUrl}")" 
-                             alt="@Model.Name" 
-                             style="max-width: 100%; max-height: 250px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" 
-                             class="img-responsive">
+                             alt="@Model.Name"
+                             style="max-width: 100%; max-height: 250px; border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin: 0 auto; display: block;">
+
                         <p class="text-muted mt-2">
                             <small>Ảnh sản phẩm: @Model.Name</small>
                         </p>
@@ -209,7 +210,7 @@
                 </dl>
 
                 @* Actions nhanh *@
-                <div class="btn-group btn-group-justified mt-3" role="group">
+                @* <div class="btn-group btn-group-justified mt-3" role="group">
                     <div class="btn-group" role="group">
                         <a asp-action="Edit" asp-route-id="@Model.ProductId" 
                            class="btn btn-warning btn-sm">
@@ -222,7 +223,7 @@
                             <i class="fa fa-trash"></i> Xóa
                         </a>
                     </div>
-                </div>
+                </div> *@
             </div>
         </div>
     </div>
