@@ -80,21 +80,54 @@ namespace API.Repositories
             return response;
         }
 
+        //public async Task<APIRespone<User>> UpdateUserAsync(int id, User model)
+        //{
+        //    var user = await _context.Users.FindAsync(id);
+        //    if (user == null)
+        //        return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
+
+        //    // 🧩 Nếu client không gửi role hợp lệ thì giữ nguyên role cũ
+        //    if (!Enum.IsDefined(typeof(UserRole), model.Role))
+        //        model.Role = user.Role;
+
+        //    user.FullName = model.FullName;
+        //    user.Email = model.Email;
+        //    user.Phone = model.Phone;
+        //    user.Address = model.Address;
+        //    user.Role = model.Role;
+
+        //    await _context.SaveChangesAsync();
+
+        //    return new APIRespone<User>
+        //    {
+        //        Success = true,
+        //        Data = user,
+        //        Message = "Cập nhật thành công"
+        //    };
+        //}
+
         public async Task<APIRespone<User>> UpdateUserAsync(int id, User model)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
                 return new APIRespone<User> { Success = false, Message = "Không tìm thấy người dùng" };
 
-            // 🧩 Nếu client không gửi role hợp lệ thì giữ nguyên role cũ
-            if (!Enum.IsDefined(typeof(UserRole), model.Role))
-                model.Role = user.Role;
+            // 🧩 Giữ nguyên giá trị cũ nếu client không gửi (null hoặc rỗng)
+            if (!string.IsNullOrWhiteSpace(model.FullName))
+                user.FullName = model.FullName;
 
-            user.FullName = model.FullName;
-            user.Email = model.Email;
-            user.Phone = model.Phone;
-            user.Address = model.Address;
-            user.Role = model.Role;
+            if (!string.IsNullOrWhiteSpace(model.Email))
+                user.Email = model.Email;
+
+            if (!string.IsNullOrWhiteSpace(model.Phone))
+                user.Phone = model.Phone;
+
+            if (!string.IsNullOrWhiteSpace(model.Address))
+                user.Address = model.Address;
+
+            // 🧩 Giữ nguyên Role
+            if (Enum.IsDefined(typeof(UserRole), model.Role))
+                user.Role = model.Role;
 
             await _context.SaveChangesAsync();
 
@@ -105,7 +138,6 @@ namespace API.Repositories
                 Message = "Cập nhật thành công"
             };
         }
-
 
         public async Task<APIRespone<bool>> DeleteUserAsync(int id)
         {
@@ -157,13 +189,28 @@ namespace API.Repositories
             return response;
         }
 
-        public async Task<APIRespone<PagedResponse<User>>> GetPageAsync(int pageNow, int pageSize)
+        public async Task<APIRespone<PagedResponse<User>>> GetPageAsync(int pageNow, int pageSize, string? search = null)
         {
+            if (pageNow <= 0) pageNow = 1;
+            if (pageSize <= 0) pageSize = 10;
+
             var response = new APIRespone<PagedResponse<User>>();
-            var totalCount = await _context.Users.CountAsync();
+
+            IQueryable<User> query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var keyword = search.Trim();
+                query = query.Where(u =>
+                    u.FullName.Contains(keyword) ||
+                    u.Email.Contains(keyword) ||
+                    u.Phone.Contains(keyword));
+            }
+
+            var totalCount = await query.CountAsync();
             var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
 
-            var data = await _context.Users
+            var data = await query
                 .OrderBy(u => u.UserId)
                 .Skip((pageNow - 1) * pageSize)
                 .Take(pageSize)
@@ -171,7 +218,7 @@ namespace API.Repositories
 
             response.Data = new PagedResponse<User>
             {
-                Data = data,
+                Data = data,                  // IEnumerable<User>
                 PageNow = pageNow,
                 PageSize = pageSize,
                 TotalCount = totalCount,
@@ -180,6 +227,7 @@ namespace API.Repositories
             response.Success = true;
             return response;
         }
+
 
 
         public async Task<APIRespone<User>> UpgradeToShipperAsync(int userId, string cccdImageUrl)

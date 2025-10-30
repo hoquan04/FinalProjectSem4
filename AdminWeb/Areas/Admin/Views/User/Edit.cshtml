@@ -63,6 +63,10 @@
                                 <option value="Customer">Khách hàng</option>
                                 <option value="Admin">Quản trị</option>
                                 @* <option value="Shipper">Shipper</option> *@
+                                @if (Model.Role == AdminWeb.Areas.Admin.Models.UserRole.Shipper)
+                                {
+                                    <option value="Shipper" selected>Shipper</option>
+                                }
                             </select>
                             <span asp-validation-for="Role" class="text-danger"></span>
                         </div>

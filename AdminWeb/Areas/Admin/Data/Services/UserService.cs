@@ -114,5 +114,23 @@ namespace AdminWeb.Areas.Admin.Data.Services
             return JsonSerializer.Deserialize<ApiResponse<bool>>(body, _jsonOptions)
                    ?? new ApiResponse<bool> { Success = false, Message = "Không nhận được phản hồi" };
         }
+
+        public async Task<ApiResponse<PagedResponse<UserViewModel>>> GetUserPageAsync(
+            string? search, int page = 1, int pageSize = 10)
+        {
+            var url = $"{_userApi}/page?pageNow={page}&pageSize={pageSize}";
+            if (!string.IsNullOrWhiteSpace(search))
+                url += $"&search={Uri.EscapeDataString(search)}";
+
+            var resp = await _httpClient.GetAsync(url);
+            var body = await resp.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<ApiResponse<PagedResponse<UserViewModel>>>(body, _jsonOptions)
+                   ?? new ApiResponse<PagedResponse<UserViewModel>>
+                   {
+                       Success = false,
+                       Message = "Không parse được dữ liệu từ API"
+                   };
+        }
     }
 }

@@ -11,451 +11,262 @@
     int totalPages = ViewBag.TotalPages ?? 0;
     int totalCount = ViewBag.TotalCount ?? 0;
     var searchModel = ViewBag.SearchModel as AdminWeb.Areas.Admin.Models.ReviewSearchViewModel;
+    int stt = 1;
 }
+<div class="col-lg-12">
+    <div class="ibox-content">
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Danh sách đánh giá</h3>
-                    @* <div class="card-tools">
-                        <a asp-action="Create" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Thêm đánh giá
-                        </a>
-                    </div> *@
+        @* 🚀 Success/Error Messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-check"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <i class="fa fa-times"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="row">
+            <form asp-action="Search" method="get">
+                <div class="col-sm-2">
+                    <div class="input-group">
+                        <input type="text" name="SearchKeyword" value="@(searchModel?.SearchKeyword)" placeholder="Tìm kiếm theo tên sản phẩm và người dùng..." class="input-sm form-control">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
                 </div>
 
-                <!-- Search Form - Simplified -->
-                <div class="card-body">
-                    <form asp-action="Search" method="get" class="mb-3">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Tên sản phẩm</label>
-                                    <input name="SearchKeyword" value="@(searchModel?.SearchKeyword)" class="form-control" placeholder="Tìm kiếm theo tên sản phẩm và người dùng..." />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Số bản ghi/trang</label>
-                                    <select name="PageSize" class="form-control">
-                                        <option value="10" selected="@(pageSize == 10)">10</option>
-                                        <option value="20" selected="@(pageSize == 20)">20</option>
-                                        <option value="50" selected="@(pageSize == 50)">50</option>
-                                        <option value="100" selected="@(pageSize == 100)">100</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>&nbsp;</label>
-                                    <div>
-                                        <button type="submit" class="btn btn-info btn-block">
-                                            <i class="fas fa-search"></i> Tìm kiếm
-                                        </button>
-                                        <a asp-action="Index" class="btn btn-secondary btn-block mt-1">
-                                            <i class="fas fa-refresh"></i> Làm mới
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <input name="PageNumber" value="1" type="hidden" />
-                    </form>
+                <div class="col-sm-2">
+                    <select name="pageSize" class="form-control input-sm" onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10 đánh giá/trang</option>
+                        <option value="20" selected="@(pageSize == 20)">20 đánh giá/trang</option>
+                        <option value="50" selected="@(pageSize == 50)">50 đánh giá/trang</option>
+                        <option value="100" selected="@(pageSize == 100)">100 đánh giá/trang</option>
+                    </select>
                 </div>
+                <input name="PageNumber" value="1" type="hidden" />
+            </form>
+        </div>
 
-                <!-- Alert Messages -->
-                @if (TempData["SuccessMessage"] != null)
+        @* Error từ API call *@
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="alert alert-danger mt-3">
+                <strong><i class="fa fa-exclamation-triangle"></i> @ViewBag.Error</strong>
+                @if (!string.IsNullOrEmpty(ViewBag.ErrorDetail))
                 {
-                    <div class="alert alert-success alert-dismissible">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <i class="icon fas fa-check"></i> @TempData["SuccessMessage"]
-                    </div>
-                }
+                    <br>
 
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <i class="icon fas fa-ban"></i> @TempData["ErrorMessage"]
-                    </div>
+                    <small>@ViewBag.ErrorDetail</small>
                 }
+                <br><small class="text-muted">
+                    <strong>Hướng dẫn:</strong> Đảm bảo API đang chạy tại <code>@AdminWeb.Areas.Admin.Data.ApiConstants.ReviewApi</code>
+                </small>
+            </div>
+        }
 
-                <div class="card-body table-responsive p-0">
-                    <table class="table table-hover text-nowrap">
-                        <thead>
+        <div class="table-responsive mt-3">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>ID</th>
+                        <th>Sản phẩm</th>
+                        <th>Người dùng</th>
+                        <th>Đánh giá</th>
+                        <th>Bình luận</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
                             <tr>
-                                <th>ID</th>
-                                <th>Sản phẩm</th>
-                                <th>Người dùng</th>
-                                <th>Đánh giá</th>
-                                <th>Bình luận</th>
-                                <th>Ngày tạo</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model != null && Model.Any())
-                            {
-                                @foreach (var item in Model)
-                                {
-                                    <tr id="review-row-@item.ReviewId">
-                                        <td>@item.ReviewId</td>
-                                        <td>
-                                            <div>
-                                                <strong>ID:</strong> @item.ProductId<br />
-                                                @if (!string.IsNullOrEmpty(item.ProductName))
-                                                {
-                                                    <small class="text-muted">@item.ProductName</small>
-                                                }
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>ID:</strong> @item.UserId<br />
-                                                @if (!string.IsNullOrEmpty(item.UserFullName))
-                                                {
-                                                    <small class="text-muted">@item.UserFullName</small>
-                                                }
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="rating">
-                                                @for (int i = 1; i <= 5; i++)
-                                                {
-                                                    if (i <= item.Rating)
-                                                    {
-                                                        <i class="fas fa-star text-warning"></i>
-                                                    }
-                                                    else
-                                                    {
-                                                        <i class="far fa-star text-muted"></i>
-                                                    }
-                                                }
-                                                <span class="ml-1">(@item.Rating/5)</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if (!string.IsNullOrEmpty(item.Comment))
+                                <td>@(stt++)</td>
+                                <td>
+                                    <span class="badge badge-primary">@item.ReviewId</span>
+                                </td>
+                                <td>
+                                    <span>@item.ProductName</span>
+                                </td>
+                                <td>
+                                    <span>@item.UserFullName</span>
+                                </td>
+                                <td>
+                                    <div class="rating">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= item.Rating)
                                             {
-                                                <div title="@item.Comment">
-                                                    @(item.Comment.Length > 50 ? item.Comment.Substring(0, 50) + "..." : item.Comment)
-                                                </div>
+                                                <i class="fas fa-star text-warning"></i>
                                             }
                                             else
                                             {
-                                                <span class="text-muted">Không có bình luận</span>
+                                                <i class="far fa-star text-muted"></i>
                                             }
-                                        </td>
-                                        <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a asp-action="Details" asp-route-id="@item.ReviewId" class="btn btn-info btn-sm" title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                @* <a asp-action="Edit" asp-route-id="@item.ReviewId" class="btn btn-warning btn-sm" title="Sửa">
-                                                    <i class="fas fa-edit"></i>
-                                                </a> *@
-                                                @* <button class="btn btn-danger btn-sm btn-delete"
-                                                        data-review-id="@item.ReviewId"
-                                                        data-product-name="@(item.ProductName ?? "N/A")"
-                                                        data-user-name="@(item.UserFullName ?? "N/A")"
-                                                        data-rating="@item.Rating"
-                                                        data-comment="@(item.Comment ?? "")"
-                                                        title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </button> *@
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
+                                        }
+                                        <span class="ml-1">(@item.Rating/5)</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Comment))
+                                    {
+                                        <div title="@item.Comment">
+                                            @(item.Comment.Length > 50 ? item.Comment.Substring(0, 50) + "..." : item.Comment)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có bình luận</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@item.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.ReviewId"
+                                           class="btn btn-sm btn-info" title="Xem chi tiết">
+                                            <i class="fa fa-eye"></i> Chi tiết
+                                        </a>
+                                        @* <a asp-action="Edit" asp-route-id="@item.ReviewId"
+                                           class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fa fa-edit"></i> Sửa
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.ReviewId"
+                                           class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fa fa-trash"></i> Xóa
+                                        </a> *@
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                <div class="p-3">
+                                    <i class="fas fa-inbox fa-3x text-muted"></i>
+                                    <p class="mt-2 text-muted">Không có dữ liệu đánh giá</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 📌 Phân trang -->
+        @if (totalPages > 1)
+        {
+            <nav>
+                <ul class="pagination">
+                    @if (currentPage > 1)
+                    {
+                        <li class="paginate_button page-item previous">
+                            @if (searchModel != null)
+                            {
+                                <a asp-action="Search"
+                                   asp-route-SearchKeyword="@searchModel.SearchKeyword"
+                                   asp-route-PageNumber="@(currentPage - 1)"
+                                   asp-route-PageSize="@pageSize"
+                                   class="page-link">«</a>
                             }
                             else
                             {
-                                <tr>
-                                    <td colspan="7" class="text-center">
-                                        <div class="p-3">
-                                            <i class="fas fa-inbox fa-3x text-muted"></i>
-                                            <p class="mt-2 text-muted">Không có dữ liệu đánh giá</p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <a asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" class="page-link">«</a>
                             }
-                        </tbody>
-                    </table>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <li class="paginate_button page-item @(i == currentPage ? "active" : "")">
+                            @if (searchModel != null)
+                            {
+                                <a asp-action="Search"
+                                   asp-route-SearchKeyword="@searchModel.SearchKeyword"
+                                   asp-route-PageNumber="@i"
+                                   asp-route-PageSize="@pageSize"
+                                   class="page-link">@i</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Index" asp-route-page="@i" asp-route-pageSize="@pageSize" class="page-link">@i</a>
+                            }
+                        </li>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <li class="paginate_button page-item next">
+                            @if (searchModel != null)
+                            {
+                                <a asp-action="Search"
+                                   asp-route-SearchKeyword="@searchModel.SearchKeyword"
+                                   asp-route-PageNumber="@(currentPage + 1)"
+                                   asp-route-PageSize="@pageSize"
+                                   class="page-link">»</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" class="page-link">»</a>
+                            }
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+
+        @* Footer info *@
+        @if (Model != null && Model.Any())
+        {
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <small class="text-muted">
+                        <i class="fa fa-info-circle"></i>
+                        Hiển thị <strong>@Model.Count</strong> đánh giá trên trang @currentPage/@totalPages (Tổng: @totalCount đánh giá)
+                        @if (!string.IsNullOrEmpty(searchModel?.SearchKeyword))
+                        {
+                            <span>cho từ khóa "<strong>@(searchModel?.SearchKeyword)</strong>"</span>
+                        }
+                    </small>
                 </div>
-
-                <!-- Pagination -->
-                @if (totalPages > 1)
-                {
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="dataTables_info">
-                                    Hiển thị @((currentPage - 1) * pageSize + 1) đến @(Math.Min(currentPage * pageSize, totalCount)) trong tổng số @totalCount bản ghi
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="dataTables_paginate paging_simple_numbers float-right">
-                                    <ul class="pagination">
-                                        @if (currentPage > 1)
-                                        {
-                                            <li class="paginate_button page-item previous">
-                                                @if (searchModel != null)
-                                                {
-                                                    <a asp-action="Search"
-                                                       asp-route-SearchKeyword="@searchModel.SearchKeyword"
-                                                       asp-route-PageNumber="@(currentPage - 1)"
-                                                       asp-route-PageSize="@pageSize"
-                                                       class="page-link">Trước</a>
-                                                }
-                                                else
-                                                {
-                                                    <a asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" class="page-link">Trước</a>
-                                                }
-                                            </li>
-                                        }
-
-                                        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
-                                        {
-                                            <li class="paginate_button page-item @(i == currentPage ? "active" : "")">
-                                                @if (searchModel != null)
-                                                {
-                                                    <a asp-action="Search"
-                                                       asp-route-SearchKeyword="@searchModel.SearchKeyword"
-                                                       asp-route-PageNumber="@i"
-                                                       asp-route-PageSize="@pageSize"
-                                                       class="page-link">@i</a>
-                                                }
-                                                else
-                                                {
-                                                    <a asp-action="Index" asp-route-page="@i" asp-route-pageSize="@pageSize" class="page-link">@i</a>
-                                                }
-                                            </li>
-                                        }
-
-                                        @if (currentPage < totalPages)
-                                        {
-                                            <li class="paginate_button page-item next">
-                                                @if (searchModel != null)
-                                                {
-                                                    <a asp-action="Search"
-                                                       asp-route-SearchKeyword="@searchModel.SearchKeyword"
-                                                       asp-route-PageNumber="@(currentPage + 1)"
-                                                       asp-route-PageSize="@pageSize"
-                                                       class="page-link">Sau</a>
-                                                }
-                                                else
-                                                {
-                                                    <a asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" class="page-link">Sau</a>
-                                                }
-                                            </li>
-                                        }
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
+                <div class="col-sm-6 text-right">
+                </div>
             </div>
-        </div>
+        }
     </div>
 </div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteReviewModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    Xác nhận xóa đánh giá
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body text-center">
-                <div class="mb-3">
-                    <i class="fas fa-trash-alt fa-4x text-danger"></i>
-                </div>
-
-                <h5 class="mb-3">Bạn có chắc chắn muốn xóa đánh giá này không?</h5>
-                <p class="text-muted mb-4">Hành động này không thể hoàn tác!</p>
-
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6">
-                                <strong>Sản phẩm:</strong><br>
-                                <span id="modal-product-name">-</span>
-                            </div>
-                            <div class="col-6">
-                                <strong>Người dùng:</strong><br>
-                                <span id="modal-user-name">-</span>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-6">
-                                <strong>Đánh giá:</strong><br>
-                                <div id="modal-rating" class="mt-1">
-                                    <!-- Stars will be populated by JavaScript -->
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <strong>Bình luận:</strong><br>
-                                <span id="modal-comment" class="text-muted">-</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times mr-1"></i>
-                    Hủy bỏ
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <span id="deleteSpinner" class="spinner-border spinner-border-sm mr-2" style="display: none;"></span>
-                    <i class="fas fa-trash mr-1"></i>
-                    Xóa đánh giá
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 
 @section Scripts {
     <script>
         $(document).ready(function() {
-            let reviewIdToDelete = null;
+            console.log('🖼️ Review Index loaded');
 
-            // Auto-submit form when page size changes
-            $('select[name="PageSize"]').change(function() {
-                $(this).closest('form').submit();
-            });
-
-            // Handle delete button click
-            $('.btn-delete').click(function() {
-                reviewIdToDelete = $(this).data('review-id');
-                const productName = $(this).data('product-name');
-                const userName = $(this).data('user-name');
-                const rating = $(this).data('rating');
-                const comment = $(this).data('comment');
-
-                // Populate modal with review data
-                $('#modal-product-name').text(productName);
-                $('#modal-user-name').text(userName);
-                $('#modal-comment').text(comment || 'Không có bình luận');
-
-                // Create rating stars
-                let starsHtml = '';
-                for(let i = 1; i <= 5; i++) {
-                    if(i <= rating) {
-                        starsHtml += '<i class="fas fa-star text-warning"></i>';
-                    } else {
-                        starsHtml += '<i class="far fa-star text-muted"></i>';
-                    }
-                }
-                starsHtml += `<span class="ml-1">(${rating}/5)</span>`;
-                $('#modal-rating').html(starsHtml);
-
-                // Show modal
-                $('#deleteReviewModal').modal('show');
-            });
-
-            // Handle confirm delete
-            $('#confirmDeleteBtn').click(function() {
-                if (!reviewIdToDelete) return;
-
-                const btn = $(this);
-                const spinner = $('#deleteSpinner');
-
-                // Show loading state
-                btn.prop('disabled', true);
-                spinner.show();
-
-                // Create a temporary form to submit properly
-                const form = $('<form>', {
-                    'method': 'POST',
-                    'action': '@Url.Action("DeleteConfirmed", "Review", new { area = "Admin" })'
-                });
-
-                form.append($('<input>', {
-                    'type': 'hidden',
-                    'name': 'id',
-                    'value': reviewIdToDelete
-                }));
-
-                form.append($('@Html.AntiForgeryToken()'));
-
-                // Submit form via AJAX
-                $.ajax({
-                    url: form.attr('action'),
-                    type: 'POST',
-                    data: form.serialize(),
-                    success: function(response) {
-                        // Hide modal
-                        $('#deleteReviewModal').modal('hide');
-
-                        // Remove row from table
-                        $('#review-row-' + reviewIdToDelete).fadeOut(300, function() {
-                            $(this).remove();
-                        });
-
-                        // Show success message
-                        if ($('.alert-success').length > 0) {
-                            $('.alert-success').remove();
-                        }
-
-                        $('.card-header').after(
-                            '<div class="alert alert-success alert-dismissible">' +
-                            '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
-                            '<i class="icon fas fa-check"></i> Xóa đánh giá thành công!' +
-                            '</div>'
-                        );
-
-                        // Reset button state
-                        btn.prop('disabled', false);
-                        spinner.hide();
-                        reviewIdToDelete = null;
-                    },
-                    error: function(xhr) {
-                        // Hide modal
-                        $('#deleteReviewModal').modal('hide');
-
-                        // Show error message
-                        if ($('.alert-danger').length > 0) {
-                            $('.alert-danger').remove();
-                        }
-
-                        $('.card-header').after(
-                            '<div class="alert alert-danger alert-dismissible">' +
-                            '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
-                            '<i class="icon fas fa-ban"></i> Có lỗi xảy ra khi xóa đánh giá!' +
-                            '</div>'
-                        );
-
-                        // Reset button state
-                        btn.prop('disabled', false);
-                        spinner.hide();
-                        reviewIdToDelete = null;
-                    }
-                });
-            });
-
-            // Reset modal when hidden
-            $('#deleteReviewModal').on('hidden.bs.modal', function() {
-                $('#confirmDeleteBtn').prop('disabled', false);
-                $('#deleteSpinner').hide();
-                reviewIdToDelete = null;
-            });
-
-                    
+            // Debug: Log image paths
+            // $('img[src*="/uploads/"]').each(function(index) {
+            //     var $img = $(this);
+            //     var src = $img.attr('src');
+            //     var title = $img.attr('title');
+            //     console.log(`📷 Image ${index + 1}:`, {
+            //         displaySrc: src,
+            //         originalPath: title
+            //     });
+            // });
         });
     </script>
 }

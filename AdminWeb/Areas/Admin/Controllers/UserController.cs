@@ -19,26 +19,43 @@ namespace AdminWeb.Areas.Admin.Controllers
         }
 
         // GET: danh sách
-        public async Task<IActionResult> Index(string? searchString)
+        public async Task<IActionResult> Index(string? searchString, int page = 1, int pageSize = 10)
         {
             ViewBag.SearchString = searchString;
 
             try
             {
-                List<UserViewModel> users;
-                if (!string.IsNullOrEmpty(searchString))
-                    users = await _userService.SearchUsersAsync(searchString);
-                else
-                    users = await _userService.GetAllUsersAsync();
+                var res = await _userService.GetUserPageAsync(searchString, page, pageSize);
+                if (res.Success && res.Data != null)
+                {
+                    // res.Data là PagedResponse<UserViewModel> với Data là List<UserViewModel>
+                    return View(res.Data);
+                }
 
-                return View(users);
+                ViewBag.Error = res.Message ?? "Không lấy được dữ liệu";
+                return View(new PagedResponse<UserViewModel>
+                {
+                    PageNow = page,
+                    PageSize = pageSize,
+                    Data = new List<UserViewModel>(),
+                    TotalCount = 0,
+                    TotalPage = 0
+                });
             }
             catch (Exception ex)
             {
                 ViewBag.Error = $"Lỗi khi tải danh sách người dùng: {ex.Message}";
-                return View(new List<UserViewModel>());
+                return View(new PagedResponse<UserViewModel>
+                {
+                    PageNow = page,
+                    PageSize = pageSize,
+                    Data = new List<UserViewModel>(),
+                    TotalCount = 0,
+                    TotalPage = 0
+                });
             }
         }
+
 
         // GET: tạo mới
         public IActionResult Create() => View(new UserCreateModel());
